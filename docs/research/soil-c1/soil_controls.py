@@ -2,8 +2,9 @@
 """Focused controls for soil_build.py and the 4-degree soil table (GPT soil C1 review, 25 Nov: H1, H2, G3, fixtures).
 Usage: soil_controls.py <g4-soil table.json> <dir of the 24 Nov per-map outputs>
 Groups: A weights; B synthetic end-to-end geometry, conservation and no-data; C fail-closed input checks; D every cell of the real table
-against the 24 Nov per-map outputs; E named regressions and fixtures; F reference display text (the page must reproduce it)."""
-import sys, os, json, math, tempfile
+against the 24 Nov per-map outputs; E named regressions and fixtures; F reference display text (soil_reference.py; the page must
+reproduce it); G table validation before the sparse rule (GPT R2-1); H layer classes (rev 3 §1b)."""
+import sys, os, json, math, tempfile, inspect, hashlib, copy
 import numpy as np
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import soil_build as B
@@ -14,47 +15,7 @@ def check(name, cond, detail=''):
     if cond: ok += 1
     else: fail += 1; print('FAIL', name, detail)
 
-# ---------- reference display text (what the page must say; F) ----------
-def fmt(x, unit):
-    """Two significant figures for display; a positive never shows as 0."""
-    if x == 0: return f'0 {unit}'
-    if x < 0.01: return f'<0.01 {unit}'
-    v = float(f'{x:.1e}')
-    d = max(0, 1 - int(math.floor(math.log10(v))))
-    if v >= 10: v = int(v)
-    return (f'{v:,}' if isinstance(v, int) else f'{v:,.{d}f}') + f' {unit}'
-
-def display(table, cid, period='2021_2024'):
-    if not isinstance(table, dict) or 'cells' not in table or 'meta' not in table:
-        return 'unknown: the soil table is not available'
-    rec = table['cells'].get(cid)
-    if rec is None:
-        if not (isinstance(cid, str) and cid.count('_') == 1 and all(p.isdigit() for p in cid.split('_'))
-                and int(cid.split('_')[0]) < 45 and int(cid.split('_')[1]) < 90):
-            return 'unknown: not a 4-degree cell'
-        return 'no organic soil mapped in this cell by this model'
-    try:
-        p = rec['periods'][period]
-        parts = []
-        if not rec['has_mapped_organic_soil'] and all(p[c]['state'] == 'zero' for c in B.COMPONENTS):
-            return 'no organic soil mapped in this cell by this model'
-        for c in B.COMPONENTS:
-            s = p[c]['state']
-            if s == 'unknown': parts.append(f'{c}: unknown')
-            elif s == 'zero': parts.append(f'{c}: 0 assigned by this model in this period; this does not establish zero real-world emissions')
-            elif s == 'positive': parts.append(f'{c} ≈ {fmt(p[c]["Mg"], "t CO₂e per year")}')
-            else: return 'unknown: malformed record'
-        parts.append(f'mapped organic soil ≈ {fmt(rec["organic_km2"], "km²")}' if rec['has_mapped_organic_soil'] else 'no organic soil mapped')
-        if p['coverage'] == 'incomplete':
-            parts.append(f'incomplete model coverage: source raster cells covering about {fmt(p["incomplete_source_footprint_km2"], "km²")} '
-                         'within this 4° cell have missing estimates. Values sum the available raster cells')
-        elif p['coverage'] == 'none':
-            return 'unknown: the model has no estimate for any part of this cell in this period'
-        elif p['coverage'] != 'complete':
-            return 'unknown: malformed record'
-        return ' · '.join(parts)
-    except (KeyError, TypeError):
-        return 'unknown: malformed record'
+from soil_reference import fmt, display, validate_table, load_table, layer_class, BINS
 
 # ---------- A. weights ----------
 W = B.weights(np.array([0., 1, 2, 3]), np.array([0., 1.5, 3])).toarray()
@@ -98,6 +59,9 @@ check('B7 sig() keeps tiny positives', B.sig(1e-30) > 0 and B.sig(0.0444444) == 
 def raises(fn):
     try: fn(); return False
     except B.InputError: return True
+def _err(fn):
+    try: fn(); return None
+    except B.InputError as e: return e
 run = lambda d, b, e: B.aggregate(lambda r0, r1: dict(drained=d, burned=b, extent=e), 3, Wx, Wy, 1.0, strip=3)
 good = lambda: (dr.copy(), bu.copy(), ex.copy())
 d, b, e = good(); d[0, 0] = np.inf
@@ -121,10 +85,32 @@ try:
                 o.write(np.zeros((1, h, w), 'float32')); o.update_tags(**tags)
             return p
         tg = dict(release='v1.0.1', units=B.EMIS_UNITS, missing_data=B.EMIS_MISSING, period='2021_2024')
-        check('C7 wrong raster size refused', raises(lambda: B.open_checked(tif('a.tif', 4, 4, B.GRID['transform'], tg), 'emissions', '2021_2024')))
-        check('C8 wrong units tag refused', raises(lambda: B.open_checked(tif('b.tif', 4, 4, B.GRID['transform'], dict(tg, units='Mg ha-1')), 'emissions', '2021_2024')))
+        check('C7 size guard reached', (lambda: (lambda e: 'size' in str(e))(_err(lambda: B.open_checked(tif('a.tif', 4, 4, B.GRID['transform'], tg), 'emissions', '2021_2024'))))())
 except ImportError:
-    check('C7/C8 rasterio available', False)
+    check('C7 rasterio available', False)
+
+# C8 (GPT R2-2): an otherwise-valid header mock reaches the tag guard; the units guard alone refuses it; without that guard it passes.
+class FakeDS:
+    def __init__(self, tags): self._t = tags; self.count, self.dtypes = 1, ('float32',); self.width, self.height = B.GRID['width'], B.GRID['height']; self.transform, self.crs = B.GRID['transform'], crs
+    def tags(self): return dict(self._t)
+import rasterio as _rio
+_open = _rio.open
+def with_fake(tags, fn):
+    _rio.open = lambda path, *a, **k: FakeDS(tags)
+    try: return fn()
+    finally: _rio.open = _open
+tg = dict(release='v1.0.1', units=B.EMIS_UNITS, missing_data=B.EMIS_MISSING, period='2021_2024')
+check('C8a valid header mock accepted (reaches every guard)', not raises(lambda: with_fake(tg, lambda: B.open_checked('x.tif', 'emissions', '2021_2024'))))
+e = _err(lambda: with_fake(dict(tg, units='Mg ha-1 yr-1'), lambda: B.open_checked('x.tif', 'emissions', '2021_2024')))
+check('C8b wrong units refused by the tag guard, not the size guard', e is not None and 'tags' in str(e) and 'size' not in str(e), e)
+src = inspect.getsource(B.open_checked).replace("t.get('units') == EMIS_UNITS and ", '')
+ns = dict(vars(B)); exec(compile(src, 'mutant', 'exec'), ns)
+check('C8c mutation: without the units guard the wrong-units mock passes, so C8b depends on that guard',
+      not raises(lambda: with_fake(dict(tg, units='Mg ha-1 yr-1'), lambda: ns['open_checked']('x.tif', 'emissions', '2021_2024'))))
+e = _err(lambda: with_fake(dict(tg, period='2016_2020'), lambda: B.open_checked('x.tif', 'emissions', '2021_2024')))
+check('C8d wrong period tag refused', e is not None and 'tags' in str(e))
+e = _err(lambda: with_fake(dict(tg, units='percent'), lambda: B.open_checked('x.tif', 'extent')))
+check('C8e wrong extent units refused', e is not None and 'units' in str(e))
 
 # ---------- D. every cell of the real table against the 24 Nov per-map outputs ----------
 tab = json.load(open(sys.argv[1])); old_dir = sys.argv[2]
@@ -188,10 +174,53 @@ check('F6 missing period is unknown', display(tab, '22_70', '1999_2000').startsw
 mal = dict(tab, cells={'22_70': {'has_mapped_organic_soil': True, 'organic_km2': 5, 'periods': {'2021_2024': {'coverage': 'complete'}}}})
 check('F7 malformed record is unknown', display(mal, '22_70').startswith('unknown'))
 check('F8 id outside the domain is unknown', display(tab, '45_0').startswith('unknown') and display(tab, 'x').startswith('unknown'))
-nonecov = dict(tab, cells={'1_1': {'has_mapped_organic_soil': True, 'organic_km2': 5, 'periods': {'2021_2024': {'coverage': 'none',
-          'incomplete_source_footprint_km2': 9, 'drained': {'Mg': None, 'state': 'unknown'}, 'burned': {'Mg': None, 'state': 'unknown'}}}}})
-check('F9 fully missing coverage is unknown, never 0', display(nonecov, '1_1').startswith('unknown'))
+nonecov = copy.deepcopy(tab); nonecov['cells']['22_70']['periods']['2021_2024'].update(coverage='none', incomplete_source_footprint_km2=169000.0,
+    drained={'Mg': None, 'state': 'unknown'}, burned={'Mg': None, 'state': 'unknown'})
+check('F9a the coverage-none fixture is itself a valid table', validate_table(nonecov) == (True, None))
+check('F9 fully missing coverage is unknown, never 0', display(nonecov, '22_70') == 'unknown: the model has no estimate for any part of this cell in this period')
 check('F10 two significant figures', fmt(305074153, 't') == '310,000,000 t' and fmt(34909, 't') == '35,000 t' and fmt(3.14, 't') == '3.1 t'
       and fmt(0.044, 'km²') == '0.044 km²' and fmt(9.94, 'km²') == '9.9 km²' and fmt(9.952, 'km²') == '10 km²' and fmt(0.004, 'km²') == '<0.01 km²', (fmt(305074153, 't'), fmt(34909, 't')))
+
+# ---------- G. table validation before the sparse rule (GPT R2-1) ----------
+check('G1 empty meta and cells is unavailable, not "no soil"', display({'meta': {}, 'cells': {}}, '22_70').startswith('unknown'))
+check('G2 unsupported period on an absent cell is unknown', display(tab, '14_49', '1999_2000').startswith('unknown'))
+neg = copy.deepcopy(tab); neg['cells']['22_70']['periods']['2021_2024']['drained']['Mg'] = -1
+check('G3 positive state with a negative value makes the table unavailable', display(neg, '22_70').startswith('unknown') and display(neg, '14_49').startswith('unknown'))
+def mutate(f):
+    t = copy.deepcopy(tab); f(t); return validate_table(t)[0]
+muts = {
+    'wrong version': lambda t: t['meta'].__setitem__('version', '1.0.2'),
+    'wrong grid': lambda t: t['meta']['grid'].__setitem__('rows', 46),
+    'period missing from meta': lambda t: t['meta']['totals'].pop('2021_2024'),
+    'sparse rule missing': lambda t: t['meta'].pop('sparse_rule'),
+    'cell id outside domain': lambda t: t['cells'].__setitem__('45_0', t['cells']['22_70']),
+    'non-canonical cell id': lambda t: t['cells'].__setitem__('022_70', t['cells'].pop('22_70')),
+    'flag disagrees with area': lambda t: t['cells']['31_78'].__setitem__('organic_km2', 0),
+    'area NaN': lambda t: t['cells']['31_78'].__setitem__('organic_km2', float('nan')),
+    'boolean as number': lambda t: t['cells']['31_78'].__setitem__('organic_km2', True),
+    'period missing in a record': lambda t: t['cells']['22_70']['periods'].pop('2001_2005'),
+    'zero state with a value': lambda t: t['cells']['13_27']['periods']['2021_2024']['drained'].__setitem__('Mg', 5),
+    'positive state with 0': lambda t: t['cells']['22_70']['periods']['2021_2024']['burned'].__setitem__('Mg', 0),
+    'Mg as string': lambda t: t['cells']['22_70']['periods']['2021_2024']['burned'].__setitem__('Mg', '5'),
+    'unknown state under complete coverage': lambda t: t['cells']['22_70']['periods']['2021_2024']['burned'].update(state='unknown', Mg=None),
+    'complete coverage with a footprint': lambda t: t['cells']['22_70']['periods']['2021_2024'].__setitem__('incomplete_source_footprint_km2', 1),
+    'incomplete coverage without a footprint': lambda t: t['cells']['38_39']['periods']['2011_2015'].__setitem__('incomplete_source_footprint_km2', 0),
+    'unknown coverage value': lambda t: t['cells']['22_70']['periods']['2021_2024'].__setitem__('coverage', 'partial'),
+}
+bad = [k for k, f in muts.items() if mutate(f)]
+check(f'G4 {len(muts)} malformed-table mutations each make the table unavailable', not bad, bad)
+check('G5 the real table validates', validate_table(tab) == (True, None))
+raw = open(sys.argv[1], 'rb').read(); sha = hashlib.sha256(raw).hexdigest()
+check('G6 pinned identity: exact bytes load; a truncated or different file does not',
+      load_table(raw, sha)[0] is not None and load_table(raw[:-10], sha)[0] is None and load_table(raw, '0' * 64)[0] is None)
+
+# ---------- H. layer classes (rev 3 §1b) ----------
+check('H1 22_70 drained in the top class', layer_class(tab, '22_70', 'drained') == ('bin', 5, False))
+check('H2 13_27 is a model zero, not no-soil or unknown', layer_class(tab, '13_27', 'drained') == 'zero')
+check('H3 14_49 is no-soil', layer_class(tab, '14_49', 'burned') == 'no-soil')
+check('H4 38_39 2011-15 burned zero over incomplete coverage', layer_class(tab, '38_39', 'burned', '2011_2015') == 'zero' and layer_class(tab, '38_39', 'drained', '2011_2015')[2] is True)
+check('H5 invalid table, component or period is unavailable', layer_class({'meta': {}, 'cells': {}}, '22_70', 'drained') == 'unavailable'
+      and layer_class(tab, '22_70', 'total') == 'unavailable' and layer_class(tab, '22_70', 'drained', '1999_2000') == 'unavailable')
+check('H6 coverage none is unknown, never zero', layer_class(nonecov, '22_70', 'drained') == 'unknown' and layer_class(nonecov, '22_70', 'burned') == 'unknown')
 print('22_70:', display(tab, '22_70')); print('38_39 2011-15:', display(tab, '38_39', '2011_2015'))
 print(f'{ok} passed, {fail} failed'); sys.exit(1 if fail else 0)

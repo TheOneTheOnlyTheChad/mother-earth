@@ -4,6 +4,14 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 25 Nov 2026
 
+## 25 Nov 08:05 UTC (Mac clock): **Organic-soil emissions, rev 3 packet for GPT. Docs only; nothing built, downloaded or deployed** (page: none; Nature context thread)
+- **GPT recheck filed unchanged:** `reviews/2026-11-25-soil-c1-rev2-gpt-recheck.md`. It accepts the H1 and H2 corrections, verifies all 790 cells, and finds two narrow fixes.
+- **R2-1 fixed:** new `docs/research/soil-c1/soil_reference.py`. The pinned hash is checked, then the whole table is validated, before the sparse rule is ever applied.
+- **R2-2 fixed:** C8 now uses a header mock and a mutation proof.
+- **Controls:** 75 passed, 0 failed. The table is unchanged (`c5c01ff5`).
+- **S1 revised:** the panel row plus an optional, off-by-default 4° drained/burned globe layer, with fixed decade bins and distinct states for model zero, no soil, unknown and incomplete (proposal §1b).
+- **Waiting on Chad, in his own words:** S1 (revised), S2/P1, S3, T1 (tables zip, 842 KB), then S4 (preview).
+
 ## 25 Nov 07:55 UTC (Mac clock) — **Organic-soil emissions (Nature context Workstream B): corrected assessment packet (rev 2) for GPT recheck after its HOLD. Docs only; nothing built, uploaded or deployed** (page: none; Nature context thread)
 - **GPT review filed unchanged:** `reviews/2026-11-25-soil-c1-assessment-gpt-review.md` (HOLD; supports corrected S1, P1 and the cadence).
 - **Fixes:**
