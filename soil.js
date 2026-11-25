@@ -168,7 +168,9 @@
       out.push({ layer: 'soil', id, soil: k, fill, stroke, mat: matFor ? matFor(fill) : undefined, geom: cellGeom(id),
         label: `<div style="font:12px IBM Plex Mono,monospace"><b>${LABEL}</b> · cell ${id}<br>${esc(what)}<br><span style="color:#7f8da3">2021–2024 average · whole 4° cell · modelled</span></div>` });
     }
-    if (st.sel && inDomain(st.sel)) out.push({ layer: 'soil-sel', id: st.sel, fill: STYLE.clear, stroke: STYLE.selStroke, alt: 0.009, mat: matFor ? matFor(STYLE.clear) : undefined, geom: cellGeom(st.sel), label: `<div style="font:12px IBM Plex Mono,monospace">Selected 4° cell ${st.sel}</div>` });
+    // the selected-cell outline belongs to this layer: drawn only while the layer is on, so opening a place panel with the layer off
+    // changes nothing on the globe (the place view's read-only rule, index.html; nature-context-ui B5)
+    if (st.on && st.sel && inDomain(st.sel)) out.push({ layer: 'soil-sel', id: st.sel, fill: STYLE.clear, stroke: STYLE.selStroke, alt: 0.009, mat: matFor ? matFor(STYLE.clear) : undefined, geom: cellGeom(st.sel), label: `<div style="font:12px IBM Plex Mono,monospace">Selected 4° cell ${st.sel}</div>` });
     return out;
   };
   S.drawn = () => st.on && drawnCells > 0;

@@ -35,7 +35,7 @@ const served = { 'index.html': read('index.html'), 'sources.html': read('sources
   if (BREAK === 'sparse-first') rep('soil.js', "if (!ready()) return { kind: 'unavailable', text: st.status", "if (!ready() && false) return { kind: 'unavailable', text: st.status");
   if (BREAK === 'zero-positive') rep('soil.js', "if (s.state === 'zero') return 'zero';", "if (s.state === 'zero') return { bin: 0, incomplete: false };");
   if (BREAK === 'combined') rep('soil.js', "parts.push(rec.has_mapped_organic_soil ?", "parts.push(`total ≈ ${fmt((p.drained.Mg || 0) + (p.burned.Mg || 0), 't CO₂e per year')}`); parts.push(rec.has_mapped_organic_soil ?");
-  if (BREAK === 'no-outline') rep('soil.js', "if (st.sel && inDomain(st.sel)) out.push(", "if (false) out.push(");
+  if (BREAK === 'no-outline') rep('soil.js', "if (st.on && st.sel && inDomain(st.sel)) out.push(", "if (false) out.push(");
   if (BREAK === 'subset-nosoil') rep('soil.js', "const inSubset = id => !st.table.meta.fixture ||", "const inSubset = id => true ||");
   if (BREAK === 'load-at-start') rep('soil.js', "    paint();\n  }\n  if (document.readyState", "    paint(); loadTable();\n  }\n  if (document.readyState");
   if (BREAK === 'no-incomplete') rep('soil.js', "if (p.coverage === 'incomplete') parts.push(", "if (false) parts.push(");
@@ -184,9 +184,15 @@ async function B() {
   await page.evaluate(() => ME.openPlace('38_39')); await waitPlace(page);
   rows = await panelRows(page); P = await polys(page);
   const order = rows.map(r => r[0]); const iF = order.findIndex(x => /^Forest disturbance/.test(x)), iS = order.indexOf('Organic-soil emissions (modelled) · whole containing 4° cell');
-  ok('B9 place panel: the soil row right after forest; the table read once for it; the layer stays off; only the selected-cell outline is drawn', iS > 0 && iS === iF + 1 && tableReqs.length === reqs0 + 1 && await page.evaluate(() => document.getElementById('tgl-soil').getAttribute('aria-checked')) === 'false' && P.length === 1 && P[0].layer === 'soil-sel' && P[0].id === '38_39', { order, reqs: tableReqs.length - reqs0, P });
+  ok('B9 place panel, layer off: the soil row right after forest; the table read once for it; the layer stays off; nothing is drawn on the globe (the place view stays read-only)', iS > 0 && iS === iF + 1 && tableReqs.length === reqs0 + 1 && await page.evaluate(() => document.getElementById('tgl-soil').getAttribute('aria-checked')) === 'false' && P.length === 0, { order, reqs: tableReqs.length - reqs0, P });
   const r38 = rowT(rows, /^Organic-soil emissions/);
   ok('B9 38_39: 2021–24 complete; the 2011–15 row inside the disclosure carries the incomplete-coverage footprint', /^modelled, not measured · 2021–2024 average · drained: 0 assigned by this model in this period; this does not establish zero real-world emissions · burned ≈ 44,000 t CO₂e per year · mapped organic soil ≈ 21,000 km² Totals/.test(r38) && !/^[^·]*·[^·]*·[^·]*·[^·]*· incomplete/.test(r38) && /2011–2015 · drained ≈ 1,800,000 t CO₂e per year · burned: 0 assigned by this model in this period; this does not establish zero real-world emissions · mapped organic soil ≈ 21,000 km² · incomplete model coverage: source raster cells covering about 10 km² within this 4° cell have missing estimates\. Values sum the available raster cells/.test(r38), r38);
+  await page.keyboard.press('Escape'); await page.click('#tgl-soil'); await page.waitForFunction(() => document.getElementById('s-soil').textContent === 'on', null, { timeout: 10000 }).catch(() => { });
+  await page.evaluate(() => ME.openPlace('22_70')); await waitPlace(page); P = await polys(page);
+  ok('B9 place panel, layer on: the selected cell is outlined in white above the soil cells; closing removes it', P.some(p => p.layer === 'soil-sel' && p.id === '22_70' && p.alt > 0.006), P.filter(p => p.layer === 'soil-sel'));
+  await page.keyboard.press('Escape'); await page.waitForTimeout(200); P = await polys(page);
+  ok('B9 …and the outline goes with the panel', !P.some(p => p.layer === 'soil-sel') && P.some(p => p.layer === 'soil'));
+  await page.click('#tgl-soil'); await page.waitForTimeout(200);
   await page.evaluate(() => ME.openPlace('10_10')); await waitPlace(page); rows = await panelRows(page);
   ok('B10 a cell outside the fixture: unknown, not "no organic soil", and says it is the preview fixture', /^unknown — this cell is not in the preview's fixture/.test(rowT(rows, /^Organic-soil emissions/)) && /preview fixture/.test(rowT(rows, /^Organic-soil emissions/)), rowT(rows, /^Organic-soil emissions/));
   await page.evaluate(() => ME.openPlace('14_49')); await waitPlace(page); rows = await panelRows(page);
