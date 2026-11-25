@@ -51,6 +51,23 @@ const SOIL_PARENT = process.env.SOIL_PARENT || 'af89de247471c768f047e40fb4a749e0
 const SOIL_FILES = ['REGISTER.md', 'assets/soil/g4-soil-v1.0.1.json', 'docs/research/soil-c1/soil_controls.py', 'docs/research/soil-c1/soil_reference.py', 'index.html', 'layers.js',
   'phase1/bare-earth-ui.test.cjs', 'phase1/soil-ui.test.cjs', 'soil.js', 'sources.html', 'style.css'];   // literal: the exact changed-path set of SOIL_PARENT..SOIL_MAIN
 const SOIL_TABLE_SHA = 'c5c01ff5a4300ace1e7348d6d25edb079ea424810e70d50a291afd0ffadb30cf';
+// Tides navigation (25 Nov 2026, Tides thread; the Animals owner's narrow pin maintenance, as for the organic-soil release): its payload
+// commit TIDES_MAIN adds the Tides page and puts a Tides tab (after Sun) and a Tides Menu item into every page's header, adds the six-tab
+// header rules to style.css and wraps World View's promise text in a <span>. index.html and sources.html (13b, 13e) are held to
+// TIDES_MAIN; the step from SOIL_MAIN to TIDES_MAIN is checked to be exactly the Tides links (and, for index.html, the promise wrapper),
+// so the organic-soil guarantee is kept. moon.html and sun.html (13e) and timeline.html (13h) are compared with their old baselines with
+// the two Tides lines set aside, exactly as the Animals lines are. 13o checks that TIDES_MAIN changed exactly the literal TIDES_FILES since
+// TIDES_PARENT (fresh main), and 13p that the maintenance after it changed only this suite. BASE_MAIN, TL_MAIN, NC_MAIN and SOIL_MAIN
+// do not move. Only a Tides release moves TIDES_MAIN (and TIDES_PARENT with it).
+const TIDES_MAIN = process.env.TIDES_MAIN || '1784a71c331c98c240f7aba9508fe69afe8229d2';     // tides-nav-rc payload: Tides tab and Menu item on every page
+const TIDES_PARENT = process.env.TIDES_PARENT || 'a84a642fb63086f045eefb6a2c7ac4ad274a0d45';   // fresh main merged into the branch before the payload
+const TIDES_FILES = ['animals.html', 'assets/tides/SOURCE.json', 'assets/tides/earth-2026-06-22.jpg', 'assets/tides/sun-2026-11-25.jpg', 'index.html', 'moon.html', 'phase1/desktop-overflow.test.cjs',
+  'phase1/tides-load-compare.cjs', 'phase1/tides-model.test.mjs', 'phase1/tides-nav.test.cjs', 'phase1/tides-ui.test.cjs', 'phase1/tides/build_sun_reference.cjs', 'phase1/tides/build_tides.mjs',
+  'phase1/tides/check_sun_reference.py', 'phase1/tides/source/sdo-hmiic-20261125T140006Z.jpg', 'phase1/timeline-ui.test.cjs', 'sources.html', 'style.css', 'sun.html', 'tides-model.js', 'tides.css',
+  'tides.html', 'tides.js', 'timeline.html'];   // literal: the exact changed-path set of TIDES_PARENT..TIDES_MAIN
+const TIDES_TAB = '    <a href="tides.html" data-view="tides">Tides</a>\n', TIDES_MENU = '      <li role="none"><a role="menuitem" href="tides.html" data-page="tides">Tides</a></li>\n';
+const noTides = t => t.replace(TIDES_TAB, '').replace(TIDES_MENU, '');
+const PROMISE_SPAN = ['<div class="promise fit"><span>', '</span></div>'], unwrapPromise = t => t.replace(PROMISE_SPAN[0], '<div class="promise">').replace(/(<div class="promise">[^<]*)<\/span><\/div>/, '$1</div>');
 const sha = b => crypto.createHash('sha256').update(b).digest('hex');
 const BREAK = process.env.BREAK || '', EDIT = process.env.EDIT || '';
 const ONLY = (process.env.SECTIONS || '').split(',').filter(Boolean).map(Number), want = n => !ONLY.length || ONLY.includes(n);
@@ -139,6 +156,10 @@ Object.assign(BREAKS, {
   'tl-script-edited': ['timeline.js', 'const MIN_SPAN = 1', 'const MIN_SPAN = 2'],
   'tl-page-edited': ['timeline.html', '</title>', ' </title>'],
   'tl-page-animals-tab-gone': ['timeline.html', '    <a href="animals.html" data-view="animals">Animals</a>\n', ''],
+  // 25 Nov 2026 (Tides navigation): the Tides lines are set aside only once each, and only those lines
+  'tides-index-tab-gone': ['index.html', '    <a href="tides.html" data-view="tides">Tides</a>\n', ''],
+  'tides-sources-menu-gone': ['sources.html', '      <li role="none"><a role="menuitem" href="tides.html" data-page="tides">Tides</a></li>\n', ''],
+  'tides-tl-tab-twice': ['timeline.html', '    <a href="tides.html" data-view="tides">Tides</a>\n', '    <a href="tides.html" data-view="tides">Tides</a>\n    <a href="tides.html" data-view="tides">Tides</a>\n'],
   'tl-page-header-edited': ['timeline.html', '<a href="animals.html" data-view="animals">Animals</a>', '<a href="animals.html" data-view="animals">Animals</a><a href="x.html">X</a>'],
   'tl-rule-dropped': ['style.css', 'body.tl .tlmain{max-width:1400px;margin:0 auto;padding:16px}\n', ''],
   'tl-rule-edited': ['style.css', 'body.tl .tlmain{max-width:1400px;', 'body.tl .tlmain{max-width:1401px;'],
@@ -152,7 +173,7 @@ const EXPECT = { 'not-exclusive': '3b', 'late-answer-draws': '5a', 'off-no-cance
   'deep-link-scrolls-to-globe': '16j', 'no-status-by-globe': '16b', 'selection-keeps-list-retry': '17a', 'list-retry-no-token': '17a', 'list-retry-late-success': '17c', 'list-retry-no-time-limit': '17h', 'pagehide-keeps-list-retry': '17f',
   'marker-in-withheld': '18c', 'hidden-ends-at-last-withheld': '18c', 'tried-before-reached': '18e', 'accuracy-in-withheld': '18a', 'replay-starts-at-first-fix': '18a', 'replay-ends-at-last-fix': '18m',
   'bird-says-not-displayed': '18f', 'new-fields-optional': '19a', 'no-acc-check': '19b', 'no-inside-period-check': '19d', 'join-across-withheld-accepted': '19c', 'no-failed-check': '19e', 'stops-skip-withheld-starts': '18i',
-  'earth-script-edited': '13c', 'nc-app-edited': '13k', 'nc-index-edited': '13b', 'nc-index-tab-gone': '13b', 'nc-index-menu-gone': '13b', 'nc-sources-edited': '13e sources.html', 'nc-sources-tab-gone': '13e sources.html', 'nc-sources-id-gone': '13e sources.html', 'nc-sources-shortcut-gone': '13e sources.html', 'ctx-sources-edited': '13e sources.html', 'ctx-sources-dropped': '13e sources.html', 'ctx-sources-moved': '13e sources.html', 'shared-rule-dropped': '13d', 'moon-page-edited': '13e moon.html', 'tl-script-edited': '13g', 'tl-page-edited': '13h', 'tl-page-animals-tab-gone': '13h', 'tl-page-header-edited': '13h',
+  'earth-script-edited': '13c', 'nc-app-edited': '13k', 'nc-index-edited': '13b', 'nc-index-tab-gone': '13b', 'nc-index-menu-gone': '13b', 'nc-sources-edited': '13e sources.html', 'nc-sources-tab-gone': '13e sources.html', 'nc-sources-id-gone': '13e sources.html', 'nc-sources-shortcut-gone': '13e sources.html', 'ctx-sources-edited': '13e sources.html', 'ctx-sources-dropped': '13e sources.html', 'ctx-sources-moved': '13e sources.html', 'shared-rule-dropped': '13d', 'moon-page-edited': '13e moon.html', 'tl-script-edited': '13g', 'tl-page-edited': '13h', 'tl-page-animals-tab-gone': '13h', 'tides-index-tab-gone': '13b', 'tides-sources-menu-gone': '13e sources.html', 'tides-tl-tab-twice': '13h', 'tl-page-header-edited': '13h',
   'tl-rule-dropped': '13i', 'tl-rule-edited': '13i', 'tl-rule-added': '13i' };
 if (BREAK && !(BREAKS[BREAK] && EXPECT[BREAK])) { console.log('FAIL  unknown break ' + BREAK); process.exit(1); }
 
@@ -262,7 +283,7 @@ const gate = () => { let go; const p = new Promise(r => { go = r; }); return { p
       assets.filter(n => /catalog/.test(n)).length >= 1 && assets.filter(n => /manifest/.test(n) && !/census|corridor/.test(n)).length === IDS.length && assets.filter(n => /census|populations/.test(n)).length === 3 && assets.filter(n => /corridor/.test(n)).sort().join() === 'corridors-R1.catalog.json,mule-deer-east-walker-corridor-R1.manifest.json' && !assets.some(n => IDS.some(id => n === JOUR[id].j.file)) && !assets.includes('coast-50m.bin') && ctx._img.length === 1 && !reqs.some(u => u.includes(HUB)) && reqs.every(allowed), { assets, img: ctx._img.length, other: reqs.filter(u => !allowed(u)) });
     ok('1g the globe is ready, still (no auto-rotation), showing the whole Earth; the backdrop line gives the picture\'s own date and says it is not the journey dates',
       s.g.globe === 'ok' && s.g.autoRotate === false && Math.abs(s.g.view.altitude - 2.2) < 0.01 && s.g.backdrop === 'imagery' && /^Backdrop: NASA satellite imagery for \d{2} [A-Z][a-z]{2} \d{4} \(NASA GIBS, VIIRS NOAA-21\), not the journey dates\./.test(s.g.note) && /Dark areas/.test(s.g.note), s.g);
-    ok('1h the header has the five tabs with Animals current', dom.tabs.map(t => t[0]).join() === 'Earth now,Timeline,Moon,Sun,Animals' && dom.tabs[4][1] === 'page' && dom.tabs.slice(0, 4).every(t => !t[1]), dom.tabs);
+    ok('1h the header has the six tabs with Animals current (Tides added after Sun, 25 Nov 2026)', dom.tabs.map(t => t[0]).join() === 'Earth now,Timeline,Moon,Sun,Tides,Animals' && dom.tabs[5][1] === 'page' && dom.tabs.slice(0, 5).every(t => !t[1]), dom.tabs);
     const img = await page.evaluate(() => ({ url: ME.animalsGlobe.IMG_URL, day: ME.animalsGlobe.IMG_DAY, G: ME.animalsGlobe.G }));
     const app = fs.readFileSync(path.join(ROOT, 'app.js'), 'utf8'), idx = fs.readFileSync(path.join(ROOT, 'index.html'), 'utf8');
     const wantDay = new Date(Date.now() - 36 * 3600e3).toISOString().slice(0, 10);
@@ -272,8 +293,8 @@ const gate = () => { let go; const p = new Promise(r => { go = r; }); return { p
       idx.includes("const gibs = '" + PREFIX + "' + IMG_DAY + '&LAYERS=' + IMG_LAYER.id;") && img.url === PREFIX + wantDay + '&LAYERS=' + img.G.IMG_LAYER && ctx._img[0] === img.url, [img.url, ctx._img]);
     ok('1k the globe library served by this suite is the version the page pins (2.45.0)', GLOBE_VER === '2.45.0' && /unpkg\.com\/globe\.gl@2\.45\.0\//.test(fs.readFileSync(path.join(ROOT, 'animals.html'), 'utf8')), GLOBE_VER);
     // the tabs on every page
-    for (const pg of ['index.html', 'timeline.html', 'moon.html', 'sun.html', 'sources.html']) { const p2 = await ctx.newPage(); await p2.goto(BASE + '/' + pg, { waitUntil: 'domcontentloaded' }); await p2.waitForTimeout(300);
-      const t = await p2.evaluate(() => [...document.querySelectorAll('nav.tabs a')].map(a => a.getAttribute('href'))); ok(`1j ${pg}: one Animals tab, last, beside Moon and Sun`, t.join() === 'index.html,timeline.html,moon.html,sun.html,animals.html', t); await p2.close(); }
+    for (const pg of ['index.html', 'timeline.html', 'moon.html', 'sun.html', 'sources.html', 'tides.html']) { const p2 = await ctx.newPage(); await p2.goto(BASE + '/' + pg, { waitUntil: 'domcontentloaded' }); await p2.waitForTimeout(300);
+      const t = await p2.evaluate(() => [...document.querySelectorAll('nav.tabs a')].map(a => a.getAttribute('href'))); ok(`1j ${pg}: one Animals tab, last, after Moon, Sun and Tides`, t.join() === 'index.html,timeline.html,moon.html,sun.html,tides.html,animals.html', t); await p2.close(); }
     await ctx.close(); }
 
   // ===== 2. One journey on (T4, T18): the zebra
@@ -498,19 +519,23 @@ const gate = () => { let go; const p = new Promise(r => { go = r; }); return { p
     // the organic-soil baseline (SOIL_MAIN): Git only; without it, its checks fail closed (13b, 13c, 13e, 13m, 13n)
     let soilHow = ''; try { git(['cat-file', '-e', SOIL_MAIN + '^{commit}']); soilHow = 'git'; } catch (_) { }
     const soilFile = f => git(['show', SOIL_MAIN + ':' + f]);
+    // the Tides navigation baseline (TIDES_MAIN): Git only; without it, its checks fail closed (13b, 13e, 13o, 13p)
+    let tidesHow = ''; try { git(['cat-file', '-e', TIDES_MAIN + '^{commit}']); tidesHow = 'git'; } catch (_) { }
+    const tidesFile = f => git(['show', TIDES_MAIN + ':' + f]);
     const tabL = '    <a href="animals.html" data-view="animals">Animals</a>\n', menuL = '      <li role="none"><a role="menuitem" href="animals.html" data-page="animals">Animals</a></li>\n', hdr = t => (/<header[\s\S]*?<\/header>/.exec(t) || [''])[0];
     // the Animals guarantees on a page, checked on their own: both links once each, and the header equals BASE_MAIN's except those links
-    const animalsHead = (b, base) => { const h0 = hdr(base); return { links: b.split(tabL).length === 2 && b.split(menuL).length === 2, header: h0.length > 200 && hdr(b).replace(tabL, '').replace(menuL, '') === h0 }; };
+    const animalsHead = (b, base) => { const h0 = hdr(base); return { links: b.split(tabL).length === 2 && b.split(menuL).length === 2, header: h0.length > 200 && unwrapPromise(noTides(hdr(b))).replace(tabL, '').replace(menuL, '') === h0 }; };   // 25 Nov 2026: the Tides lines and the promise wrapper set aside too
     if (!how) { fail++; failed.push('13a'); console.log(`NOT RUN  13a–13e: main ${BASE_MAIN.slice(0, 7)} is not available (no Git metadata here and no BASE_DIR). The comparisons with main were not made.`); }
     else { ok(`13a the baseline is main ${BASE_MAIN.slice(0, 7)} (read from ${how === 'dir' ? 'BASE_DIR' : 'Git'})`, true);
       const mainIdx = mainFile('index.html'), idx = served('index.html');
-      const strip = t => t.replace('    <a href="animals.html" data-view="animals">Animals</a>\n', '').replace('      <li role="none"><a role="menuitem" href="animals.html" data-page="animals">Animals</a></li>\n', '').replace(/style\.css\?v=\d+/, 'style.css?v=X');
+      const strip = t => noTides(t).replace('    <a href="animals.html" data-view="animals">Animals</a>\n', '').replace('      <li role="none"><a role="menuitem" href="animals.html" data-page="animals">Animals</a></li>\n', '').replace(/style\.css\?v=\d+/, 'style.css?v=X');
       // 13b (24 Nov 2026, Nature context): was 'index.html equals main's except the Animals links and the stylesheet version'. The page now
       // carries the Nature context release, so it is held byte-for-byte to NC_MAIN, and the Animals guarantees are checked on their own.
       // 25 Nov 2026 (organic soil): held to SOIL_MAIN instead of NC_MAIN; the Animals guarantees are still checked on their own.
-      if (!soilHow) { fail++; failed.push('13b'); console.log(`NOT RUN  13b: the organic-soil baseline ${SOIL_MAIN.slice(0, 7)} is not available.`); }
-      else { const whole = idx === soilFile('index.html'), g = animalsHead(idx, mainIdx);
-        ok(`13b index.html is byte-identical to the file at the organic-soil baseline ${SOIL_MAIN.slice(0, 7)}; it carries the Animals tab link and menu link once each; and its header equals main ${BASE_MAIN.slice(0, 7)}'s except those two links`, whole && g.links && g.header, { whole, links: g.links, header: g.header }); }
+      // 25 Nov 2026 (Tides navigation): held to TIDES_MAIN; SOIL_MAIN's file plus exactly the two Tides lines and the promise wrapper is TIDES_MAIN's.
+      if (!soilHow || !tidesHow) { fail++; failed.push('13b'); console.log(`NOT RUN  13b: the baseline ${!soilHow ? SOIL_MAIN.slice(0, 7) : TIDES_MAIN.slice(0, 7)} is not available.`); }
+      else { const tf = tidesFile('index.html'), whole = idx === tf, step = unwrapPromise(noTides(tf)) === soilFile('index.html') && tf.split(TIDES_TAB).length === 2 && tf.split(TIDES_MENU).length === 2 && tf.includes(PROMISE_SPAN[0]), g = animalsHead(idx, mainIdx);
+        ok(`13b index.html is byte-identical to the file at the Tides baseline ${TIDES_MAIN.slice(0, 7)}, which is the organic-soil baseline ${SOIL_MAIN.slice(0, 7)}'s plus exactly the Tides tab, the Tides Menu item and the promise wrapper; it carries the Animals tab link and menu link once each; and its header equals main ${BASE_MAIN.slice(0, 7)}'s except those links`, whole && step && g.links && g.header, { whole, step, links: g.links, header: g.header }); }
       const same = ['aircraft.js', 'wind.js', 'nightlights.js', 'dustrgb.js', 'oceanheat.js', 'sky.js', 'skyscene.js', 'arts.js', 'craft.js', 'moonglobe.js', 'moonlight.js', 'sunglobe.js', 'phase1/collector-mac.mjs'];
       // 25 Nov 2026 (organic soil): 'layers.js' and 'phase1/bare-earth-ui.test.cjs' left this list; the soil release adds one Layers row and
       // the Bare Earth suite counts it. Both are held to SOIL_MAIN below; the other 13 files stay on BASE_MAIN.
@@ -534,13 +559,13 @@ const gate = () => { let go; const p = new Promise(r => { go = r; }); return { p
         ok(`13e ${pg} equals main's except the Animals links and the stylesheet version${rel ? ', and (release) the one added Animals section with its shortcut in the Sections list, which names all six sources and the omitted Low class and never says private preview' : ''}`, strip(rel ? b.replace(sec, '').replace(' · <a href="#animals">Animals</a>', '') : b) === a.replace(/style\.css\?v=\d+/, 'style.css?v=X') && (!rel || (sec.test(b) && b.split(' · <a href="#animals">Animals</a> · <a href="#search">Search</a>').length === 2 && ['10.5441/001/1.f3550b4f', '10.5281/zenodo.5575189', 'ptt id 98364', '10.5441/001/1.3hp3s250', '10.5061/dryad.vx0k6djp7', '10.5066/P1ETBSYE', 'Low-use class'].every(x => b.includes(x)) && !/private preview/i.test(b)))); }
       // 13e sources.html (24 Nov 2026, Nature context): byte-identical to NC_MAIN, plus every Animals guarantee the old check made, on its own
       { const b = served('sources.html'), sec = /  <h2 id="animals">[\s\S]*?(?=  <h2 id="search">)/;
-        if (!ncHow || !soilHow) { fail++; failed.push('13e sources.html'); console.log(`NOT RUN  13e sources.html: the baseline ${!soilHow ? SOIL_MAIN.slice(0, 7) : NC_MAIN.slice(0, 7)} is not available.`); }
+        if (!ncHow || !soilHow || !tidesHow) { fail++; failed.push('13e sources.html'); console.log(`NOT RUN  13e sources.html: the baseline ${!soilHow ? SOIL_MAIN.slice(0, 7) : !tidesHow ? TIDES_MAIN.slice(0, 7) : NC_MAIN.slice(0, 7)} is not available.`); }
         else { // 25 Nov 2026 (organic soil): byte-identical to the file at SOIL_MAIN, which already holds the reviewed zebra block (C1a). The
           // block is still checked on its own: present once, on the line after the zebra's source paragraph. Animals guarantees as before.
           const bl = b.split('\n'), at = bl.findIndex(l => l.startsWith('  <p><b>Plains zebra, collar Z3866')), ctxOk = at >= 0 && bl[at + 1] === CTX_SOURCES && b.split(CTX_SOURCES).length === 2;
-          const whole = soilHow ? b === soilFile('sources.html') : false, g = animalsHead(b, mainFile('sources.html')), section = sec.test(b), shortcut = b.split(' · <a href="#animals">Animals</a> · <a href="#search">Search</a>').length === 2,
+          const tsf = tidesFile('sources.html'), whole = b === tsf && noTides(tsf) === soilFile('sources.html') && tsf.split(TIDES_TAB).length === 2 && tsf.split(TIDES_MENU).length === 2, g = animalsHead(b, mainFile('sources.html')), section = sec.test(b), shortcut = b.split(' · <a href="#animals">Animals</a> · <a href="#search">Search</a>').length === 2,
             ids = ['10.5441/001/1.f3550b4f', '10.5281/zenodo.5575189', 'ptt id 98364', '10.5441/001/1.3hp3s250', '10.5061/dryad.vx0k6djp7', '10.5066/P1ETBSYE', 'Low-use class'].filter(x => !b.includes(x)), noPreview = !/private preview/i.test(b);
-          ok(`13e sources.html is byte-identical to the file at the organic-soil baseline ${SOIL_MAIN.slice(0, 7)}; the reviewed zebra land-context block is present once, after the zebra's source paragraph; it carries the Animals tab link and menu link once each and main ${BASE_MAIN.slice(0, 7)}'s header except those links; its Animals section, its one shortcut in the Sections list, all six sources and the omitted Low class are present; it never says private preview`, whole && ctxOk && g.links && g.header && section && shortcut && ids.length === 0 && noPreview, { whole, ctxOk, links: g.links, header: g.header, section, shortcut, missing: ids, noPreview }); } }
+          ok(`13e sources.html is byte-identical to the file at the Tides baseline ${TIDES_MAIN.slice(0, 7)}, which is the organic-soil baseline ${SOIL_MAIN.slice(0, 7)}'s plus exactly the Tides tab and Menu item; the reviewed zebra land-context block is present once, after the zebra's source paragraph; it carries the Animals tab link and menu link once each and main ${BASE_MAIN.slice(0, 7)}'s header except those links; its Animals section, its one shortcut in the Sections list, all six sources and the omitted Low class are present; it never says private preview`, whole && ctxOk && g.links && g.header && section && shortcut && ids.length === 0 && noPreview, { whole, ctxOk, links: g.links, header: g.header, section, shortcut, missing: ids, noPreview }); } }
       // 13j (24 Nov 2026, Nature context): NC_MAIN descends from NC_PARENT and changed no production file but the three above
       { let names = null; try { git(['merge-base', '--is-ancestor', NC_PARENT, NC_MAIN]); names = git(['diff', '--name-only', NC_PARENT, NC_MAIN]).split('\n').filter(Boolean); } catch (_) { }
         if (!names) { fail++; failed.push('13j'); console.log(`NOT RUN  13j: ${NC_PARENT.slice(0, 7)}..${NC_MAIN.slice(0, 7)} cannot be read from Git (or ${NC_PARENT.slice(0, 7)} is not an ancestor). The scope check was not made.`); }
@@ -565,6 +590,18 @@ const gate = () => { let go; const p = new Promise(r => { go = r; }); return { p
           else { const cur = (() => { try { return git(['diff', '--name-only', SOIL_MAIN, '--', 'phase1/animals-tab-ui.test.cjs']).trim(); } catch (_) { return 'x'; } })(); info = { uncommitted: cur }; ok13n = cur === 'phase1/animals-tab-ui.test.cjs' && git(['diff', '--name-only', SOIL_MAIN]).split('\n').filter(Boolean).every(f => f === 'phase1/animals-tab-ui.test.cjs'); } } catch (_) { }
         if (ok13n === null) { fail++; failed.push('13n'); console.log('NOT RUN  13n: the maintenance commit after SOIL_MAIN could not be read from Git.'); }
         else ok('13n the Animals-suite maintenance after the organic-soil payload changes only this suite, on top of SOIL_MAIN (before it is committed: the working tree differs from SOIL_MAIN in this suite only)', ok13n, info); }
+      // 13o (25 Nov 2026, Tides navigation): TIDES_MAIN descends from TIDES_PARENT and its changed paths are EXACTLY the literal TIDES_FILES
+      { let names = null; try { git(['merge-base', '--is-ancestor', TIDES_PARENT, TIDES_MAIN]); names = git(['diff', '--name-only', TIDES_PARENT, TIDES_MAIN]).split('\n').filter(Boolean); } catch (_) { }
+        if (!names) { fail++; failed.push('13o'); console.log(`NOT RUN  13o: ${TIDES_PARENT.slice(0, 7)}..${TIDES_MAIN.slice(0, 7)} cannot be read from Git (or ${TIDES_PARENT.slice(0, 7)} is not an ancestor). The scope check was not made.`); }
+        else { const extra = names.filter(f => !TIDES_FILES.includes(f)), missing = TIDES_FILES.filter(f => !names.includes(f));
+          ok(`13o ${TIDES_PARENT.slice(0, 7)}..${TIDES_MAIN.slice(0, 7)} changes exactly the ${TIDES_FILES.length} listed files (app.js, layers.js, soil.js, animals scripts and the hub not among them)`, extra.length === 0 && missing.length === 0 && !names.some(f => /^(app|layers|soil|animals[a-z-]*)\.js$|worker\.js$/.test(f)), { extra, missing }); } }
+      // 13p (25 Nov 2026, Tides navigation): the maintenance that added the Tides pins is the first commit after TIDES_MAIN, on the path to
+      // here, that touches this suite; its parent is TIDES_MAIN and it changes this suite and nothing else.
+      { let ok13p = null, info = {}; try { const firsts = git(['log', '--reverse', '--ancestry-path', '--format=%H', TIDES_MAIN + '..HEAD', '--', 'phase1/animals-tab-ui.test.cjs']).split('\n').filter(Boolean);
+          const m = firsts[0]; if (m) { const parents = git(['log', '-1', '--format=%P', m]).trim().split(' '), files = git(['diff-tree', '--no-commit-id', '--name-only', '-r', m]).split('\n').filter(Boolean); info = { commit: m.slice(0, 7), parents, files }; ok13p = parents.length === 1 && parents[0] === TIDES_MAIN && files.length === 1 && files[0] === 'phase1/animals-tab-ui.test.cjs'; }
+          else { const cur = (() => { try { return git(['diff', '--name-only', TIDES_MAIN, '--', 'phase1/animals-tab-ui.test.cjs']).trim(); } catch (_) { return 'x'; } })(); info = { uncommitted: cur }; ok13p = cur === 'phase1/animals-tab-ui.test.cjs' && git(['diff', '--name-only', TIDES_MAIN]).split('\n').filter(Boolean).every(f => f === 'phase1/animals-tab-ui.test.cjs'); } } catch (_) { }
+        if (ok13p === null) { fail++; failed.push('13p'); console.log('NOT RUN  13p: the maintenance commit after TIDES_MAIN could not be read from Git.'); }
+        else ok('13p the Animals-suite maintenance after the Tides navigation payload changes only this suite, on top of TIDES_MAIN (before it is committed: the working tree differs from TIDES_MAIN in this suite only)', ok13p, info); }
       // ----- the Timeline's own files, against main at TL_MAIN (the Timeline's latest release)
       const TL_DIR = process.env.TL_DIR || ''; let tlHow = '';
       if (TL_DIR && fs.existsSync(path.join(TL_DIR, 'timeline.html'))) tlHow = 'dir'; else { try { git(['cat-file', '-e', TL_MAIN + '^{commit}']); tlHow = 'git'; } catch (_) { } }
@@ -576,8 +613,9 @@ const gate = () => { let go; const p = new Promise(r => { go = r; }); return { p
         // 13h protects what 13e protected for this page: nothing but a Timeline release changes it, and all the Animals work ever added
         // to it is its two links. The page pins its own stylesheet version, so the version is compared too (13e set it aside).
         { const b = served('timeline.html'), tabL = '    <a href="animals.html" data-view="animals">Animals</a>\n', menuL = '      <li role="none"><a role="menuitem" href="animals.html" data-page="animals">Animals</a></li>\n', hd = t => (/<header[\s\S]*?<\/header>/.exec(t) || [''])[0], oldHd = hd(mainFile('timeline.html'));
-          const whole = b === tlFile('timeline.html'), links = b.split(tabL).length === 2 && b.split(menuL).length === 2, header = oldHd.length > 200 && hd(b).replace(tabL, '').replace(menuL, '') === oldHd;
-          ok(`13h timeline.html is byte-identical to main's at the Timeline baseline; it carries the Animals tab link and menu link once each; and its header equals main ${BASE_MAIN.slice(0, 7)}'s except those two links`, whole && links && header, { whole, links, header }); }
+          // 25 Nov 2026 (Tides navigation): the Tides tab and Menu item (once each) are set aside, exactly as the Animals lines are
+          const tides = b.split(TIDES_TAB).length === 2 && b.split(TIDES_MENU).length === 2, whole = noTides(b) === tlFile('timeline.html'), links = b.split(tabL).length === 2 && b.split(menuL).length === 2, header = oldHd.length > 200 && noTides(hd(b)).replace(tabL, '').replace(menuL, '') === oldHd;
+          ok(`13h timeline.html is byte-identical to main's at the Timeline baseline except the Tides tab and Menu item (once each); it carries the Animals tab link and menu link once each; and its header equals main ${BASE_MAIN.slice(0, 7)}'s except those links`, tides && whole && links && header, { tides, whole, links, header }); }
         // 13i protects what 13d protected for these lines, and more: the stylesheet's Timeline rules are exactly the Timeline release's,
         // in the same order (none dropped, none edited, none added by other work)
         { const tl = t => t.split('\n').filter(isTl), a = tl(tlFile('style.css')), b = tl(css), i = a.findIndex((l, k) => l !== b[k]);
