@@ -4,6 +4,14 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 25 Nov 2026
 
+## 25 Nov 11:53 UTC (clock reading) — **Animals: first IWC reply filed (enquiry D). Reference year, quantiles and a source given; a statement on links. Not reviewed by GPT; nothing cleared; whale example stays parked.** (page: none; Animals thread)
+- **Filed:** `docs/research/animals-source-audit/ENQUIRIES-EXPANSION.md` rev 1.2, the text as Chad pasted it on 25 Nov, the sender's address left out.
+- **It says:** the abundance figure refers to 2015; quantiles 5 % / 50 % / 95 % = 16580 / 18111 / 20700; BSC1 and BSC2 combined; data to 2015, assessment completed 2016; source paper SC/66A/SH03; links allowed for education and outreach, not commercial use, signposted and credited.
+- **It does not say** that the proposed card (status sentence, figure, classes on our page) may be shown. Not treated as permission.
+- **Difference recorded, not resolved:** 5 % value 16580 in the reply against 15,580 recorded from the graphics page on 20 Nov (`WHALE-RECOVERY.md` §2).
+- **Not read:** the linked archive PDF (text-only rule) and SC/66A/SH03.
+- **Next:** GPT reviews what the reply covers; any answer to the IWC is Chad's. Nothing sent, nothing chased.
+
 ## 25 Nov (after 10:25 UTC) — **Organic-soil emissions: GPT recheck PASS for the fixture preview `e51ca61`** (Nature context thread)
 - **Filed unchanged:** `reviews/2026-11-25-soil-preview-rc-r2-gpt-recheck.md`.
 - **Verdict:** the four findings are closed. The release-scope plan is supported, with these requirements:
