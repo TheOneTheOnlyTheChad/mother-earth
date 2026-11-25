@@ -6,7 +6,7 @@
 <title>Mother Earth — Sources &amp; Details</title>
 <meta name="description" content="Sources, attribution, what each layer measures, observation windows, coverage grades, comparison methods and limitations for Mother Earth.">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
-<link rel="stylesheet" href="style.css?v=202612210400">
+<link rel="stylesheet" href="style.css?v=202612250800">
 </head>
 <body class="doc">
 <header class="top">
@@ -17,6 +17,7 @@
     <a href="timeline.html" data-view="timeline">Timeline</a>
     <a href="moon.html" data-view="moon">Moon</a>
     <a href="sun.html" data-view="sun">Sun</a>
+    <a href="tides.html" data-view="tides">Tides</a>
     <a href="animals.html" data-view="animals">Animals</a>
   </nav>
   <div class="clock" id="clock">--:--:--<span>UTC</span></div>
@@ -27,6 +28,7 @@
       <li role="none"><a role="menuitem" href="timeline.html" data-page="timeline">Timeline</a></li>
       <li role="none"><a role="menuitem" href="moon.html" data-page="moon">Moon</a></li>
       <li role="none"><a role="menuitem" href="sun.html" data-page="sun">Sun</a></li>
+      <li role="none"><a role="menuitem" href="tides.html" data-page="tides">Tides</a></li>
       <li role="none"><a role="menuitem" href="animals.html" data-page="animals">Animals</a></li>
       <li role="none"><a role="menuitem" href="sources.html" data-page="sources">Sources &amp; Details</a></li>
     </ul>
@@ -35,7 +37,7 @@
 <main>
   <p class="small"><a href="index.html">← World View</a></p>
   <nav class="toc" aria-label="Sections">
-    <a href="#report">Status report</a> · <a href="#sources">Sources &amp; attribution</a> · <a href="#measures">What each layer measures</a> · <a href="#windows">Windows &amp; cadence</a> · <a href="#dates">Observation vs retrieval</a> · <a href="#coverage">Coverage</a> · <a href="#kept">What is kept</a> · <a href="#comparisons">Comparisons</a> · <a href="#tiers">Classification</a> · <a href="#imagery">Imagery</a> · <a href="#daynight">Day/night overlay</a> · <a href="#plastic">Microplastic samples</a> · <a href="#soil">Organic-soil emissions</a> · <a href="#animals">Animals</a> · <a href="#search">Search</a> · <a href="#limits">Limitations</a>
+    <a href="#report">Status report</a> · <a href="#sources">Sources &amp; attribution</a> · <a href="#measures">What each layer measures</a> · <a href="#windows">Windows &amp; cadence</a> · <a href="#dates">Observation vs retrieval</a> · <a href="#coverage">Coverage</a> · <a href="#kept">What is kept</a> · <a href="#comparisons">Comparisons</a> · <a href="#tiers">Classification</a> · <a href="#imagery">Imagery</a> · <a href="#daynight">Day/night overlay</a> · <a href="#plastic">Microplastic samples</a> · <a href="#soil">Organic-soil emissions</a> · <a href="#tides">Tides</a> · <a href="#animals">Animals</a> · <a href="#search">Search</a> · <a href="#limits">Limitations</a>
   </nav>
 
   <h2 id="report">Full status report</h2>
@@ -238,6 +240,12 @@
   <p><b>Times.</b> Three times are kept apart. “File updated” is the time SDO’s server gave for the file; it is what this page shows and what the age limit is counted from. “Retrieved” is when our hub fetched it. <b>When the Sun was observed is not stated by the file and is not shown.</b> A picture is shown for at most three hours after its file was updated; after that the globe says “No recent picture”, also in a tab left open.</p>
   <p><b>Our changes.</b> The flat picture is wrapped on a sphere from the disc’s centre and radius, measured in the picture itself, and the tilt of the Sun’s axis toward Earth on that date (calculated; Meeus, <i>Astronomical Algorithms</i>). The outermost edge of the disc, the black sky around it and SDO’s printed caption are not drawn. On 14 Nov 2026 we checked the placement once against the sunspot region positions in NOAA SWPC’s Solar Region Summary for that day.</p>
   <p><b>Credit.</b> Courtesy of NASA/SDO and the AIA, EVE, and HMI science teams. No endorsement by NASA is implied.</p>
+
+  <h2 id="tides">Tides — how the Moon and Sun shape them (computed model; own page)</h2>
+  <p><b>What it is.</b> On <a href="tides.html">the Tides page</a>, a model that shows how the Moon and the Sun stretch an ocean covering the whole Earth, land included. It is computed, not observed: no tide gauge, satellite or water level is read, nothing is fetched while the page is open, and it gives no date, no time, no height in metres and no prediction for any coast. The page says so beside the scene: “Idealised tide model · Bulges exaggerated · Body sizes and distances not to scale · Not a tide prediction”.</p>
+  <p><b>The rule.</b> The value in any direction is P2(angle to the Moon) + 0.46 × P2(angle to the Sun), where P2(x) = (3x² − 1) / 2 and x is the cosine of the angle; a body that is switched off counts as zero, and the two parts are added before anything is drawn (model <code>tides-model-R1</code>). The form and the Sun-to-Moon ratio come from the tide-generating potential in R. H. Stewart, <i>Introduction to Physical Oceanography</i>, §17.4 (<a href="https://geo.libretexts.org/Bookshelves/Oceanography/Introduction_to_Physical_Oceanography_(Stewart)/17%3A_Coastal_Processes_and_Tides/17.4%3A_Theory_of_Ocean_Tides" target="_blank" rel="noopener">LibreTexts copy</a>, which gives 0.46051); the step from that potential to a surface shape is our own short derivation for a rigid Earth, constant gravity and a still ocean that does not attract itself. Drawn radius = 1.15 + 0.12 × value Earth radii, the same at every angle and in every mode, greatly exaggerated. Left out on purpose: the tilt of Earth’s axis and of the Moon’s orbit, changing distances, the ocean’s response time, friction, coasts and basins, the give of the solid Earth and the ocean’s own gravity.</p>
+  <p><b>The pictures are reference pictures, not live.</b> Moving the Moon does not change them, and they are not part of the calculation. <b>Earth:</b> NASA GIBS, VIIRS NOAA-21 true colour, the daily picture for 22 June 2026, kept unchanged in this site’s files; it has cloud, seams between satellite passes and a dark southern polar cap (polar night on that date). <b>Moon:</b> the Moon page’s map (NASA’s Scientific Visualization Studio, CGI Moon Kit colour map), unchanged. <b>Sun:</b> one picture our hub had fetched from NASA’s Solar Dynamics Observatory (HMI continuum browse image; file updated 25 November 2026, 14:00 UTC; when the Sun was observed is not stated by the file), wrapped on a sphere by us in the same way as on the <a href="sun.html">Sun page</a> and kept in this site’s files. Only the side that faced Earth is drawn from the picture; the rest is plain, with stripes, and is not filled in. It is an Earth-facing view, not a picture of the whole Sun. Its orientation was checked on this picture against NOAA SWPC’s Solar Region Summary 329.</p>
+  <p><b>Credit.</b> We acknowledge the use of imagery provided by services from NASA’s Global Imagery Browse Services (GIBS), part of NASA’s Earth Science Data and Information System (ESDIS). NASA’s Scientific Visualization Studio. Courtesy of NASA/SDO and the AIA, EVE, and HMI science teams. No endorsement by NASA is implied. Hashes, dates and our changes for each picture: <code>assets/tides/SOURCE.json</code> in this site’s repository.</p>
 
   <h2 id="animals">Animals — recorded journeys, dated counts and one published corridor (dated archive; own page)</h2>
   <p><b>What it is.</b> The <a href="animals.html">Animals page</a> shows records that ended years ago: the recorded positions of one tagged animal at a time, replayed against the dates they were recorded; yearly counts of African penguin colonies to 2019; and one published map product for a mule deer herd. Nothing on it shows where any animal is now. Recorded animal journeys, the dated counts and the dated corridor product are shown as archive material by the site owner's decisions of 19 to 21 Nov 2026; this is a narrow exception for these records, and the live layers keep their own rules.</p>

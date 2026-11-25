@@ -1,0 +1,141 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Tides · how the Moon and Sun shape them · Mother Earth</title>
+<meta name="description" content="An idealised model of how the Moon and the Sun stretch an all-ocean Earth. A mechanism view: not a tide prediction.">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="style.css?v=202612250800">
+<link rel="stylesheet" href="tides.css?v=202612260100">
+</head>
+<body class="tides" data-body="tides">
+<header class="top">
+  <h1>Mother Earth</h1>
+  <div class="promise">Tides · a model of the mechanism</div>
+  <nav class="tabs" aria-label="Views">
+    <a href="index.html" data-view="earth">Earth now</a>
+    <a href="timeline.html" data-view="timeline">Timeline</a>
+    <a href="moon.html" data-view="moon">Moon</a>
+    <a href="sun.html" data-view="sun">Sun</a>
+    <a href="tides.html" data-view="tides" aria-current="page">Tides</a>
+    <a href="animals.html" data-view="animals">Animals</a>
+  </nav>
+  <nav class="menu" aria-label="Pages">
+    <button id="menu-btn" type="button" aria-haspopup="true" aria-expanded="false" aria-controls="menu-list">Menu</button>
+    <ul id="menu-list" role="menu">
+      <li role="none"><a role="menuitem" href="index.html" data-page="world">World View</a></li>
+      <li role="none"><a role="menuitem" href="timeline.html" data-page="timeline">Timeline</a></li>
+      <li role="none"><a role="menuitem" href="moon.html" data-page="moon">Moon</a></li>
+      <li role="none"><a role="menuitem" href="sun.html" data-page="sun">Sun</a></li>
+      <li role="none"><a role="menuitem" href="tides.html" data-page="tides" aria-current="page">Tides</a></li>
+      <li role="none"><a role="menuitem" href="animals.html" data-page="animals">Animals</a></li>
+      <li role="none"><a role="menuitem" href="sources.html" data-page="sources">Sources &amp; Details</a></li>
+    </ul>
+  </nav>
+</header>
+<main id="td-main" class="tdmain">
+  <h2 id="td-h">How the Moon and Sun shape the tides</h2>
+  <p class="td-model" id="td-model"><span class="ev comp">Computed</span> Idealised tide model · Bulges exaggerated · Body sizes and distances not to scale · Not a tide prediction</p>
+  <p class="td-lede">The pale blue surface is a model: an ocean covering the whole Earth, land included, pulled only by the Moon and the Sun. Move the Moon and watch the shape change. It is not measured water and says nothing about any coast.</p>
+
+  <div class="td-grid">
+    <section id="td-box" class="td-box" aria-label="Model scene: Earth, Moon and Sun" data-three="starting">
+      <div id="td-scene" class="td-scene"></div>
+      <span id="td-tag-earth" class="td-tag" hidden>Earth</span>
+      <span id="td-tag-sun" class="td-tag" hidden>Sun</span>
+      <button id="td-handle" class="td-handle" type="button" hidden aria-label="Moon. Drag it around Earth, or use the arrow keys." aria-describedby="td-readout"><span>Moon</span></button>
+      <p id="td-3d" class="td-3d">Loading the 3-D scene…</p>
+    </section>
+
+    <section class="td-ctl" aria-label="Controls">
+      <div class="td-row">
+        <label for="td-slider">Moon position <span class="dim">(degrees from the Sun’s direction)</span></label>
+        <input id="td-slider" type="range" min="0" max="359" step="1" value="0" aria-valuetext="0°, new Moon">
+      </div>
+      <div class="td-row td-btns" role="group" aria-label="Moon phase presets">
+        <button type="button" data-preset="0" aria-pressed="true">New Moon</button>
+        <button type="button" data-preset="90" aria-pressed="false">First quarter</button>
+        <button type="button" data-preset="180" aria-pressed="false">Full Moon</button>
+        <button type="button" data-preset="270" aria-pressed="false">Last quarter</button>
+      </div>
+      <fieldset class="td-row td-modes">
+        <legend>Whose pull is counted</legend>
+        <label><input type="radio" name="td-mode" value="both" checked> Both</label>
+        <label><input type="radio" name="td-mode" value="moon"> Moon only</label>
+        <label><input type="radio" name="td-mode" value="sun"> Sun only</label>
+      </fieldset>
+      <div class="td-row td-btns">
+        <button id="td-play" type="button" aria-pressed="false">Play</button>
+        <span id="td-view-ctl" class="td-btns" role="group" aria-label="Camera">
+          <button id="td-view-over" type="button" aria-pressed="true">Overhead</button>
+          <button id="td-view-ang" type="button" aria-pressed="false">Angled</button>
+        </span>
+        <button id="td-reset" type="button">Reset</button>
+      </div>
+      <p id="td-cycle" class="td-cycle">Illustrative cycle: 0%</p>
+      <p class="dim td-small">Phase names describe how the Moon looks from Earth. This picture is seen from outside, above Earth’s north pole, so it does not show that view.</p>
+    </section>
+
+    <aside class="td-side" aria-label="Cross-section and explanation">
+      <figure class="td-fig">
+        <svg id="td-xsec" class="td-xsec" viewBox="-3.25 -2.05 5.3 4.1" role="img" aria-labelledby="td-xsec-t td-readout" data-deg="0" data-mode="both">
+          <title id="td-xsec-t">Cross-section of the model in the plane of the Moon’s orbit, seen from above the north pole, Sun to the left</title>
+          <!-- TIDES-XSEC:BEGIN --><circle class="x-orbit" cx="0" cy="0" r="1.72"/><path class="x-water" fill-rule="evenodd" d="M-1.325 0L-1.325 0.023L-1.324 0.046L-1.323 0.069L-1.321 0.092L-1.318 0.115L-1.315 0.138L-1.311 0.161L-1.307 0.184L-1.303 0.206L-1.297 0.229L-1.291 0.251L-1.285 0.273L-1.278 0.295L-1.271 0.317L-1.263 0.338L-1.255 0.36L-1.246 0.381L-1.236 0.402L-1.227 0.422L-1.216 0.443L-1.206 0.463L-1.195 0.483L-1.183 0.502L-1.171 0.521L-1.158 0.54L-1.146 0.559L-1.133 0.577L-1.119 0.595L-1.105 0.613L-1.091 0.63L-1.076 0.647L-1.061 0.663L-1.046 0.679L-1.031 0.695L-1.015 0.711L-0.999 0.726L-0.982 0.74L-0.966 0.755L-0.949 0.768L-0.932 0.782L-0.915 0.795L-0.897 0.808L-0.88 0.82L-0.862 0.832L-0.844 0.844L-0.826 0.855L-0.808 0.866L-0.79 0.877L-0.771 0.887L-0.753 0.897L-0.734 0.907L-0.715 0.916L-0.697 0.924L-0.678 0.933L-0.659 0.941L-0.64 0.949L-0.621 0.956L-0.602 0.964L-0.583 0.97L-0.564 0.977L-0.545 0.983L-0.526 0.989L-0.507 0.995L-0.488 1L-0.469 1.005L-0.45 1.01L-0.431 1.015L-0.412 1.019L-0.393 1.023L-0.374 1.027L-0.355 1.031L-0.336 1.034L-0.317 1.037L-0.298 1.04L-0.28 1.043L-0.261 1.046L-0.242 1.048L-0.223 1.05L-0.205 1.052L-0.186 1.054L-0.167 1.056L-0.149 1.057L-0.13 1.058L-0.111 1.059L-0.093 1.06L-0.074 1.061L-0.056 1.062L-0.037 1.062L-0.019 1.062L0 1.062L0.019 1.062L0.037 1.062L0.056 1.062L0.074 1.061L0.093 1.06L0.111 1.059L0.13 1.058L0.149 1.057L0.167 1.056L0.186 1.054L0.205 1.052L0.223 1.05L0.242 1.048L0.261 1.046L0.28 1.043L0.298 1.04L0.317 1.037L0.336 1.034L0.355 1.031L0.374 1.027L0.393 1.023L0.412 1.019L0.431 1.015L0.45 1.01L0.469 1.005L0.488 1L0.507 0.995L0.526 0.989L0.545 0.983L0.564 0.977L0.583 0.97L0.602 0.964L0.621 0.956L0.64 0.949L0.659 0.941L0.678 0.933L0.697 0.924L0.715 0.916L0.734 0.907L0.753 0.897L0.771 0.887L0.79 0.877L0.808 0.866L0.826 0.855L0.844 0.844L0.862 0.832L0.88 0.82L0.897 0.808L0.915 0.795L0.932 0.782L0.949 0.768L0.966 0.755L0.982 0.74L0.999 0.726L1.015 0.711L1.031 0.695L1.046 0.679L1.061 0.663L1.076 0.647L1.091 0.63L1.105 0.613L1.119 0.595L1.133 0.577L1.146 0.559L1.158 0.54L1.171 0.521L1.183 0.502L1.195 0.483L1.206 0.463L1.216 0.443L1.227 0.422L1.236 0.402L1.246 0.381L1.255 0.36L1.263 0.338L1.271 0.317L1.278 0.295L1.285 0.273L1.291 0.251L1.297 0.229L1.303 0.206L1.307 0.184L1.311 0.161L1.315 0.138L1.318 0.115L1.321 0.092L1.323 0.069L1.324 0.046L1.325 0.023L1.325 0L1.325 -0.023L1.324 -0.046L1.323 -0.069L1.321 -0.092L1.318 -0.115L1.315 -0.138L1.311 -0.161L1.307 -0.184L1.303 -0.206L1.297 -0.229L1.291 -0.251L1.285 -0.273L1.278 -0.295L1.271 -0.317L1.263 -0.338L1.255 -0.36L1.246 -0.381L1.236 -0.402L1.227 -0.422L1.216 -0.443L1.206 -0.463L1.195 -0.483L1.183 -0.502L1.171 -0.521L1.158 -0.54L1.146 -0.559L1.133 -0.577L1.119 -0.595L1.105 -0.613L1.091 -0.63L1.076 -0.647L1.061 -0.663L1.046 -0.679L1.031 -0.695L1.015 -0.711L0.999 -0.726L0.982 -0.74L0.966 -0.755L0.949 -0.768L0.932 -0.782L0.915 -0.795L0.897 -0.808L0.88 -0.82L0.862 -0.832L0.844 -0.844L0.826 -0.855L0.808 -0.866L0.79 -0.877L0.771 -0.887L0.753 -0.897L0.734 -0.907L0.715 -0.916L0.697 -0.924L0.678 -0.933L0.659 -0.941L0.64 -0.949L0.621 -0.956L0.602 -0.964L0.583 -0.97L0.564 -0.977L0.545 -0.983L0.526 -0.989L0.507 -0.995L0.488 -1L0.469 -1.005L0.45 -1.01L0.431 -1.015L0.412 -1.019L0.393 -1.023L0.374 -1.027L0.355 -1.031L0.336 -1.034L0.317 -1.037L0.298 -1.04L0.28 -1.043L0.261 -1.046L0.242 -1.048L0.223 -1.05L0.205 -1.052L0.186 -1.054L0.167 -1.056L0.149 -1.057L0.13 -1.058L0.111 -1.059L0.093 -1.06L0.074 -1.061L0.056 -1.062L0.037 -1.062L0.019 -1.062L0 -1.062L-0.019 -1.062L-0.037 -1.062L-0.056 -1.062L-0.074 -1.061L-0.093 -1.06L-0.111 -1.059L-0.13 -1.058L-0.149 -1.057L-0.167 -1.056L-0.186 -1.054L-0.205 -1.052L-0.223 -1.05L-0.242 -1.048L-0.261 -1.046L-0.28 -1.043L-0.298 -1.04L-0.317 -1.037L-0.336 -1.034L-0.355 -1.031L-0.374 -1.027L-0.393 -1.023L-0.412 -1.019L-0.431 -1.015L-0.45 -1.01L-0.469 -1.005L-0.488 -1L-0.507 -0.995L-0.526 -0.989L-0.545 -0.983L-0.564 -0.977L-0.583 -0.97L-0.602 -0.964L-0.621 -0.956L-0.64 -0.949L-0.659 -0.941L-0.678 -0.933L-0.697 -0.924L-0.715 -0.916L-0.734 -0.907L-0.753 -0.897L-0.771 -0.887L-0.79 -0.877L-0.808 -0.866L-0.826 -0.855L-0.844 -0.844L-0.862 -0.832L-0.88 -0.82L-0.897 -0.808L-0.915 -0.795L-0.932 -0.782L-0.949 -0.768L-0.966 -0.755L-0.982 -0.74L-0.999 -0.726L-1.015 -0.711L-1.031 -0.695L-1.046 -0.679L-1.061 -0.663L-1.076 -0.647L-1.091 -0.63L-1.105 -0.613L-1.119 -0.595L-1.133 -0.577L-1.146 -0.559L-1.158 -0.54L-1.171 -0.521L-1.183 -0.502L-1.195 -0.483L-1.206 -0.463L-1.216 -0.443L-1.227 -0.422L-1.236 -0.402L-1.246 -0.381L-1.255 -0.36L-1.263 -0.338L-1.271 -0.317L-1.278 -0.295L-1.285 -0.273L-1.291 -0.251L-1.297 -0.229L-1.303 -0.206L-1.307 -0.184L-1.311 -0.161L-1.315 -0.138L-1.318 -0.115L-1.321 -0.092L-1.323 -0.069L-1.324 -0.046L-1.325 -0.023ZM1 0A1 1 0 1 0 -1 0A1 1 0 1 0 1 0Z"/><circle class="x-earth" cx="0" cy="0" r="1"/><circle class="x-ref" cx="0" cy="0" r="1.15"/><path class="x-surf" d="M-1.325 0L-1.325 0.023L-1.324 0.046L-1.323 0.069L-1.321 0.092L-1.318 0.115L-1.315 0.138L-1.311 0.161L-1.307 0.184L-1.303 0.206L-1.297 0.229L-1.291 0.251L-1.285 0.273L-1.278 0.295L-1.271 0.317L-1.263 0.338L-1.255 0.36L-1.246 0.381L-1.236 0.402L-1.227 0.422L-1.216 0.443L-1.206 0.463L-1.195 0.483L-1.183 0.502L-1.171 0.521L-1.158 0.54L-1.146 0.559L-1.133 0.577L-1.119 0.595L-1.105 0.613L-1.091 0.63L-1.076 0.647L-1.061 0.663L-1.046 0.679L-1.031 0.695L-1.015 0.711L-0.999 0.726L-0.982 0.74L-0.966 0.755L-0.949 0.768L-0.932 0.782L-0.915 0.795L-0.897 0.808L-0.88 0.82L-0.862 0.832L-0.844 0.844L-0.826 0.855L-0.808 0.866L-0.79 0.877L-0.771 0.887L-0.753 0.897L-0.734 0.907L-0.715 0.916L-0.697 0.924L-0.678 0.933L-0.659 0.941L-0.64 0.949L-0.621 0.956L-0.602 0.964L-0.583 0.97L-0.564 0.977L-0.545 0.983L-0.526 0.989L-0.507 0.995L-0.488 1L-0.469 1.005L-0.45 1.01L-0.431 1.015L-0.412 1.019L-0.393 1.023L-0.374 1.027L-0.355 1.031L-0.336 1.034L-0.317 1.037L-0.298 1.04L-0.28 1.043L-0.261 1.046L-0.242 1.048L-0.223 1.05L-0.205 1.052L-0.186 1.054L-0.167 1.056L-0.149 1.057L-0.13 1.058L-0.111 1.059L-0.093 1.06L-0.074 1.061L-0.056 1.062L-0.037 1.062L-0.019 1.062L0 1.062L0.019 1.062L0.037 1.062L0.056 1.062L0.074 1.061L0.093 1.06L0.111 1.059L0.13 1.058L0.149 1.057L0.167 1.056L0.186 1.054L0.205 1.052L0.223 1.05L0.242 1.048L0.261 1.046L0.28 1.043L0.298 1.04L0.317 1.037L0.336 1.034L0.355 1.031L0.374 1.027L0.393 1.023L0.412 1.019L0.431 1.015L0.45 1.01L0.469 1.005L0.488 1L0.507 0.995L0.526 0.989L0.545 0.983L0.564 0.977L0.583 0.97L0.602 0.964L0.621 0.956L0.64 0.949L0.659 0.941L0.678 0.933L0.697 0.924L0.715 0.916L0.734 0.907L0.753 0.897L0.771 0.887L0.79 0.877L0.808 0.866L0.826 0.855L0.844 0.844L0.862 0.832L0.88 0.82L0.897 0.808L0.915 0.795L0.932 0.782L0.949 0.768L0.966 0.755L0.982 0.74L0.999 0.726L1.015 0.711L1.031 0.695L1.046 0.679L1.061 0.663L1.076 0.647L1.091 0.63L1.105 0.613L1.119 0.595L1.133 0.577L1.146 0.559L1.158 0.54L1.171 0.521L1.183 0.502L1.195 0.483L1.206 0.463L1.216 0.443L1.227 0.422L1.236 0.402L1.246 0.381L1.255 0.36L1.263 0.338L1.271 0.317L1.278 0.295L1.285 0.273L1.291 0.251L1.297 0.229L1.303 0.206L1.307 0.184L1.311 0.161L1.315 0.138L1.318 0.115L1.321 0.092L1.323 0.069L1.324 0.046L1.325 0.023L1.325 0L1.325 -0.023L1.324 -0.046L1.323 -0.069L1.321 -0.092L1.318 -0.115L1.315 -0.138L1.311 -0.161L1.307 -0.184L1.303 -0.206L1.297 -0.229L1.291 -0.251L1.285 -0.273L1.278 -0.295L1.271 -0.317L1.263 -0.338L1.255 -0.36L1.246 -0.381L1.236 -0.402L1.227 -0.422L1.216 -0.443L1.206 -0.463L1.195 -0.483L1.183 -0.502L1.171 -0.521L1.158 -0.54L1.146 -0.559L1.133 -0.577L1.119 -0.595L1.105 -0.613L1.091 -0.63L1.076 -0.647L1.061 -0.663L1.046 -0.679L1.031 -0.695L1.015 -0.711L0.999 -0.726L0.982 -0.74L0.966 -0.755L0.949 -0.768L0.932 -0.782L0.915 -0.795L0.897 -0.808L0.88 -0.82L0.862 -0.832L0.844 -0.844L0.826 -0.855L0.808 -0.866L0.79 -0.877L0.771 -0.887L0.753 -0.897L0.734 -0.907L0.715 -0.916L0.697 -0.924L0.678 -0.933L0.659 -0.941L0.64 -0.949L0.621 -0.956L0.602 -0.964L0.583 -0.97L0.564 -0.977L0.545 -0.983L0.526 -0.989L0.507 -0.995L0.488 -1L0.469 -1.005L0.45 -1.01L0.431 -1.015L0.412 -1.019L0.393 -1.023L0.374 -1.027L0.355 -1.031L0.336 -1.034L0.317 -1.037L0.298 -1.04L0.28 -1.043L0.261 -1.046L0.242 -1.048L0.223 -1.05L0.205 -1.052L0.186 -1.054L0.167 -1.056L0.149 -1.057L0.13 -1.058L0.111 -1.059L0.093 -1.06L0.074 -1.061L0.056 -1.062L0.037 -1.062L0.019 -1.062L0 -1.062L-0.019 -1.062L-0.037 -1.062L-0.056 -1.062L-0.074 -1.061L-0.093 -1.06L-0.111 -1.059L-0.13 -1.058L-0.149 -1.057L-0.167 -1.056L-0.186 -1.054L-0.205 -1.052L-0.223 -1.05L-0.242 -1.048L-0.261 -1.046L-0.28 -1.043L-0.298 -1.04L-0.317 -1.037L-0.336 -1.034L-0.355 -1.031L-0.374 -1.027L-0.393 -1.023L-0.412 -1.019L-0.431 -1.015L-0.45 -1.01L-0.469 -1.005L-0.488 -1L-0.507 -0.995L-0.526 -0.989L-0.545 -0.983L-0.564 -0.977L-0.583 -0.97L-0.602 -0.964L-0.621 -0.956L-0.64 -0.949L-0.659 -0.941L-0.678 -0.933L-0.697 -0.924L-0.715 -0.916L-0.734 -0.907L-0.753 -0.897L-0.771 -0.887L-0.79 -0.877L-0.808 -0.866L-0.826 -0.855L-0.844 -0.844L-0.862 -0.832L-0.88 -0.82L-0.897 -0.808L-0.915 -0.795L-0.932 -0.782L-0.949 -0.768L-0.966 -0.755L-0.982 -0.74L-0.999 -0.726L-1.015 -0.711L-1.031 -0.695L-1.046 -0.679L-1.061 -0.663L-1.076 -0.647L-1.091 -0.63L-1.105 -0.613L-1.119 -0.595L-1.133 -0.577L-1.146 -0.559L-1.158 -0.54L-1.171 -0.521L-1.183 -0.502L-1.195 -0.483L-1.206 -0.463L-1.216 -0.443L-1.227 -0.422L-1.236 -0.402L-1.246 -0.381L-1.255 -0.36L-1.263 -0.338L-1.271 -0.317L-1.278 -0.295L-1.285 -0.273L-1.291 -0.251L-1.297 -0.229L-1.303 -0.206L-1.307 -0.184L-1.311 -0.161L-1.315 -0.138L-1.318 -0.115L-1.321 -0.092L-1.323 -0.069L-1.324 -0.046L-1.325 -0.023Z"/><text class="x-lbl" x="0" y="0.06" text-anchor="middle">Earth</text><g class="x-sun"><circle cx="-2.75" cy="0" r="0.42"/><text class="x-lbl" x="-2.75" y="-0.55" text-anchor="middle">Sun</text></g><g class="x-moon"><circle cx="-1.72" cy="0" r="0.13"/><text class="x-lbl" x="-1.52" y="-0.22" text-anchor="start">Moon</text></g><!-- TIDES-XSEC:END -->
+        </svg>
+        <figcaption>
+          <span class="td-key"><i class="k-surf"></i>Model surface: an ocean over the whole Earth, land included</span>
+          <span class="td-key"><i class="k-ref"></i>Reference level. Above it is “high”, below it is “low”</span>
+          <span class="dim">The surface is lifted off the globe so its low parts stay visible. “Low” means below the reference circle, not below the ground.</span>
+        </figcaption>
+      </figure>
+      <p id="td-readout" class="td-readout">Moon at 0° from the Sun’s direction · new Moon · high-to-low difference 100% of the model’s largest</p>
+      <p id="td-explain" class="td-explain">Moon and Sun in line (new Moon). The two stretches lie along the same line and add up: the largest difference between the model’s high and low. These are called spring tides. The name has nothing to do with the season, and new and full Moon give the same shape.</p>
+      <noscript><p class="td-explain">The controls need JavaScript. The cross-section shows the starting state: new Moon, both pulls counted.</p></noscript>
+    </aside>
+  </div>
+  <p id="td-status" class="td-sr" role="status" aria-live="polite"></p>
+
+  <details class="td-more" id="td-how">
+    <summary>How this works</summary>
+    <ol>
+      <li><b>Why two bulges.</b> The Moon’s pull gets weaker with distance. It is stronger on the side of Earth facing the Moon than at Earth’s centre, and weaker still on the far side. Earth as a whole is being pulled too, so what matters is the pull at each place <i>compared with the pull at the centre</i>. Compared that way, the near side is drawn toward the Moon and the far side is left behind: both are stretched away from the centre. Nothing pushes the far side outward.</li>
+      <li><b>The Sun does it too.</b> The Sun pulls on Earth far harder than the Moon does, but tides come from how much the pull <i>changes across</i> Earth, and the Sun is about 390 times farther away. In this model its stretch is about 46% of the Moon’s.</li>
+      <li><b>In line: spring tides.</b> At new Moon and at full Moon the two stretches lie along the same line and add. The model gives exactly the same shape for both. “Spring” here has nothing to do with the season.</li>
+      <li><b>At right angles: neap tides.</b> At the quarter Moons the Sun’s stretch lies across the Moon’s. The difference between high and low in the orbit plane falls to about <!-- TIDES-NEAP:BEGIN -->37<!-- TIDES-NEAP:END -->% of its largest. It does not fall to nothing, and the surface is not a sphere.</li>
+      <li><b>Real oceans are different.</b> Continents, depth, the shapes of ocean basins and the weather change real water levels and their timing. High water at a real coast need not come when the Moon is overhead, and not every place has two similar high waters a day. This model shows none of that.</li>
+    </ol>
+    <p><b>What is left out on purpose:</b> the tilt of Earth’s axis and of the Moon’s orbit (here the equator lies in the orbit plane), the changing distances of the Moon and the Sun, the time the ocean takes to respond, friction, the give of the solid Earth, and the ocean’s own gravity. Earth does not turn in this picture and the Sun’s direction is held still. Playback speed means nothing.</p>
+  </details>
+
+  <details class="td-more" id="td-sources">
+    <summary>Sources and method</summary>
+    <h3>The model</h3>
+    <ul>
+      <li><b>Rule:</b> value in any direction = P2(angle to the Moon) + 0.46 × P2(angle to the Sun), where P2(x) = (3x² − 1) / 2 and x is the cosine of the angle. The two parts are added before anything is drawn. A body that is switched off counts as zero. Model version <code>tides-model-R1</code>.</li>
+      <li><b>Where it comes from:</b> the tide-generating potential in R. H. Stewart, <i>Introduction to Physical Oceanography</i>, §17.4 “Theory of Ocean Tides” (<a href="https://geo.libretexts.org/Bookshelves/Oceanography/Introduction_to_Physical_Oceanography_(Stewart)/17%3A_Coastal_Processes_and_Tides/17.4%3A_Theory_of_Ocean_Tides">LibreTexts copy</a>, read in full 25 November 2026), which also gives the Sun-to-Moon ratio 0.46051. The step from that potential to a surface shape is our own short derivation for a rigid Earth, constant gravity and a small, still displacement (surface = an equipotential, so height = −potential ÷ gravity). It is not a quotation.</li>
+      <li><b>Drawing:</b> <!-- TIDES-DRAW:BEGIN -->surface radius = 1.15 + 0.12 × value, in Earth radii, the same in every mode and at every angle (from 1.062 to 1.325 Earth radii, always outside the globe).<!-- TIDES-DRAW:END --> The shape is greatly exaggerated. The model gives a relative shape only: no heights in metres are claimed, and water volume is not conserved by the drawing.</li>
+      <li><b>Scale:</b> the Moon’s size against Earth’s is to scale. The distances and the Sun’s size are not, and they are never used in the calculation.</li>
+      <li><b>Light:</b> Earth and the Moon are lit from the Sun’s direction with parallel rays. The Sun is drawn at its picture’s own brightness.</li>
+    </ul>
+    <h3>The pictures: reference images, not live</h3>
+    <p>Moving the Moon does not change these pictures. They show what the bodies look like; they are not part of the calculation.</p>
+    <ul>
+      <li><b>Earth:</b> NASA GIBS, VIIRS NOAA-21 true colour, the daily picture for 22 June 2026, kept unchanged. It contains cloud, visible seams between satellite passes and a dark southern polar cap (polar night on that date). We acknowledge the use of imagery provided by services from NASA’s Global Imagery Browse Services (GIBS), part of NASA’s Earth Science Data and Information System (ESDIS).</li>
+      <li><b>Moon:</b> NASA’s Scientific Visualization Studio, CGI Moon Kit colour map (2025 version), unchanged. An appearance map, tuned for looks, not a new observation. The near side is kept facing Earth.</li>
+      <li><b>Sun:</b> NASA Solar Dynamics Observatory, HMI continuum browse picture; file updated 25 November 2026, 14:00 UTC (the file does not state when the Sun was observed). Wrapped on a sphere by us, as on the <a href="sun.html">Sun page</a>, with the Earth-facing side toward Earth. The plain, striped part is outside that picture’s view: it is not filled in. Courtesy of NASA/SDO and the AIA, EVE, and HMI science teams.</li>
+    </ul>
+    <h3>Reading</h3>
+    <ul>
+      <li>NOAA JetStream, <a href="https://www.noaa.gov/jetstream/ocean/tides">Tides</a>: the pull compared with Earth’s centre; local patterns and timing.</li>
+      <li>NOAA National Ocean Service, <a href="https://oceanservice.noaa.gov/education/tutorial_tides/tides06_variations.html">Tidal Variations: The Influence of Position and Distance</a>: spring and neap tides.</li>
+      <li>NOAA National Ocean Service, <a href="https://oceanservice.noaa.gov/education/tutorial_tides/tides08_othereffects.html">What Affects Tides in Addition to the Sun and Moon?</a>: coasts, basins and weather.</li>
+      <li>NOAA National Ocean Service, <a href="https://oceanservice.noaa.gov/education/tutorial_tides/tides04_angle.html">Changing Angles and Changing Tides</a>: the tilt this model leaves out.</li>
+    </ul>
+    <p class="dim">Full register of sources: <a href="sources.html#tides">Sources &amp; Details</a>.</p>
+  </details>
+</main>
+<script src="tides-model.js?v=202612260100"></script>
+<script src="tides.js?v=202612260100"></script>
+</body>
+</html>

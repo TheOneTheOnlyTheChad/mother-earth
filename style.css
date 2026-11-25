@@ -384,6 +384,19 @@ details.cd>.cav{margin-top:2px}
   .top .clock{grid-area:c} .top .menu{grid-area:m} .top .tabs{grid-area:v}
   .tabs a{flex:1;justify-content:center;min-height:44px}
 }
+/* TIDES-NAV:BEGIN — six tabs (Tides added after Sun, tides-nav-rc, 25 Nov 2026). Measured by phase1/tides-nav.test.cjs with the real
+   fonts and with fallback fonts. Five-tab rules above are kept; these only tighten where six tabs did not fit. */
+@media (max-width:480px){.tabs a{padding:0 2px;letter-spacing:.01em;font-size:12.5px}}   /* six tabs on a phone: with fallback fonts the five-tab compact size overflowed at 360–390 px */
+@media (max-width:420px){.top{padding-left:10px;padding-right:10px}.tabs a{letter-spacing:0;font-size:12px}}
+@media (min-width:721px) and (max-width:900px){.tabs a{padding:0 3px;letter-spacing:0}}   /* one-row header, six tabs: with fallback fonts it was 30 px too wide at 721 px */
+@media (min-width:721px) and (max-width:760px){.top{gap:6px}.tabs a{padding:0 2px}}   /* six tabs, fallback fonts: 8 px too wide at 721 px */
+@media (max-width:340px){.tabs a{padding:0 1px;font-size:11.5px}}   /* six tabs at 320 px (five tabs already overflowed there with fallback fonts on main) */
+/* World View's long promise: shown only where its two full lines fit (measured in the promise's own font, so it works with
+   fallback fonts too); otherwise not shown at all, never cut. Same mechanism as the Earth from Space branch's header. */
+@media (min-width:1200px){.top .promise.fit{display:block;container-type:inline-size}}
+.top .promise.fit>span{display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;line-clamp:2;overflow:hidden}
+@container (max-width:63ch){.top .promise.fit>span{display:none}}
+/* TIDES-NAV:END */
 body.tl .top{position:sticky;top:0;z-index:40}
 body.tl .tlmain{max-width:1400px;margin:0 auto;padding:16px}
 body.tl .tlmain h2{font:700 26px/1.1 var(--display);letter-spacing:.03em;text-transform:uppercase;margin:4px 0 6px}

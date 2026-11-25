@@ -1,0 +1,119 @@
+{
+ "note": "Reference images for the Tides explorer (tides.html). Dated appearance pictures, never live, and not part of the calculation.",
+ "model": "tides-model-R1",
+ "images": [
+  {
+   "path": "assets/tides/earth-2026-06-22.jpg",
+   "bytes": 574096,
+   "sha256": "5e50da4e1688ad7881e7bb074ae1e507b67948dde4b5010174ed760edc6f095b",
+   "body": "Earth",
+   "pixels": [
+    2048,
+    1024
+   ],
+   "provider": "NASA GIBS (Global Imagery Browse Services), ESDIS",
+   "layer": "VIIRS_NOAA21_CorrectedReflectance_TrueColor",
+   "image_date": "2026-06-22",
+   "request": "https://gibs.earthdata.nasa.gov/wms/epsg4326/best/wms.cgi?SERVICE=WMS&REQUEST=GetMap&VERSION=1.3.0&FORMAT=image/jpeg&WIDTH=2048&HEIGHT=1024&CRS=EPSG:4326&BBOX=-90,-180,90,180&TIME=2026-06-22&LAYERS=VIIRS_NOAA21_CorrectedReflectance_TrueColor",
+   "retrieved_utc": "2026-11-25T14:30:24Z",
+   "retrieved_by": "Claude, browser pane on Chad's Mac; the same request shape as the Earth page",
+   "modifications": "none; served unchanged",
+   "measured": {
+    "near_black_share_percent": {
+     "whole_image": 20.6,
+     "north_of_66N": 0.2,
+     "30S_to_30N": 0.3,
+     "north_of_30S": 0.4,
+     "overhead_disc_area_weighted": 0.5
+    },
+    "definition": "R, G and B all below 12"
+   },
+   "candidates_considered": [
+    {
+     "date": "2026-06-20",
+     "sha256": "72dfec113b645d678120cc26c20d61fa8de44d6d560bf45e53a81ba8dd451dcf",
+     "overhead_disc": 0.4
+    },
+    {
+     "date": "2026-06-22",
+     "chosen": true,
+     "overhead_disc": 0.5
+    },
+    {
+     "date": "2026-09-21",
+     "sha256": "1d1554a8fc6f785c0e47e0e40234850add1b12de6439b9f8911bd126e831fd6f",
+     "overhead_disc": 2.2,
+     "north_of_66N": 31.5
+    },
+    {
+     "date": "2026-09-23",
+     "sha256": "007c314cfd8efbdadffa6d7602d4a1ecf87ebe73408183facf0b0d1ea102e0b9",
+     "overhead_disc": 2.7,
+     "north_of_66N": 35.0
+    }
+   ],
+   "choice": "Both June frames show a lit Arctic. 22 June was chosen by eye in the Overhead and Angled views (Europe and the Mediterranean clearer of cloud). The dark southern polar cap is not seen from the north.",
+   "credit": "We acknowledge the use of imagery provided by services from NASA's Global Imagery Browse Services (GIBS), part of NASA's Earth Science Data and Information System (ESDIS).",
+   "terms_read": "docs/research/tides/TIDES-IMAGE-USE-READS-2026-11-25.md",
+   "layer_check": {
+    "read_utc": "2026-11-25T15:12:26Z",
+    "by": "Claude, browser pane on Chad's Mac",
+    "layer_metadata": "https://gibs.earthdata.nasa.gov/layer-metadata/v1.0/VIIRS_NOAA21_CorrectedReflectance_TrueColor.json (title 'Corrected Reflectance (True Color)', NOAA-21 / VIIRS, daily; lists 12 source collections; no licence or restriction field)",
+    "source_collections": "NASA CMR records of the 12 listed collections (VJ202MOD/IMG, VJ203MOD/IMG, NRT and standard): 11 read, 1 (C2837615614-LANCEMODIS) answered 404. In all 11: UseConstraints 'None' (NRT ones add: see the LANCE disclaimer; 7 also FreeAndOpenData true); originator NASA/GSFC VCST; distributors LANCE MODIS or LAADS. The NRT AccessConstraints note that downloading the source files needs an Earthdata login; GIBS imagery itself was fetched without one.",
+    "result": "no use restriction found on the layer or its source collections. The LANCE disclaimer already in REGISTER applies."
+   }
+  },
+  {
+   "path": "assets/moon/lroc_color_2k.jpg",
+   "bytes": 457942,
+   "sha256": "f7130a1822681fa7512d7dcfd40db8c10b9ba4f06777910348698260ed7a2170",
+   "body": "Moon",
+   "note": "The Moon page's own file, unchanged; its record is assets/moon/SOURCE.json.",
+   "credit": "NASA's Scientific Visualization Studio"
+  },
+  {
+   "path": "assets/tides/sun-2026-11-25.jpg",
+   "bytes": 332048,
+   "sha256": "62857fae83f7d1c6cfc203970e6da9d55c853501ed36a56e90c78e698ed5d5bc",
+   "body": "Sun",
+   "pixels": [
+    2048,
+    1024
+   ],
+   "provider": "NASA Solar Dynamics Observatory",
+   "product": "SDO/HMI continuum, colourised (\"latest\" browse image, 1024 px)",
+   "original": {
+    "path": "phase1/tides/source/sdo-hmiic-20261125T140006Z.jpg",
+    "bytes": 202801,
+    "sha256": "0dcaf4cc09e3604e682a1989ad500d07f86e04ce2effce11b99e0428bee1892d",
+    "hub_id": "20261125T140006Z-0dcaf4cc09e3604e",
+    "hub_route": "/snapshot/sunface/20261125T140006Z-0dcaf4cc09e3604e/sun.jpg",
+    "source_url": "https://sdo.gsfc.nasa.gov/assets/img/latest/latest_1024_HMIIC.jpg",
+    "file_updated": "2026-11-25T14:00:06Z",
+    "file_updated_meaning": "SDO's Last-Modified header as our hub recorded it. Not an observation time; the file states none.",
+    "retrieved_by_hub": "2026-11-25T14:08:16.124Z",
+    "copied_from_hub_utc": "2026-11-25T14:29:48Z"
+   },
+   "transform": {
+    "by": "phase1/tides/build_sun_reference.cjs, running sunglobe.js's own sunB0, fitDisc and buildTexture",
+    "disc_fit": {
+     "cx": 511.51866039581296,
+     "cy": 511.55953988166095,
+     "R": 482.1937118552199,
+     "rms": 0.239863347307221,
+     "n": 1826
+    },
+    "b0_deg": 1.6052551332233818,
+    "mask_rho": 0.97,
+    "projection": "orthographic, Earth-facing hemisphere only; everything else plain with stripes",
+    "wrapped_rgba_sha256": "0839efacc92ca82186425f69ad5ad528f05694cc08e62e7456a3154cdea5d4f2",
+    "encoding": "JPEG, quality 0.9, Chromium canvas"
+   },
+   "modifications": "a modified display texture: reprojected onto a sphere and masked by us; the unseen side is left plain. Not a data product; nothing is measured from it.",
+   "orientation_evidence": "Checked on THIS picture (25 Nov 2026): the three sunspot regions in NOAA SWPC Solar Region Summary 329 (valid 24 Nov 24:00 UTC), moved forward 14 h by differential rotation, were found in the held original within 1.1 degrees of latitude and 2.2 of longitude, assuming north up and west to the right (phase1/tides/check_sun_reference.py; docs/research/tides/sun-reference-check-2026-11-25.json). Limit: the picture's observation time is unknown (1 h moves the prediction about 0.55 degrees). Earlier, for sun.html: one frame of 14 Nov 2026 against SRS 318.",
+   "credit": "Courtesy of NASA/SDO and the AIA, EVE, and HMI science teams.",
+   "terms_read": "docs/research/tides/TIDES-IMAGE-USE-READS-2026-11-25.md",
+   "mask_evidence": "Independent re-projection of the held original compared with the wrapped texture: no source pixel beyond 0.97 of the radius is used; mean difference 1.36 (used part) and 1.63 (plain part) on a 0-255 scale; bright texels in the plain part only within 4 texels of the edge (JPEG spill). Same script and evidence file."
+  }
+ ]
+}

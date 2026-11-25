@@ -113,10 +113,10 @@ const st = p => p.evaluate(id => {
     for (const [pg, want] of [['timeline.html', 'timeline'], ['index.html', 'earth'], ['sources.html', null], ['moon.html', 'moon'], ['sun.html', 'sun'], ['animals.html', 'animals']]) {
       await p.goto(BASE + '/' + pg).catch(() => {});
       const t = await p.evaluate(() => [...document.querySelectorAll('nav.tabs a')].map(a => [a.dataset.view, a.getAttribute('aria-current'), a.getAttribute('href')]));
-      ok(`tabs: ${pg} has Earth now · Timeline · Moon · Sun · Animals`, t.length === 5 && t.map(x => x[2]).join() === 'index.html,timeline.html,moon.html,sun.html,animals.html', t);
+      ok(`tabs: ${pg} has Earth now · Timeline · Moon · Sun · Tides · Animals`, t.length === 6 && t.map(x => x[2]).join() === 'index.html,timeline.html,moon.html,sun.html,tides.html,animals.html', t);   // Tides added after Sun (tides-nav-rc, 25 Nov 2026)
       ok(`tabs: ${pg} aria-current`, want ? t.filter(x => x[1] === 'page').map(x => x[0]).join() === want : t.every(x => !x[1]), t);
       const menu = await p.evaluate(() => [...document.querySelectorAll('#menu-list a')].map(a => a.dataset.page).join());
-      ok(`menu: ${pg} lists World View · Timeline · Moon · Sun · Animals · Sources`, menu === 'world,timeline,moon,sun,animals,sources', menu);
+      ok(`menu: ${pg} lists World View · Timeline · Moon · Sun · Tides · Animals · Sources`, menu === 'world,timeline,moon,sun,tides,animals,sources', menu);
     }
     await c.close();
   }
