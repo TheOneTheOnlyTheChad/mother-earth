@@ -1,6 +1,6 @@
-# Nature context — organic-soil emissions (Workstream B): corrected assessment packet and proposed presentation (rev 3)
+# Nature context — organic-soil emissions (Workstream B): corrected assessment packet and proposed presentation (rev 3, cleaned 25 Nov as the build brief)
 
-**Rev 3, 25 Nov 2026. Docs only.** Rev 3 answers GPT's rev 2 recheck (`reviews/2026-11-25-soil-c1-rev2-gpt-recheck.md`, filed unchanged): it fixes R2-1 and R2-2, and revises S1 to add an optional globe layer (§1b) after Chad raised the spatial-discovery gap. Rev 2 text below stands except where §0a says otherwise.
+**Rev 3, 25 Nov 2026. Docs only.** *Cleaned 25 Nov after GPT's preview-readiness review (`reviews/2026-11-25-soil-c1-rev3-preview-readiness-gpt-review.md`) and preview review (`reviews/2026-11-25-soil-preview-rc-gpt-review.md`): superseded wording in §1, §1b and §2 now matches what was approved and built (`soil-preview-rc`). No decision changed.* Rev 3 answers GPT's rev 2 recheck (`reviews/2026-11-25-soil-c1-rev2-gpt-recheck.md`, filed unchanged): it fixes R2-1 and R2-2, and revises S1 to add an optional globe layer (§1b) after Chad raised the spatial-discovery gap. Rev 2 text below stands except where §0a says otherwise.
 - **Supersedes:** rev 2 of 25 Nov (commit `d520b33`) and rev 1 of 24 Nov (commit `72ea123`).
 - **Answers:** GPT's soil C1 assessment review, which was a HOLD (`reviews/2026-11-25-soil-c1-assessment-gpt-review.md`, filed unchanged).
 - **Under:** Chad's standing decision of 24 Nov, which allows dated snapshots and modelled datasets (START-HERE §2), and his acceptance of the dated-model exception for this product.
@@ -41,9 +41,9 @@ Controls: `soil_controls.py` gives **75 passed, 0 failed** (rev 2: 58). The tabl
 
 ## 1. Proposed presentation (first preview: fixture only, page only)
 
-**Where:** a row in the existing "Everything here" panel, after Forest disturbance, plus an entry on Sources. There is no globe layer.
+**Where:** a row in the existing "Everything here" panel, after Forest disturbance, plus an entry on Sources, plus the optional globe layer in §1b (Chad's revised S1).
 
-**Row** (the full text is fixed by the reference function in `soil_controls.py`, which the page must reproduce):
+**Row** (the full text is fixed by `soil_reference.display` in `docs/research/soil-c1/soil_reference.py`, which the page must reproduce):
 
 > **Organic-soil emissions (modelled) · whole containing 4° cell** — modelled, not measured · **2021–2024 average** · drained ≈ <a> t CO₂e per year · burned ≈ <b> t CO₂e per year · mapped organic soil ≈ <c> km² of this cell
 > <span class="q">Totals for the whole 4° cell, not this point and not per hectare. Substantial model uncertainty; local uncertainty is not quantified. Glen et al. 2026 model outputs v1.0.1 (WRI Land & Carbon Lab; CC BY 4.0): IPCC Tier 1 factors applied to mapped drainage and burned area. Drainage is inferred from nearby roads, canals and land use; fire is conservative. A period average, not this year, and not linked to fires shown elsewhere on this page. Source checked <date>.</span>
@@ -90,7 +90,7 @@ The row answers "what does the model estimate for the cell containing this place
 - **Period:** fixed to the 2021–2024 annual average in the first preview; no period switch.
 - **Component:** a two-way switch, drained or burned. No combined score.
 - **What is drawn:** the same 4° cells as the data, through the existing cell-polygon path used by forest. No points, and no inferred hotspots within a cell.
-- **Colour classes:** fixed decade bins in t CO₂e per year per **whole** cell (`soil_reference.BINS`), on one sequential palette, the same scale for both components.
+- **Colour classes:** fixed decade bins in t CO₂e per year per **whole** cell (`soil_reference.BINS`), on one sequential palette, the same scale for both components. As built: one ochre hue, dark to light in OKLCH (`#6a3913 #925512 #b7761f #d49838 #e8bd6d #f7e3b0`), near-opaque fills (0.88) with thin dark cell edges. The lowest class is labelled "more than 0, below 1,000".
 
   | Bin (t CO₂e/yr per cell) | Drained cells | Burned cells |
   |---|---:|---:|
@@ -104,14 +104,14 @@ The row answers "what does the model estimate for the cell containing this place
 
   These are the counts from the real table, 2021–24. The bins are decades, not quantiles, so the scale does not move when the data changes. The colours themselves go to the preview for review against these counts.
 - **Distinct states in the key and on the globe:**
-  - **Model zero:** a hollow outline in the layer colour, no fill. It never shares the look of unavailable.
+  - **Model zero:** hollow, with an ochre outline, no fill. It never shares the look of unavailable.
   - **No organic soil mapped:** nothing drawn; the key says so.
-  - **Unknown coverage (`none`):** the site's existing grey "unknown" cell outline. There are none in v1.0.1.
-  - **Incomplete coverage:** the bin fill, plus a dashed outline, so a partial sum is visibly partial (Iceland and the Canadian Arctic cells only in 2011–15 and 2016–20; in 2021–24 there are none, so the first preview shows the style only from a synthetic fixture).
+  - **Unknown coverage (`none`):** the site's red "unknown" cell outline. There are none in v1.0.1. Unknown-only outlines do not count in the Key.
+  - **Incomplete coverage:** a violet outline, kept for **values and zeros alike** (filled = a sum over the available raster cells; hollow = a 0 over them), so a partial sum is visibly partial. globe.gl strokes cannot be dashed, so the outline is solid (Iceland and the Canadian Arctic cells only in 2011–15 and 2016–20; in 2021–24 there are none, so the first preview shows the style only from a synthetic fixture).
   - **Table unavailable:** the card says "unknown — the soil table is not available" and nothing is drawn.
 - **Legend (key line):** "Organic-soil emissions (modelled), 2021–2024 average, t CO₂e per year per whole 4° cell; Glen et al. 2026 v1.0.1." The card adds: "Cell totals, not intensity: 4° cells shrink towards the poles (a 70°N cell has about a third of the area of an equatorial one), so colours compare cell totals, not emissions per km²." No per-km² layer in the first preview.
-- **Selection:** clicking a cell opens the existing cell inspector, which shows the same text as the row (`soil_reference.display`), and draws a **new** selected-cell outline; the page has none today. The "Everything here" row for any selected place shows the same cell, outlined the same way, so a regional total is never read as a point value. The row and inspector carry the explanation: both components, mapped area, period, caveats and Sources. The layer is a way to find and select cells.
-- **Key count:** the layer counts as one in "Key · N layers" while drawn.
+- **Selection:** clicking a cell opens the cell inspector with the same text as the row (`soil_reference.display`), with its rows stacked so the figures get the panel's width, and draws a **white** selected-cell outline, which is new to the page. **The outline belongs to the layer:** it is drawn only while the layer is on, for the inspector and for the "Everything here" panel alike. With the layer off, the panel names the cell and its bounds in its "Selected" row and changes nothing on the globe (the place view's read-only rule; accepted by GPT, P1).
+- **Key count:** the layer counts as one in "Key · N layers" while it draws a value or a model zero; unknown-only outlines and the selection outline do not count.
 - **Not in the first preview:** a period switch, a per-km² view, a combined total, a separate tab, animation.
 - **Reference:** `soil_reference.layer_class()` fixes the class of every cell, state and invalid input (controls H1–H6). The page must reproduce it.
 
@@ -121,7 +121,7 @@ The row answers "what does the model estimate for the cell containing this place
 - **Contents:** 790 cells, all five periods.
 - **Build:** `soil_build.py` ran on the workspace copies of the two verified downloads; 272 s; peak 1,629 MiB (Linux). No new download, and the rasters were not re-fetched.
 - **Totals:** identical to rev 1 (raster sums; the exported 6-figure table sums agree within 7×10⁻⁷ relative, which is storage rounding): drainage 1.9922 / 2.0087 / 2.0026 / 2.0740 / 2.1491 and fire 0.6337 / 0.5972 / 0.6934 / 0.4808 / 0.5419 Gt CO₂e/yr. Conservation holds for every period and component, and nothing falls outside the world.
-- **Controls:** `soil_controls.py` gives **58 passed, 0 failed**.
+- **Controls:** `soil_controls.py` gives **75 passed, 0 failed** (§0a; the breakdown below is the rev 2 list of 58, before groups G and H were added).
   - A, weights (6): split overlap, negative coordinates, touching edges, aligned intervals, clipped coverage, outside bins.
   - B, synthetic end-to-end with real pyproj, scipy and matrix products (10): a 3 × 3 km raster across longitude 0° and the 2°N parallel, with hand-computed bin sums, NaN footprint, organic area, conservation and nothing outside.
   - C, fail-closed (8): infinite values, negatives, NaN extent, extent above 100, differing masks, wrong raster size and wrong units tag are each refused; good input is accepted.

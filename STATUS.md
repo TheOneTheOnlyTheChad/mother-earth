@@ -4,6 +4,17 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 25 Nov 2026
 
+## 25 Nov 10:25 UTC (Mac clock 10:18 at the last check): **Organic-soil emissions preview, round 2 (`soil-preview-rc` `e51ca61`) for GPT recheck after its HOLD. Nothing merged, downloaded or deployed** (page: preview branch only; Nature context thread)
+- **GPT's preview review filed unchanged** (HOLD). T1 closed as a documented raster/table difference; the layer-owned outline and the fixture handling were accepted.
+- **GPT's earlier preview-readiness review filed unchanged as well.** I had not read it before round 1; its items are handled here.
+- **Fixes:**
+  - one-hue OKLCH ramp with near-opaque fills;
+  - zeros keep incomplete coverage (violet outline);
+  - unknown-only outlines do not count in the Key;
+  - stacked soil inspector.
+- **Tests:** soil-ui 45/0; OLD and 13 breaks fail. The 15 nearest suites were rerun: failures are the same as on main, plus the expected Animals pins.
+- **Records:** proposal wording cleaned (no decision changed). Packet: `reviews/2026-11-25-soil-preview-rc-r2.md`, including the explicit 13j/13m plan for release.
+
 ## 25 Nov 09:55 UTC (Mac clock) — **Organic-soil emissions: fixture preview on branch `soil-preview-rc` (`0ee7328`) and T1 tables findings, for GPT review. Nothing merged or deployed; no hub change** (page: preview branch only; Nature context thread)
 - **Chad's go (25 Nov):** S1 revised (row plus optional layer), S2 P1, S3, T1 (tables zip only), S4 (fixture preview on a branch).
 - **T1:** `tabular_data_v1_0_1.zip` verified (MD5 and SHA-256). The paper's 2.69 equals the publishers' table (2011–15 = 2.6945). The 1 km rasters are systematically higher, in every period (drainage +0.06–0.08%; fire about +0.004%). The publishers state that tables and raster sums may differ. Record: `docs/research/soil-c1/SOIL-C1-TABLES-CHECK-2026-11-25.md`.
