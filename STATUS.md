@@ -4,6 +4,14 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 25 Nov 2026
 
+## 25 Nov 03:26:28 UTC (clock reading) — **Timeline R4: GPT's live smoke PASS; enquiries E1–E4 sent by Chad; Drimolen author replied with the article; thread handed over** (page: none; docs only; Timeline thread)
+- **GPT's scoped live smoke test: PASS, no rollback recommended** (about 03:13–03:19 UTC). Filed unchanged: `reviews/2026-11-25-timeline-r4-live-smoke-gpt-review.md` (sha256 `8ebe60f7…a355`). Three page hashes matched; catalogue validated through the live page (its shell request to the hub got 403). Still open after it: real phone, Safari, screen reader, true 200 % zoom, physical wheel.
+- **Enquiries E1 (Drimolen), E2 (Ngandong), E3 (Liang Bua), E4 (La Ferrassie wording) are SENT** by Chad from his own address, 25 Nov (his statement). No address in the repo. Record: `docs/research/TIMELINE-HUMAN-RELATIVES-ENQUIRY-DRAFTS.md` rev 4.
+- **E1 reply the same day:** the Drimolen corresponding author answered ("a layer with a direct date of ~2.04 Ma, but is certainly not younger than 1.95 Ma"), attached the article for our own reading and asked for the link when the entry is done. Chad replies himself. The article is on the Mac in the private packet only (`research/timeline-human-relatives/2026-11-24-claude/pdf/`, sha256 `c409c156…a770`, with `ADDENDUM-2-DRIMOLEN-REPLY-2026-11-25.md`); Chad's Downloads copy is his to delete.
+- **Drimolen is NOT on the page and nothing is started.** Evidence to review, not clearance. Next for a Timeline thread, each on Chad's go: source-check revision for C4 from the full text → GPT → new catalogue revision (R5; hub pin and page release on his own lines) → send the author the link.
+- **Left for the next Timeline thread:** the Project copies of the two release packets lack §10 and §9 (repository copies complete).
+- **Next overall:** Nature resumes. HANDOVER's Timeline block is updated.
+
 ## 25 Nov 00:03:59 UTC — **TIMELINE RELEASED: "Humans and human relatives", four dated finds, catalogue `tl-2026-11-R4`. Live page = merge `49d91bc`. Thread closed out** (production: page; Timeline thread; entry written 00:10:13 UTC clock reading; Chad, 24 Nov 18:47 UTC: "Approve: merge timeline-finds-release-rc b198033 into main (page release: Humans and human relatives, tl-2026-11-R4, release date 25 Nov 2026), with served-hash and live checks")
 - **Held until the catalogue's release day.** The line came on 24 Nov; the merge was made when the clock read 25 Nov 00:03 UTC.
 - **Before (00:03:28–00:03:32 UTC):** hub 0.6.25; R4 route 200, 48,134 B, `74b1f8b1…00ca`; R1, R2, R3 and the unversioned route exact. Branch still `b198033`, main still `e44d600`.
