@@ -115,7 +115,8 @@ BINS = [(0, 1e3), (1e3, 1e4), (1e4, 1e5), (1e5, 1e6), (1e6, 1e7), (1e7, math.inf
 
 
 def layer_class(table, cid, component, period='2021_2024'):
-    """'unavailable' | 'no-soil' | 'unknown' | 'zero' | ('bin', i, incomplete)."""
+    """'unavailable' | 'no-soil' | 'unknown' | ('zero', incomplete) | ('bin', i, incomplete).
+    Coverage is kept for zeros as for values (GPT preview review H1, 25 Nov): a 0 summed over part of a cell is incomplete too."""
     if not validate_table(table)[0] or component not in COMPONENTS or period not in PERIODS or not cell_in_domain(cid):
         return 'unavailable'
     rec = table['cells'].get(cid)
@@ -126,6 +127,6 @@ def layer_class(table, cid, component, period='2021_2024'):
     if not rec['has_mapped_organic_soil'] and s['state'] == 'zero':
         return 'no-soil'
     if s['state'] == 'unknown': return 'unknown'
-    if s['state'] == 'zero': return 'zero'
+    if s['state'] == 'zero': return ('zero', p['coverage'] == 'incomplete')
     i = next(k for k, (lo, hi) in enumerate(BINS) if lo <= s['Mg'] < hi)
     return ('bin', i, p['coverage'] == 'incomplete')
