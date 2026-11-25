@@ -25,7 +25,10 @@ const CATOF = u => fs.readFileSync(ROOT + '/phase1/timeline/catalogue/' + u.spli
     const r = await p.evaluate(() => [...document.querySelectorAll('body *')].filter(e => !e.closest('#clock, canvas, .clock')).map(e => { const q = e.getBoundingClientRect(), s = getComputedStyle(e); return [e.tagName, e.id, Math.round(q.left), Math.round(q.top), Math.round(q.width), Math.round(q.height), s.color, s.backgroundColor, s.fontSize, s.display].join('|'); }));
     await c.close(); return r; };
   for (const page of ['index.html', 'sources.html', 'moon.html', 'sun.html', 'animals.html']) for (const [w, h] of [[1280, 860], [390, 844]]) {
-    const a = await boxes(page, old('style.css'), w, h), a2 = await boxes(page, old('style.css'), w, h), n = await boxes(page, cur('style.css'), w, h);
+    // 25 Nov 2026 (Tides navigation): the six-tab header rules (the stylesheet's TIDES-NAV block) change the header on purpose and are
+    // measured by phase1/tides-nav.test.cjs; they are set aside here, so this check still guards everything else in the stylesheet.
+    const noNav = t => { const m = t.match(/\/\* TIDES-NAV:BEGIN[\s\S]*?TIDES-NAV:END \*\/\n?/g) || []; if (m.length !== 1) throw new Error('style.css: expected one TIDES-NAV block, found ' + m.length); return t.replace(m[0], ''); };
+    const a = await boxes(page, old('style.css'), w, h), a2 = await boxes(page, old('style.css'), w, h), n = await boxes(page, noNav(cur('style.css')), w, h);
     const diff = (x, y) => x.length !== y.length ? -1 : x.filter((v, i) => v !== y[i]).length;
     const noise = diff(a, a2), d = diff(a, n);
     if (d !== 0) bad++;
