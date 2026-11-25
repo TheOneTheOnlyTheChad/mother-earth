@@ -13,6 +13,7 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 - **Close-out:** REGISTER heading now "on the page since 25 Nov 2026". Branches `timeline-finds-release-rc`, `timeline-r4-hub-rc`, `timeline-finds-rc` deleted on the GitHub branches page (gone by 00:09:23 UTC; all three were on main); nine branches remain: `main` and eight of other threads, untouched. No Timeline copy was in the Mac `_review/`; the eleven folders there belong to other threads and stay. START-HERE §1 and §4aj, HANDOVER's Timeline block updated.
 - **Rollback (own Approve line):** page first, `git revert -m 1 49d91bc`; hub 0.6.24 (`db4f9cdf…1aa5`, `72ea123`) only after the page is back on R3; the R2 object stays.
 - **Open:** real phone, Safari, screen reader, 200 % zoom, a physical wheel on the live page; `ships` degraded and `firms:recovery` down in `/status` (no reading of mine before the hub deploy; hub owner's); enquiries E1–E4 are Chad's to send, none sent.
+- **After the close-out commit `1520286` (docs only):** served `REGISTER.md` `f930a67c…` (148,214 B) and the page files unchanged at 00:10:58 UTC. Mac synced to `1520286` at 00:10:25 UTC, preserve-first: 28 files preserved in `_preserved/20261125T001025Z/`, each equal to the last synced commit `06c7ee3`; 455 new; re-compare clean. This line is added in a later commit; the Mac gets it in a second sync.
 - **One record:** `reviews/2026-11-25-timeline-r4-close-out.md`.
 - **Next:** Nature resumes (its own thread). Nothing is started for Timeline.
 
