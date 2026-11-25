@@ -4,6 +4,16 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 25 Nov 2026
 
+## 25 Nov (after 10:25 UTC) — **Organic-soil emissions: GPT recheck PASS for the fixture preview `e51ca61`** (Nature context thread)
+- **Filed unchanged:** `reviews/2026-11-25-soil-preview-rc-r2-gpt-recheck.md`.
+- **Verdict:** the four findings are closed. The release-scope plan is supported, with these requirements:
+  - historical 13j/13k stay intact;
+  - 13m uses a literal file manifest;
+  - the anchors are bound, including any test-maintenance commit;
+  - the negative controls are demonstrated on the integrated candidate.
+- **Not cleared:** merge or deployment.
+- **Next, on Chad's own go:** a fresh-main candidate with the full 790-record table, fixture wording removed, hashes and REGISTER updated, Key/mobile evidence, then GPT review, then Chad's Approve line.
+
 ## 25 Nov 10:25 UTC (Mac clock 10:18 at the last check): **Organic-soil emissions preview, round 2 (`soil-preview-rc` `e51ca61`) for GPT recheck after its HOLD. Nothing merged, downloaded or deployed** (page: preview branch only; Nature context thread)
 - **GPT's preview review filed unchanged** (HOLD). T1 closed as a documented raster/table difference; the layer-owned outline and the fixture handling were accepted.
 - **GPT's earlier preview-readiness review filed unchanged as well.** I had not read it before round 1; its items are handled here.
