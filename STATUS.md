@@ -4,6 +4,20 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 25 Nov 2026
 
+## 25 Nov 04:20 UTC (clock reading) — **Animals journey context: GPT's evidence review filed (pilot PASS; full run held for five extractor fixes); Chad's acceptances; full zebra extractor with those fixes, a verifier and 39 offline controls, back to GPT for a targeted check. Not run; no tiles downloaded; corridor parked.** (page: none; Animals thread; branch `animals-journey-context-proposal` `e76d4de`)
+- **GPT's review** filed unchanged: `reviews/2026-11-25-animals-journey-context-evidence-gpt-review.md` (sha256 `b242f682…a836`). `6.03` reads as "Collection 6 standard processing" per NASA GIBS's value map (GPT's read).
+- **Chad, 25 Nov:** accepts the six whole-file Hansen downloads (976.6 MB), the labelled 30 % year-2000 threshold and the collapsed monthly table; extractor back to GPT before he runs it.
+- **Extractor** `phase1/animals/journey_context_firms_fetch.py` (sha256 `91c115a0…8d77`):
+  - 81 requests (80 keyed, 1 keyless missing-data list).
+  - Stops on any unreadable or ill-formed key status, or at 2,000 used.
+  - Bytes are capped while reading.
+  - Strict CSV validation; the stored bytes are the hashed bytes.
+  - An explicit end state: complete, stopped or invalid.
+  - Transactions are estimated at about 755, an estimate and not a maximum.
+- **Verifier** `journey_context_verify.py` refuses anything incomplete or altered.
+- **Controls:** `journey_context_firms_fetch.test.py`, 39 passed in the workspace and 39 on the Mac shell (Python 3.10). Two defects were found and fixed while writing them (an empty gap list accepted; a key in a status body treated as fatal).
+- **Records:** evidence rev 1.2, build brief rev 1.2. Mac `_review/animals-journey-context-extractor/` (`read/` as text, `run/` runnable; hashes equal to the branch).
+
 ## 25 Nov 03:55 UTC (clock reading) — **Animals journey context: FIRMS pilot run by Chad (Terminal, 03:50 UTC); results and the zebra's final budget in the evidence record rev 1.1; package to GPT. Nothing built.** (page: none; Animals thread; branch `animals-journey-context-proposal` `2c19327`)
 - **Pilot:** six requests, all 200.
   - 33 MODIS detections in two 5-day windows.
