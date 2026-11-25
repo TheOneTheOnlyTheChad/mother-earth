@@ -4,6 +4,14 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 25 Nov 2026
 
+## 25 Nov 07:09 UTC (clock reading) — **Animals journey context C1a CLOSED OUT: GPT's live smoke PASS filed unchanged; branch deleted; Mac tidied and synced; handover written. Corridor and reply-dependent work parked.** (page: none; Animals thread)
+- **GPT's live smoke:** PASS, no rollback (`reviews/2026-11-25-animals-journey-context-c1a-gpt-live-smoke.md`, `d2802bbb…162b1a`). Served hashes match; deferred loading seen; figures, disclosures, 390 px fit, keyboard, Sources paragraph and no switch activation confirmed; no console errors.
+- **Open, recorded:** real phone, Safari, screen reader, print, true 200 % zoom. `kept-ui`'s three World View failures exist on main without this work.
+- **GitHub:** `animals-journey-context-proposal` deleted (fully merged; the git proxy refused with 403, done on GitHub's branches page). `animals-assessment-rc` kept; no other thread's branch touched.
+- **Mac:** this thread's four `_review/` folders and the ChatGPT-folder packet moved to `_to_delete/` (stamp `20261125T070538Z`). Private inputs kept in `research/animals-journey-context/`. Mac main synced to `ffb1f68` preserve-first: 7 files updated, 47 new, old copies in `_preserved/20261125T070721Z/`, each matching an earlier commit; 1,745 of 1,745 files then equal.
+- **Note:** `animals.html` now uses `style.css?v=202612250100`, the key `animals-assessment-rc` holds; that branch needs a new key at release.
+- **Record:** `reviews/2026-11-25-animals-journey-context-c1a-close-out.md`. **Next Animals thread:** Project doc `claude/HANDOVER-ANIMALS-WAITING.md`.
+
 ## 25 Nov 06:58 UTC (clock reading) — **Animals journey context C1a RELEASED: zebra historical regional land context live on the Animals page (merge `64e9cf59`) on Chad's Approve line; served hashes match; scoped live check passed; live smoke to GPT.** (pages: Animals, Sources; Animals thread)
 - **Chad, 25 Nov:** "Approve: merge animals-journey-context-proposal at `16133f23…ee742ee19d`… preserving current main, with served-hash verification and the scoped live check. No hub change; corridor remains parked." GPT's release recheck PASS, filed unchanged (`reviews/2026-11-25-animals-journey-context-c1a-gpt-release-recheck.md`, `c8dd2124…cdd4`).
 - **Merge** `64e9cf59` (parents `9a06ba33`, `16133f23`), 06:54:07 UTC; tree equals the reviewed head; no hub change.
