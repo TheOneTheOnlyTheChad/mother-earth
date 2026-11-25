@@ -19,12 +19,12 @@ body.tides .td-box[data-three="none"] .td-scene{display:none}
 body.tides .td-3d{margin:0;padding:6px 10px;font-size:12px;color:var(--dim);border-top:1px solid var(--line);background:var(--panel);position:relative;z-index:3}
 body.tides .td-tag,body.tides .td-handle{position:absolute;left:0;top:0;z-index:2;font:600 12px/1 var(--display);letter-spacing:.08em;text-transform:uppercase;color:var(--fg);white-space:nowrap}
 body.tides .td-tag[hidden],body.tides .td-handle[hidden]{display:none}
-body.tides .td-tag{pointer-events:none;margin:-34px 0 0 -50px;width:100px;text-align:center;text-shadow:0 0 4px #000,0 0 2px #000}
-body.tides .td-handle{all:unset;position:absolute;left:0;top:0;z-index:2;width:48px;height:48px;margin:-24px 0 0 -24px;border-radius:50%;cursor:grab;touch-action:none;box-sizing:border-box;border:1.5px dashed rgba(255,179,71,.75)}
+body.tides .td-tag{pointer-events:none;text-align:center;text-shadow:0 0 4px #000,0 0 2px #000}
+body.tides .td-handle{all:unset;position:absolute;left:0;top:0;z-index:2;width:48px;height:48px;border-radius:50%;cursor:grab;touch-action:none;box-sizing:border-box;border:1.5px dashed rgba(255,179,71,.75)}
 body.tides .td-handle.drag{cursor:grabbing;border-style:solid}
 body.tides .td-handle:hover{border-color:var(--accent);background:rgba(255,179,71,.08)}
 body.tides .td-handle:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
-body.tides .td-handle span{position:absolute;left:50%;top:-18px;transform:translateX(-50%);font:600 12px/1 var(--display);letter-spacing:.08em;text-transform:uppercase;color:var(--accent);white-space:nowrap;text-shadow:0 0 4px #000,0 0 2px #000}
+body.tides .td-handle span{position:absolute;left:0;top:0;pointer-events:none;font:600 12px/1 var(--display);letter-spacing:.08em;text-transform:uppercase;color:var(--accent);white-space:nowrap;text-shadow:0 0 4px #000,0 0 2px #000}
 
 body.tides .td-ctl{grid-area:ctl;border:1px solid var(--line);background:var(--card);padding:12px 14px;min-width:0}
 body.tides .td-row{margin:0 0 12px;border:0;padding:0;min-width:0}

@@ -1,0 +1,89 @@
+{
+ "checked": "held files only, no network",
+ "original_sha256": "0dcaf4cc09e3604e682a1989ad500d07f86e04ce2effce11b99e0428bee1892d",
+ "texture_sha256": "62857fae83f7d1c6cfc203970e6da9d55c853501ed36a56e90c78e698ed5d5bc",
+ "srs_sha256": "01efcfa810597520f58b656aef513ba21e74ca89a3de94e2bf0bb21eefc4546e",
+ "srs": "NOAA SWPC Solar Region Summary 329, issued 2026-11-25 00:30 UTC, locations valid 2026-11-24 24:00 UTC (services.swpc.noaa.gov/text/srs.txt, read 2026-11-25 15:12 UTC)",
+ "advance_hours": 14.0,
+ "limits_deg": {
+  "lat_deg": 1.5,
+  "lon_deg": 3.0
+ },
+ "spots_found": [
+  {
+   "pixels": 5,
+   "x": 204.6,
+   "y": 372.8,
+   "lat": 17.92,
+   "lon_west": -41.99
+  },
+  {
+   "pixels": 72,
+   "x": 946.1,
+   "y": 388.9,
+   "lat": 15.31,
+   "lon_west": 69.13
+  },
+  {
+   "pixels": 7,
+   "x": 833.0,
+   "y": 578.3,
+   "lat": -6.77,
+   "lon_west": 42.17
+  }
+ ],
+ "regions": [
+  {
+   "region": "4579",
+   "srs_lat": 15,
+   "srs_lon_west": 62,
+   "predicted_lon_west": 69.91,
+   "found": {
+    "pixels": 72,
+    "x": 946.1,
+    "y": 388.9,
+    "lat": 15.31,
+    "lon_west": 69.13
+   },
+   "d_lat": 0.31,
+   "d_lon": -0.78
+  },
+  {
+   "region": "4581",
+   "srs_lat": -7,
+   "srs_lon_west": 34,
+   "predicted_lon_west": 41.98,
+   "found": {
+    "pixels": 7,
+    "x": 833.0,
+    "y": 578.3,
+    "lat": -6.77,
+    "lon_west": 42.17
+   },
+   "d_lat": 0.23,
+   "d_lon": 0.19
+  },
+  {
+   "region": "4582",
+   "srs_lat": 19,
+   "srs_lon_west": -52,
+   "predicted_lon_west": -44.15,
+   "found": {
+    "pixels": 5,
+    "x": 204.6,
+    "y": 372.8,
+    "lat": 17.92,
+    "lon_west": -41.99
+   },
+   "d_lat": -1.08,
+   "d_lon": 2.16
+  }
+ ],
+ "mask": {
+  "max_radius_sampled": 0.97,
+  "mean_abs_diff_used": 1.36,
+  "mean_abs_diff_plain": 1.63,
+  "bright_plain_texels": 66,
+  "bright_plain_texels_beyond_4_of_edge": 0
+ }
+}

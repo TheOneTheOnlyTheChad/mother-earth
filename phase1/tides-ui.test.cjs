@@ -25,6 +25,11 @@ const BREAKS = {
   'reset-partial': ['tides.js', 'st.playing = false; st.deg = INITIAL.deg; st.mode = INITIAL.mode;', 'st.playing = false; st.deg = INITIAL.deg;'],
   'img-fail-kills': ['tides.js', "st.images[key] = ok ? 'ok' : 'failed';", "st.images[key] = ok ? 'ok' : 'failed'; if (!ok) no3d('A picture failed.');"],
   'live-word': ['tides.html', 'Idealised tide model · Bulges exaggerated', 'Live idealised tide model · Bulges exaggerated'],
+  // added after GPT's first-build review (R1, R2, R3, R5)
+  'stale-draw': ['tides.html', 'surface radius = 1.15 + 0.12 × value', 'surface radius = 1.12 + 0.08 × value'],
+  'explain-12': ['tides.js', 'if (offAlign <= M.PRESET_TOL) return', 'if (offAlign <= 12) return', 'if (offQuarter <= M.PRESET_TOL) return', 'if (offQuarter <= 12) return'],
+  'labels-fixed': ['tides.js', 'const pe = choose(tags.earth, \'E\', E, rE, 8, [away, ...AX, ...DG]);', 'const pe = rectAt(tags.earth, E, [0, 1], rE, 8);', "pm = choose(lbl, 'M', Mo, rM, 4, [out, perp, [-perp[0], -perp[1]], ...AX, ...DG]);", "pm = rectAt(lbl, Mo, [0, -1], rM, 4);"],
+  'touch-none': ['tides.js', "if (ct.domElement && ct.domElement.style) ct.domElement.style.touchAction = 'pan-y';", ''],
 };
 if (B && !BREAKS[B]) { console.log('unknown BREAK ' + B); process.exit(2); }
 const served = rel => {
@@ -100,6 +105,8 @@ async function sceneXY(p, x, y, z) { return p.evaluate(([x, y, z]) => { const s 
     ok('T8c model area: no "live", "now", "today", UTC, year, clock time or metres', !/\blive\b|\bnow\b|\btoday\b|\bUTC\b|\b20\d\d\b|\d\d:\d\d|\bmetres?\b|\d\s?m\b/i.test(area), (area.match(/\blive\b|\bnow\b|\btoday\b|\bUTC\b|\b20\d\d\b|\d\d:\d\d|\bmetres?\b|\d\s?m\b/ig) || []));
     ok('T8d all-ocean label and the lifted-surface note are visible beside the scene', await p.evaluate(() => { const v = el => { const r = el.getBoundingClientRect(), c = getComputedStyle(el); return r.width > 0 && r.height > 0 && c.visibility !== 'hidden' && c.display !== 'none'; };
       const cap = document.querySelector('.td-fig figcaption'); return v(cap) && /ocean over the whole Earth, land included/.test(cap.textContent) && /lifted off the globe/.test(cap.textContent) && v(document.getElementById('td-model')); }));
+    const drawn = await p.evaluate(() => { const li = [...document.querySelectorAll('#td-sources li')].find(l => /^Drawing:/.test(l.textContent)); const how = document.getElementById('td-how').textContent; return { li: li && li.textContent, want: TidesModel.drawingText(), how: /falls to about (\d+)%/.exec(how), neap: TidesModel.neapPercent() }; });
+    ok('T8h Sources prints the drawing constants the model uses, and How this works the model\'s neap share', !!drawn.li && drawn.li.includes(drawn.want) && !!drawn.how && Number(drawn.how[1]) === drawn.neap, drawn);
     ok('T8e reference dates only inside the closed "Sources and method" disclosure', await p.evaluate(() => { const d = document.getElementById('td-sources'); return !d.open && /22 June 2026/.test(d.textContent) && /file updated 25 November 2026/.test(d.textContent) && /not live/.test(d.textContent); }));
 
     // ---------- T2: pictures, records, orientation evidence
@@ -113,7 +120,8 @@ async function sceneXY(p, x, y, z) { return p.evaluate(([x, y, z]) => { const s 
     const sunC = await sceneXY(p, -400, 0, 0), sunL = await sceneXY(p, -460, 0, 0), sunR = await sceneXY(p, -340, 0, 0);
     const lFar = await canvasLum(p, sunL.x + 14, sunL.y, 6), lNear = await canvasLum(p, sunR.x - 14, sunR.y, 6);
     ok('T2d Sun: the picture faces Earth (Earth side bright, far side plain); B0 tilt recorded 1.605°', lNear > 2 * lFar && lNear > 80, { near: Math.round(lNear), far: Math.round(lFar) });
-    ok('T2e Sun orientation evidence and its limit are recorded in SOURCE.json', /SRS 318/.test(fs.readFileSync(path.join(ROOT, 'assets/tides/SOURCE.json'), 'utf8')) && /Not re-checked for this picture/.test(fs.readFileSync(path.join(ROOT, 'assets/tides/SOURCE.json'), 'utf8')));
+    let sunChk = ''; try { sunChk = execFileSync('python3', ['-I', path.join(ROOT, 'phase1/tides/check_sun_reference.py'), '--check'], { encoding: 'utf8' }); } catch (e) { sunChk = 'FAILED ' + (e.stdout || '') + (e.stderr || ''); }
+    ok('T2e Sun reference checked on this picture: three SWPC regions found where north-up predicts; no pixel past the 0.97 mask; stored evidence reproduces', /orientation and mask checks pass; stored evidence matches/.test(sunChk), sunChk.trim().slice(-300));
 
     // ---------- T7: light. Earth and Moon lit from the Sun's side; the Sun does not respond to the light at all
     const e1 = await sceneXY(p, -60, 0, 0), e2 = await sceneXY(p, 60, 0, 0);
@@ -192,6 +200,12 @@ async function sceneXY(p, x, y, z) { return p.evaluate(([x, y, z]) => { const s 
     const changes = await p.evaluate(async () => { let n = 0; const o = new MutationObserver(() => n++); o.observe(document.getElementById('td-status'), { childList: true, characterData: true, subtree: true }); document.getElementById('td-play').click(); await new Promise(r => setTimeout(r, 2500)); document.getElementById('td-play').click(); await new Promise(r => setTimeout(r, 700)); o.disconnect(); return n; });
     ok('T9c no status announcement per frame: at most one while playing 2.5 s and stopping', changes <= 1, { changes });
     ok('T9d the slider and the Moon handle have readable names and values', await p.evaluate(() => /Moon position/.test(document.querySelector('label[for="td-slider"]').textContent) && /°, /.test(document.getElementById('td-slider').getAttribute('aria-valuetext')) && /Moon\. Drag it around Earth, or use the arrow keys/.test(document.getElementById('td-handle').getAttribute('aria-label'))));
+    // explanation wording: exact geometry only at the presets (GPT R2)
+    const ex = await p.evaluate(() => { const out = {}; for (const d of [0, 10, 45, 90, 100, 180, 190, 270, 280, 359.6]) { TIDES.setDeg(d); out[d] = { t: document.getElementById('td-explain').textContent, name: TidesModel.phaseName(d) }; } TIDES.setDeg(0); return out; });
+    const exact = t => /in line \(|at right angles \(|the largest difference|the smallest difference/.test(t);
+    ok('T6i at the presets the explanation names the exact geometry (spring at new and full, neap at the quarters)', /in line \(new Moon\)/.test(ex[0].t) && /in line \(full Moon\)/.test(ex[180].t) && /at right angles \(first quarter\)/.test(ex[90].t) && /at right angles \(last quarter\)/.test(ex[270].t) && /in line \(new Moon\)/.test(ex[359.6].t), Object.fromEntries(Object.entries(ex).map(([k, v]) => [k, v.t.slice(0, 50)])));
+    ok('T6j 10° from a preset the explanation says "close to", gives the actual share, and claims no exact geometry', [10, 100, 190, 280].every(d => /^Close to (new Moon|first quarter|full Moon|last quarter), 10° from/.test(ex[d].t) && /\d+% of/.test(ex[d].t) && !exact(ex[d].t)) && !exact(ex[45].t) && /^Between the two/.test(ex[45].t), { 10: ex[10].t, 100: ex[100].t, 45: ex[45].t });
+    ok('T6k the explanation and the phase readout agree (no exact claim where the phase is named "between")', Object.values(ex).every(v => !exact(v.t) || !/^between/.test(v.name)));
     // hidden tab
     await p.click('#td-play'); await sleep(300);
     await p.evaluate(() => { Object.defineProperty(document, 'hidden', { configurable: true, get: () => true }); document.dispatchEvent(new Event('visibilitychange')); });
@@ -252,15 +266,65 @@ async function sceneXY(p, x, y, z) { return p.evaluate(([x, y, z]) => { const s 
     ok('T9i reduced motion: starts paused and draws nothing on its own', !(await st(rp2)).playing && rr1 === rr0, { rr0, rr1 });
     await R.ctx.close();
 
+    // ---------- T7: labels never sit on another body (GPT R3): both camera presets, four phases, three window sizes, plus free camera
+    const labelProblems = async pg => pg.evaluate(() => {
+      const g = TIDES.tagGeom(), box = document.getElementById('td-scene').getBoundingClientRect(), rr = el => { const r = el.getBoundingClientRect(); return { l: r.left - box.left, t: r.top - box.top, r: r.right - box.left, b: r.bottom - box.top }; };
+      const E = rr(document.getElementById('td-tag-earth')), S = rr(document.getElementById('td-tag-sun')), H = rr(document.getElementById('td-handle')), ML = rr(document.querySelector('#td-handle span'));
+      const hit = (a, b) => a.l < b.r && b.l < a.r && a.t < b.b && b.t < a.b;
+      const circ = (a, c, r) => { const x = Math.max(a.l, Math.min(c[0], a.r)), y = Math.max(a.t, Math.min(c[1], a.b)); return Math.hypot(x - c[0], y - c[1]) < r; };
+      const bad = [];
+      if (hit(E, H) || hit(E, ML) || circ(E, g.M, g.rM)) bad.push('Earth label on the Moon');
+      if (circ(ML, g.E, g.rE)) bad.push('Moon label on Earth');
+      if (hit(S, E) || hit(S, ML) || circ(S, g.M, g.rM)) bad.push('Sun label on another label or the Moon');
+      if (circ(E, g.S, g.rS) || circ(ML, g.S, g.rS)) bad.push('a label on the Sun');
+      return bad;
+    });
+    const sizes = [[1280, 900], [1280, 720], [390, 844]], lp = [];
+    for (const [w, h] of sizes) {
+      const V = await open(browser, { viewport: { width: w, height: h } }), vp = V.page;
+      for (const view of ['over', 'ang']) for (const d of [0, 90, 180, 270]) {
+        await vp.click('#td-view-' + view); await vp.click('[data-preset="' + d + '"]'); await settle(vp);
+        const b = await labelProblems(vp); if (b.length) lp.push(w + 'x' + h + ' ' + view + ' ' + d + '°: ' + b.join(', '));
+      }
+      if (w === 1280 && h === 720) { await vp.click('#td-view-ang'); await vp.click('[data-preset="90"]'); await settle(vp); await vp.locator('#td-box').screenshot({ path: path.join(require('os').tmpdir(), 'tides-angled-90-1280x720.png') }); }
+      // free camera: three drags from the Angled view at first quarter
+      await vp.click('#td-view-ang'); await vp.click('[data-preset="90"]'); await settle(vp);
+      const sb = await vp.locator('#td-scene').boundingBox();
+      for (const [dx, dy] of [[120, -30], [-200, 40], [60, 70]]) {
+        await vp.mouse.move(sb.x + 30, sb.y + sb.height - 30); await vp.mouse.down(); await vp.mouse.move(sb.x + 30 + dx, sb.y + sb.height - 30 + dy, { steps: 8 }); await vp.mouse.up(); await settle(vp);
+        const b = await labelProblems(vp); if (b.length) lp.push(w + 'x' + h + ' free camera after drag ' + dx + ',' + dy + ': ' + b.join(', '));
+      }
+      await V.ctx.close();
+    }
+    ok('T7i no label sits on another body or label: Overhead and Angled × four phases × 1280×900, 1280×720, 390×844, plus three free-camera positions each', lp.length === 0, lp);
+
     // ---------- T8 / layout at phone width
     const P = await open(browser, { viewport: { width: 390, height: 844 }, touch: true }), pp = P.page;
     const lay = await pp.evaluate(() => { const r = id => document.getElementById(id).getBoundingClientRect();
       return { sw: document.documentElement.scrollWidth, model: r('td-model').width, scene: r('td-box').width, ctlTop: r('td-play').top, sceneBottom: r('td-box').bottom, clock: !!document.querySelector('.top .clock') }; });
     ok('T8f 390 px: no sideways overflow; scene full width; controls under the scene; model line shown; no clock', lay.sw <= 390 && lay.scene >= 360 && lay.ctlTop > lay.sceneBottom && lay.model > 300 && !lay.clock, lay);
     ok('T8g 390 px: the explanation does not cover the scene', await pp.evaluate(() => { const a = document.getElementById('td-box').getBoundingClientRect(), b = document.getElementById('td-explain').getBoundingClientRect(); return b.top >= a.bottom; }));
-    const tb = await pp.locator('#td-box').boundingBox(); const y0 = await pp.evaluate(() => scrollY);
-    await pp.touchscreen.tap(tb.x + 10, tb.y + 10); await pp.evaluate(() => window.scrollBy(0, 300)); await sleep(300);
-    ok('T9j touch: the page still scrolls (scene does not trap vertical panning)', (await pp.evaluate(() => scrollY)) > y0 && (await pp.evaluate(() => getComputedStyle(document.getElementById('td-scene')).touchAction)) === 'pan-y');
+    // real touch swipes (CDP touch events, not a programmatic scroll): vertical on the scene scrolls the page and leaves the
+    // model and camera alone; sideways on the scene turns the camera and does not scroll; on the Moon handle it moves the Moon
+    const cdp = await pp.context().newCDPSession(pp);
+    const swipe = async (x0, y0, x1, y1) => { await cdp.send('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: [{ x: x0, y: y0 }] });
+      for (let k = 1; k <= 12; k++) { await cdp.send('Input.dispatchTouchEvent', { type: 'touchMove', touchPoints: [{ x: x0 + (x1 - x0) * k / 12, y: y0 + (y1 - y0) * k / 12 }] }); await sleep(16); }
+      await cdp.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] }); await sleep(500); await settle(pp); };
+    await pp.evaluate(() => { document.getElementById('td-box').scrollIntoView({ block: 'start' }); window.scrollBy(0, -60); }); await sleep(300);
+    const tb = await pp.locator('#td-scene').boundingBox(), sy = tb.y + tb.height * 0.8, sx = tb.x + 30;
+    const t0 = { y: await pp.evaluate(() => scrollY), cam: await pp.evaluate(() => TIDES.camera().pos), s: await st(pp) };
+    await swipe(sx, sy, sx, sy - 160);
+    const t1 = { y: await pp.evaluate(() => scrollY), cam: await pp.evaluate(() => TIDES.camera().pos), s: await st(pp) };
+    ok('T9j touch: a vertical swipe on the scene scrolls the page; the Moon angle stays', t1.y > t0.y + 40 && t1.s.deg === t0.s.deg, { y0: t0.y, y1: t1.y, deg: [t0.s.deg, t1.s.deg] });
+    await pp.evaluate(() => { document.getElementById('td-box').scrollIntoView({ block: 'start' }); window.scrollBy(0, -60); }); await sleep(300);
+    const tb2 = await pp.locator('#td-scene').boundingBox(), y2 = await pp.evaluate(() => scrollY), c2 = await pp.evaluate(() => TIDES.camera().pos);
+    await swipe(tb2.x + 40, tb2.y + tb2.height * 0.8, tb2.x + 260, tb2.y + tb2.height * 0.8);
+    const y3 = await pp.evaluate(() => scrollY), c3 = await pp.evaluate(() => TIDES.camera().pos);
+    ok('T9l touch: a sideways swipe on the scene turns the camera and does not scroll', y3 === y2 && Math.hypot(c3[0] - c2[0], c3[1] - c2[1], c3[2] - c2[2]) > 5, { y2, y3 });
+    const hb2 = await pp.locator('#td-handle').boundingBox(), d0 = (await st(pp)).deg, y4 = await pp.evaluate(() => scrollY);
+    await swipe(hb2.x + 24, hb2.y + 24, hb2.x + 24, hb2.y + 24 - 120);
+    const d1 = (await st(pp)).deg, y5 = await pp.evaluate(() => scrollY);
+    ok('T9m touch: a swipe that starts on the Moon moves the Moon and does not scroll', Math.abs(d1 - d0) > 3 && y5 === y4, { d0, d1, y4, y5 });
     ok('T9k 390 px: page errors none', P.errors.length === 0, P.errors);
     await P.ctx.close();
   } catch (e) { fail++; failed.push('harness'); console.log('FAIL  harness error: ' + (e && e.stack || e)); }

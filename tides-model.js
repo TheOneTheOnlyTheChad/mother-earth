@@ -48,10 +48,14 @@
   /** The largest in-plane range the model can show: Both, Moon and Sun in line. */
   const SPRING_RANGE = 1.5 * (A_MOON + A_SUN);
   const PRESETS = [[0, 'new Moon'], [90, 'first quarter'], [180, 'full Moon'], [270, 'last quarter']];
+  /** Within this many degrees of a preset the phase is named as that preset; the page's exact-geometry wording uses the same limit. */
+  const PRESET_TOL = 0.5;
+  /** Angular distance from deg to the nearest of the given angles, in degrees. */
+  const offFrom = (deg, list) => { const a = norm(deg); return Math.min(...list.map(d => { const x = Math.abs(a - d); return Math.min(x, 360 - x); })); };
   /** Words for a Moon angle: the preset's name within half a degree, otherwise the two it lies between. */
   function phaseName(deg) {
     const a = norm(deg);
-    for (const [d, name] of PRESETS) { const off = Math.min(Math.abs(a - d), 360 - Math.abs(a - d)); if (off <= 0.5) return name; }
+    for (const [d, name] of PRESETS) { if (offFrom(a, [d]) <= PRESET_TOL) return name; }
     const i = Math.floor(a / 90) % 4, j = (i + 1) % 4;
     return 'between ' + PRESETS[i][1] + ' and ' + PRESETS[j][1];
   }
@@ -77,7 +81,15 @@
       '<text class="x-lbl" x="' + f(mx + (mx > 1.1 ? -0.2 : 0.2)) + '" y="' + f(my + (my > 0 ? 0.34 : -0.22)) + '" text-anchor="' + (mx > 1.1 ? 'end' : 'start') + '">' + (moonOn ? 'Moon' : 'Moon, not counted') + '</text></g>';
   }
 
-  const api = { REV, A_MOON, A_SUN, BASE, K, MODES, U_SUN, SPRING_RANGE, PRESETS, P2, norm, planeDir, uMoon, coeff, q, qDirs, radius, inPlane, phaseName, xsec };
+  /** The "Drawing" sentence in the page's Sources and method, from the same constants (written into tides.html by the build). */
+  function drawingText() {
+    const lo = BASE + K * -0.73, hi = BASE + K * 1.46, f = x => (Math.round(x * 1000) / 1000).toString();
+    return 'surface radius = ' + BASE + ' + ' + K + ' × value, in Earth radii, the same in every mode and at every angle (from ' + f(lo) + ' to ' + f(hi) + ' Earth radii, always outside the globe).';
+  }
+  /** The neap range as a whole percentage of the spring range (the page's "about N%"). */
+  const neapPercent = () => Math.round(inPlane(90, 'both').range / SPRING_RANGE * 100);
+
+  const api = { REV, PRESET_TOL, offFrom, drawingText, neapPercent, A_MOON, A_SUN, BASE, K, MODES, U_SUN, SPRING_RANGE, PRESETS, P2, norm, planeDir, uMoon, coeff, q, qDirs, radius, inPlane, phaseName, xsec };
   if (typeof module !== 'undefined' && module.exports) module.exports = api;
   root.TidesModel = api;
 })(typeof window !== 'undefined' ? window : globalThis);

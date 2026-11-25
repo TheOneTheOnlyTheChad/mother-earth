@@ -1,0 +1,49 @@
+{
+ "measured_utc": "2026-11-25T15:54:20.162Z",
+ "machine": "Intel(R) Xeon(R) Processor @ 2.30GHz × 2, 8 GB, linux",
+ "renderer": "Chromium headless, SwiftShader (software WebGL)",
+ "viewport": "1280×900",
+ "cache": "cold (new context each run)",
+ "network": "none: local files, no latency; other hosts refused",
+ "runs": 5,
+ "tides.html": {
+  "ready_ms_median": 646,
+  "ready_ms_all": [
+   808,
+   639,
+   646,
+   630,
+   660
+  ],
+  "dcl_ms_median": 48,
+  "load_ms_median": 267,
+  "bytes_total": 3296201,
+  "bytes_images": 1364086,
+  "images": {
+   "assets/tides/earth-2026-06-22.jpg": 574096,
+   "assets/moon/lroc_color_2k.jpg": 457942,
+   "assets/tides/sun-2026-11-25.jpg": 332048
+  },
+  "files": 9,
+  "requests_refused": 1
+ },
+ "moon.html": {
+  "ready_ms_median": 342,
+  "ready_ms_all": [
+   339,
+   342,
+   368,
+   361,
+   332
+  ],
+  "dcl_ms_median": 46,
+  "load_ms_median": 259,
+  "bytes_total": 2421840,
+  "bytes_images": 457942,
+  "images": {
+   "assets/moon/lroc_color_2k.jpg": 457942
+  },
+  "files": 8,
+  "requests_refused": 2
+ }
+}

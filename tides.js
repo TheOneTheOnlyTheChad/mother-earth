@@ -52,13 +52,21 @@
   const round1 = d => Math.round(M.norm(d) * 10) / 10;
   const degText = d => { const r = round1(d); return (r === 360 ? 0 : r) + '°'; };
   const share = () => Math.round(M.inPlane(st.deg, st.mode).range / M.SPRING_RANGE * 100);
+  /** The explanation for the current state. Exact geometry ("in line", "at right angles", "largest", "smallest") is claimed
+   *  only within M.PRESET_TOL of the preset angle, the same limit that names the phase; nearby angles get "close to" wording
+   *  with the actual share; elsewhere the general sentence. */
+  const NEAR = 15;
   function explain() {
-    const a = M.norm(st.deg), near = d => Math.min(Math.abs(a - d), 360 - Math.abs(a - d)) <= 12;
+    const a = M.norm(st.deg), offAlign = M.offFrom(a, [0, 180]), offQuarter = M.offFrom(a, [90, 270]), pct = share() + '%';
+    const nearest = list => list.reduce((b, d) => M.offFrom(a, [d]) < M.offFrom(a, [b]) ? d : b);
+    const name = d => ({ 0: 'new Moon', 90: 'first quarter', 180: 'full Moon', 270: 'last quarter' })[d];
     if (st.mode === 'moon') return 'Moon only. The Moon pulls harder on the near side of Earth than on Earth’s centre, and harder on the centre than on the far side. Measured against the centre, both sides are stretched away from it, so the model surface rises on two opposite sides and dips in a band between them.';
     if (st.mode === 'sun') return 'Sun only. The Sun does the same thing along its own line, at about 46% of the Moon’s strength in this model. Its total pull on Earth is far larger than the Moon’s; what makes tides is how much that pull differs from one side of Earth to the other, and the Sun is much farther away.';
-    if (near(0) || near(180)) return 'Moon and Sun in line (' + (near(0) ? 'new' : 'full') + ' Moon). The two stretches lie along the same line and add up: the largest difference between the model’s high and low. These are called spring tides. The name has nothing to do with the season, and new and full Moon give the same shape.';
-    if (near(90) || near(270)) return 'Moon and Sun at right angles (' + (near(90) ? 'first' : 'last') + ' quarter). The Sun’s stretch lies across the Moon’s and partly fills in its dips: a smaller difference between high and low, called neap tides. It does not vanish, and the surface does not become a sphere.';
-    return 'Between the two. As the Moon moves round, the Sun’s smaller stretch turns from adding to the Moon’s to working across it, and the combined shape changes smoothly.';
+    if (offAlign <= M.PRESET_TOL) return 'Moon and Sun in line (' + name(nearest([0, 180])) + '). The two stretches lie along the same line and add up: the largest difference between the model’s high and low. These are called spring tides. The name has nothing to do with the season, and new and full Moon give the same shape.';
+    if (offQuarter <= M.PRESET_TOL) return 'Moon and Sun at right angles (' + name(nearest([90, 270])) + '). The Sun’s stretch lies across the Moon’s and partly fills in its dips: the smallest difference between high and low, called neap tides. It does not vanish, and the surface does not become a sphere.';
+    if (offAlign <= NEAR) return 'Close to ' + name(nearest([0, 180])) + ', ' + Math.round(offAlign) + '° from being in line. The two stretches nearly line up, so the difference between the model’s high and low is close to its largest: ' + pct + ' of it. It is largest exactly at new and full Moon (spring tides).';
+    if (offQuarter <= NEAR) return 'Close to ' + name(nearest([90, 270])) + ', ' + Math.round(offQuarter) + '° from a right angle. The Sun’s stretch lies nearly across the Moon’s, so the difference between high and low is close to its smallest: ' + pct + ' of the largest. It is smallest exactly at the quarter Moons (neap tides), and never zero.';
+    return 'Between the two. As the Moon moves round, the Sun’s smaller stretch turns from adding to the Moon’s to working across it, and the combined shape changes smoothly. Difference between high and low now: ' + pct + ' of the largest.';
   }
   function statusLine() { return 'Moon at ' + degText(st.deg) + ', ' + M.phaseName(st.deg) + '. ' + MODE_WORDS[st.mode] + '. Difference between the model’s high and low in the orbit plane: ' + share() + '% of its largest.'; }
 
@@ -238,11 +246,41 @@
     const cam = globe.camera(), v = new H.V3(x, y, z).project(cam), W = el.clientWidth, Hh = el.clientHeight;
     return { x: (v.x + 1) / 2 * W, y: (1 - v.y) / 2 * Hh, front: v.z < 1 };
   }
+  /** Labels never sit on another body: Earth's label goes on the side of Earth away from the Moon (as seen on screen), the
+   *  Moon's label on the side of the Moon away from Earth, each just outside the body's drawn size. The Sun's label sits above
+   *  the Sun. Recomputed on every camera or Moon change. */
+  const unit2 = (x, y, fx, fy) => { const l = Math.hypot(x, y); return l > 1e-6 ? [x / l, y / l] : [fx, fy]; };
   function placeTags() {
     if (!globe || !bodies || st.three !== 'ok') return;
-    const put = (node, p, dy) => { node.style.transform = 'translate(' + p.x.toFixed(1) + 'px,' + (p.y + dy).toFixed(1) + 'px)'; node.style.visibility = p.front ? 'visible' : 'hidden'; };
-    const mp = bodies.moon.position; put(handle, screen(mp.x, mp.y, mp.z), 0);
-    const eb = screen(0, 0, 0), ex = screen(R * 1.33, 0, 0), rpx = Math.hypot(ex.x - eb.x, ex.y - eb.y); put(tags.earth, { x: eb.x, y: eb.y + rpx + 40, front: true }, 0); const sp = bodies.sun.position; put(tags.sun, screen(sp.x, sp.y, sp.z), 0);
+    const E = screen(0, 0, 0), mp = bodies.moon.position, Mo = screen(mp.x, mp.y, mp.z), sp = bodies.sun.position, S = screen(sp.x, sp.y, sp.z);
+    // on-screen radii: Earth's model surface (largest drawn radius) and the Moon
+    const far = 1.33 * R, rE = Math.max(...[[far, 0, 0], [-far, 0, 0], [0, 0, far], [0, 0, -far], [0, far, 0], [0, -far, 0]].map(p => { const q = screen(...p); return Math.hypot(q.x - E.x, q.y - E.y); }));
+    const rM = Math.max(24, ...[[MOON_R, 0, 0], [0, MOON_R, 0], [0, 0, MOON_R]].map(p => { const q = screen(mp.x + p[0], mp.y + p[1], mp.z + p[2]); return Math.hypot(q.x - Mo.x, q.y - Mo.y); }));
+    const rS = Math.max(...[[SUN_R, 0, 0], [0, SUN_R, 0], [0, 0, SUN_R]].map(p => { const q = screen(sp.x + p[0], sp.y + p[1], sp.z + p[2]); return Math.hypot(q.x - S.x, q.y - S.y); }));
+    const rectAt = (node, c, dir, r, gap) => {   // label box just outside a circle of radius r around c, in direction dir
+      const w = node.offsetWidth, h = node.offsetHeight, d = r + gap + Math.abs(dir[0]) * w / 2 + Math.abs(dir[1]) * h / 2;
+      const x = c.x + dir[0] * d - w / 2, y = c.y + dir[1] * d - h / 2; return { x, y, l: x, t: y, r: x + w, b: y + h };
+    };
+    const circles = { E: [E, rE], M: [Mo, rM], S: [S, rS] }, placed = [];
+    const cost = (q, own) => {   // overlap of a candidate box with the other bodies and the labels already placed (0 = clear)
+      let c = 0;
+      for (const k in circles) { if (k === own) continue; const [p, r] = circles[k], x = Math.max(q.l, Math.min(p.x, q.r)), y = Math.max(q.t, Math.min(p.y, q.b)), dd = Math.hypot(x - p.x, y - p.y); if (dd < r) c += r - dd; }
+      for (const o of placed) { const ox = Math.min(q.r, o.r) - Math.max(q.l, o.l), oy = Math.min(q.b, o.b) - Math.max(q.t, o.t); if (ox > 0 && oy > 0) c += ox * oy / 10; }
+      return c;
+    };
+    const choose = (node, own, c, r, gap, dirs) => { let best = null;   // nearest clear spot; if none is clear (the camera low, one body in front of another), step outward
+      for (const extra of [0, 30, 60, 100, 150]) { for (const d of dirs) { const q = rectAt(node, c, d, r, gap + extra), k = cost(q, own) + extra / 1000; if (!best || k < best.k - 1e-9) best = { q, k }; if (k === extra / 1000) break; } if (best.k === extra / 1000) break; }
+      placed.push(best.q); return best.q; };
+    const away = unit2(E.x - Mo.x, E.y - Mo.y, 0, 1), out = unit2(Mo.x - E.x, Mo.y - E.y, 0, -1), perp = [-out[1], out[0]];
+    const AX = [[0, -1], [0, 1], [-1, 0], [1, 0]], DG = [[0.7071, -0.7071], [-0.7071, -0.7071], [0.7071, 0.7071], [-0.7071, 0.7071]];
+    st.tagGeom = { E: [E.x, E.y], rE, M: [Mo.x, Mo.y], rM, S: [S.x, S.y], rS };
+    const ps = choose(tags.sun, 'S', S, rS, 6, [[0, -1], [0, 1], ...DG]);
+    const pe = choose(tags.earth, 'E', E, rE, 8, [away, ...AX, ...DG]);
+    const lbl = handle.querySelector('span'), pm = choose(lbl, 'M', Mo, rM, 4, [out, perp, [-perp[0], -perp[1]], ...AX, ...DG]);
+    tags.earth.style.transform = 'translate(' + pe.x.toFixed(1) + 'px,' + pe.y.toFixed(1) + 'px)'; tags.earth.style.visibility = E.front ? 'visible' : 'hidden';
+    tags.sun.style.transform = 'translate(' + ps.x.toFixed(1) + 'px,' + ps.y.toFixed(1) + 'px)'; tags.sun.style.visibility = S.front ? 'visible' : 'hidden';
+    handle.style.transform = 'translate(' + (Mo.x - 24).toFixed(1) + 'px,' + (Mo.y - 24).toFixed(1) + 'px)'; handle.style.visibility = Mo.front ? 'visible' : 'hidden';
+    lbl.style.transform = 'translate(' + (pm.x - (Mo.x - 24)).toFixed(1) + 'px,' + (pm.y - (Mo.y - 24)).toFixed(1) + 'px)';
   }
 
   // ---------- Moon handle: pointer drag in the orbit plane, and arrow keys
@@ -287,6 +325,9 @@
         const rr = globe.renderer(), orig = rr.render.bind(rr); rr.render = (...a) => { st.renders++; return orig(...a); };
         const cam = globe.camera(); cam.fov = 32; cam.updateProjectionMatrix();
         const ct = globe.controls(); ct.autoRotate = false; ct.enablePan = false; ct.enableZoom = false; ct.minPolarAngle = 0.01; ct.maxPolarAngle = 78 * DEG;
+        // the camera controls set touch-action:none on their element, which would trap a vertical swipe on a phone: let the
+        // browser keep vertical panning (page scroll); a sideways drag still turns the camera
+        if (ct.domElement && ct.domElement.style) ct.domElement.style.touchAction = 'pan-y';
         ct.addEventListener('start', () => { st.orbiting = true; kick(0); });
         ct.addEventListener('end', () => { st.orbiting = false; kick(900); });
         ct.addEventListener('change', placeTags);
@@ -302,7 +343,7 @@
 
   window.TIDES = {
     state: () => ({ deg: st.deg, mode: st.mode, playing: st.playing, view: st.view, three: st.three, why: st.why, imgErr: st.imgErr, images: Object.assign({}, st.images), dragging: st.dragging, orbiting: st.orbiting, looping: !!st.loop }),
-    renders: () => st.renders, initial: INITIAL,
+    renders: () => st.renders, initial: INITIAL, tagGeom: () => st.tagGeom || null,
     camera: () => globe ? { pos: globe.camera().position.toArray(), pov: globe.pointOfView() } : null,
     surface: () => shell ? { positions: Array.from(shell.pos.array), base: Array.from(shell.base), bounds: shell.geo.boundingSphere && shell.geo.boundingSphere.radius, normals: Array.from(shell.geo.attributes.normal.array) } : null,
     bodies: () => bodies ? { moon: bodies.moon.position.toArray(), moonRotY: bodies.moon.rotation.y, sun: bodies.sun.position.toArray(), light: bodies.dir ? bodies.dir.position.toArray() : null, lightParent: bodies.dir && bodies.dir.parent === globe.scene(), lightType: bodies.dir && bodies.dir.type, sunLit: bodies.sun.material.color.getHex() !== 0 } : null,

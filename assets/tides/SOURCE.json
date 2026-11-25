@@ -54,7 +54,14 @@
    ],
    "choice": "Both June frames show a lit Arctic. 22 June was chosen by eye in the Overhead and Angled views (Europe and the Mediterranean clearer of cloud). The dark southern polar cap is not seen from the north.",
    "credit": "We acknowledge the use of imagery provided by services from NASA's Global Imagery Browse Services (GIBS), part of NASA's Earth Science Data and Information System (ESDIS).",
-   "terms_read": "docs/research/tides/TIDES-IMAGE-USE-READS-2026-11-25.md"
+   "terms_read": "docs/research/tides/TIDES-IMAGE-USE-READS-2026-11-25.md",
+   "layer_check": {
+    "read_utc": "2026-11-25T15:12:26Z",
+    "by": "Claude, browser pane on Chad's Mac",
+    "layer_metadata": "https://gibs.earthdata.nasa.gov/layer-metadata/v1.0/VIIRS_NOAA21_CorrectedReflectance_TrueColor.json (title 'Corrected Reflectance (True Color)', NOAA-21 / VIIRS, daily; lists 12 source collections; no licence or restriction field)",
+    "source_collections": "NASA CMR records of the 12 listed collections (VJ202MOD/IMG, VJ203MOD/IMG, NRT and standard): 11 read, 1 (C2837615614-LANCEMODIS) answered 404. In all 11: UseConstraints 'None' (NRT ones add: see the LANCE disclaimer; 7 also FreeAndOpenData true); originator NASA/GSFC VCST; distributors LANCE MODIS or LAADS. The NRT AccessConstraints note that downloading the source files needs an Earthdata login; GIBS imagery itself was fetched without one.",
+    "result": "no use restriction found on the layer or its source collections. The LANCE disclaimer already in REGISTER applies."
+   }
   },
   {
    "path": "assets/moon/lroc_color_2k.jpg",
@@ -103,9 +110,10 @@
     "encoding": "JPEG, quality 0.9, Chromium canvas"
    },
    "modifications": "a modified display texture: reprojected onto a sphere and masked by us; the unseen side is left plain. Not a data product; nothing is measured from it.",
-   "orientation_evidence": "north-up in SDO's browse image rests on one frame checked for sun.html on 14 Nov 2026 against NOAA SWPC SRS 318 (within about 1 degree of latitude, 4.5 of longitude). Not re-checked for this picture.",
+   "orientation_evidence": "Checked on THIS picture (25 Nov 2026): the three sunspot regions in NOAA SWPC Solar Region Summary 329 (valid 24 Nov 24:00 UTC), moved forward 14 h by differential rotation, were found in the held original within 1.1 degrees of latitude and 2.2 of longitude, assuming north up and west to the right (phase1/tides/check_sun_reference.py; docs/research/tides/sun-reference-check-2026-11-25.json). Limit: the picture's observation time is unknown (1 h moves the prediction about 0.55 degrees). Earlier, for sun.html: one frame of 14 Nov 2026 against SRS 318.",
    "credit": "Courtesy of NASA/SDO and the AIA, EVE, and HMI science teams.",
-   "terms_read": "docs/research/tides/TIDES-IMAGE-USE-READS-2026-11-25.md"
+   "terms_read": "docs/research/tides/TIDES-IMAGE-USE-READS-2026-11-25.md",
+   "mask_evidence": "Independent re-projection of the held original compared with the wrapped texture: no source pixel beyond 0.97 of the radius is used; mean difference 1.36 (used part) and 1.63 (plain part) on a 0-255 scale; bright texels in the plain part only within 4 texels of the edge (JPEG spill). Same script and evidence file."
   }
  ]
 }
