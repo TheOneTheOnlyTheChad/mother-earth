@@ -4,7 +4,7 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 25 Nov 2026
 
-## 25 Nov 07:00 UTC (clock reading) — **Animals journey context C1a: GPT's candidate review filed (PASS for the feature; four release items); final release tree prepared and tested on fresh main; back to GPT for the bounded release recheck. Not merged; corridor parked.** (pages: Animals and Sources, branch only; Animals thread; branch `animals-journey-context-proposal`)
+## 25 Nov 06:33 UTC (clock reading) — **Animals journey context C1a: GPT's candidate review filed (PASS for the feature; four release items); final release tree prepared and tested on fresh main; back to GPT for the bounded release recheck. Not merged; corridor parked.** (pages: Animals and Sources, branch only; Animals thread; branch `animals-journey-context-proposal`)
 - **GPT's review** filed unchanged: `reviews/2026-11-25-animals-journey-context-c1a-gpt-review.md` (sha256 `b4c1bb3d…ec44`). Chad accepts the near-screen loading, the acknowledgement in the block, "about 245.0 ha" and the two disclosed area bases.
 - **Memory:** the build ran in a Linux VM on the Mac, not on macOS; the old "105 MB" was MiB. The builder now labels by platform; re-measured 104.7 MiB (raw 107,208 KiB; `/usr/bin/time` agrees), `--check` identical.
 - **Sources and REGISTER:** one Sources line after the zebra's source paragraph; two REGISTER entries (FIRMS `MODIS_SP` archive, Hansen v1.13). Check 13e now allows exactly that line on top of NC_MAIN's file, byte for byte; three new breaks plus the old unrelated-edit breaks are caught. No pin moved.

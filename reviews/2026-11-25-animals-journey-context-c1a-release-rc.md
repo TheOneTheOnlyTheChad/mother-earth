@@ -2,7 +2,7 @@
 
 **Branch:** `animals-journey-context-proposal`. Release tree: the head that carries this record (STATUS gives its commit). Fresh main `bfdd370a` was merged at `bfa9cf00`.
 **State:** final release tree, prepared for the recheck and then Chad's Approve line. Not merged and not deployed. The corridor (C1b) stays parked.
-**Written:** 25 Nov 2026, about 06:55 UTC (clock reading).
+**Written:** 25 Nov 2026, 06:33 UTC (clock reading).
 **Chad, 25 Nov:**
 > "File GPT's review unchanged and prepare the final release tree. The loading choice, acknowledgement placement, rounding and disclosed area bases are accepted. Correct the macOS memory units and measurement record, regenerate the stale packet checksum, and include the exact REGISTER/Sources additions with the narrow test adjustment described in GPT's review. Keep all existing pins unchanged. Test that final tree on fresh main and return it for the bounded release recheck before my Approve line. No repeat extraction or downloads needed."
 
