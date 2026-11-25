@@ -4,6 +4,19 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 25 Nov 2026
 
+## 25 Nov 03:49 UTC (clock reading) — **Animals journey context: Chad's decisions and evidence-step go; GPT's proposal review filed; evidence record and build brief written; FIRMS pilot script ready on the Mac for Chad's Terminal run. Nothing built; no key used yet; no large download.** (page: none; Animals thread; branch `animals-journey-context-proposal` `9209abd`)
+- **Chad, 25 Nov:** his standing dated-data exception covers historical journey context; J-D2 C (zebra and East Walker only), J-D3 A subject to evidence, J-D4 A, J-D5 B, J-D6 A; go for the bounded evidence step with GPT's corrections folded in; exact budget before a small zebra pilot; no full corridor extraction.
+- **GPT's review** filed unchanged: `reviews/2026-11-25-animals-journey-context-proposal-gpt-review.md` (sha256 `0ad6893b…a8`).
+- **Evidence (Claude, 25 Nov, browser pane; text only):**
+  - FIRMS area requests take 1–5 days, not 10.
+  - FIRMS's gap list (fetched keyless) names no MODIS gap day in the zebra's period and 28 in 2017–24, all in 2022.
+  - Hansen v1.13 covers 2000–2025 under CC BY 4.0; years before 2011 are not reprocessed; the authors warn against definitive area from pixel counts.
+  - The tile encoding was measured from the files: `lossyear` runs 0–25 (the page's prose says 1–20); pixels are 0.00025°.
+  - Tile sizes come from headers only: zebra 976.6 MB, corridor 707.6 MB.
+  - Region and areas frozen: zebra 371,722 km² (`17_50`, `17_51`), corridor 151,515 km² (`32_15`).
+- **Pilot:** `phase1/animals/journey_context_firms_pilot.py` (sha256 `91be1a2e…a027`), also at `research/animals-journey-context/` on the Mac. At most six requests, no retries, a stop rule, and the key is read by the script and never printed (offline-tested). Neither shell reaches FIRMS, so Chad runs it in Terminal.
+- **Next:** pilot result → evidence rev 1.1 with the zebra's final budget → GPT → Chad's C1a go.
+
 ## 25 Nov 03:26:28 UTC (clock reading) — **Timeline R4: GPT's live smoke PASS; enquiries E1–E4 sent by Chad; Drimolen author replied with the article; thread handed over** (page: none; docs only; Timeline thread)
 - **GPT's scoped live smoke test: PASS, no rollback recommended** (about 03:13–03:19 UTC). Filed unchanged: `reviews/2026-11-25-timeline-r4-live-smoke-gpt-review.md` (sha256 `8ebe60f7…a355`). Three page hashes matched; catalogue validated through the live page (its shell request to the hub got 403). Still open after it: real phone, Safari, screen reader, true 200 % zoom, physical wheel.
 - **Enquiries E1 (Drimolen), E2 (Ngandong), E3 (Liang Bua), E4 (La Ferrassie wording) are SENT** by Chad from his own address, 25 Nov (his statement). No address in the repo. Record: `docs/research/TIMELINE-HUMAN-RELATIVES-ENQUIRY-DRAFTS.md` rev 4.
