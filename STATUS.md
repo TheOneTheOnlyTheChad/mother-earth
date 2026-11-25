@@ -4,6 +4,18 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 25 Nov 2026
 
+## 25 Nov 04:32 UTC (clock reading) — **Animals journey context: GPT's targeted extractor review filed (HOLD on H1, H2); both fixed on the branch with focused offline controls; back to GPT for recheck. Not run; no tiles downloaded; corridor parked.** (page: none; Animals thread; branch `animals-journey-context-proposal` `0fce44a`)
+- **GPT's review** filed unchanged: `reviews/2026-11-25-animals-journey-context-extractor-gpt-review.md` (sha256 `e8818215…cafd`).
+- **H1:** the missing-data list is now parsed with the standard library's HTML parser. Attributed rows are read; real dates and known satellite labels are required; anything unreadable stops the run. A live-list fixture (sha256 `8b9c8d5d…82be`) parses to 171 rows with no MODIS gap in the interval.
+- **H2:** the verifier holds its own fixed product, region, interval and plan, and pins the approved extractor (sha256 `62e29621…a752`). It re-checks every window and the status readings, and re-parses the saved provenance.
+- **Controls:** 72 passed, 0 failed, in the workspace and on the Mac shell. GPT's reproductions pass on the new code and fail on the old (`h1h2-old-vs-new.log`).
+- **Replacement hashes:**
+  - `journey_context_firms_fetch.py` `62e29621…a752`
+  - `journey_context_verify.py` `4bdaf0a7…ab00`
+  - `journey_context_firms_fetch.test.py` `3f7ade9c…1cd9`
+  - fixture `8b9c8d5d…82be`
+- **Records:** evidence rev 1.3, §4c. Mac `_review/animals-journey-context-extractor-h1h2/` (earlier copy moved to `_to_delete/`).
+
 ## 25 Nov 04:20 UTC (clock reading) — **Animals journey context: GPT's evidence review filed (pilot PASS; full run held for five extractor fixes); Chad's acceptances; full zebra extractor with those fixes, a verifier and 39 offline controls, back to GPT for a targeted check. Not run; no tiles downloaded; corridor parked.** (page: none; Animals thread; branch `animals-journey-context-proposal` `e76d4de`)
 - **GPT's review** filed unchanged: `reviews/2026-11-25-animals-journey-context-evidence-gpt-review.md` (sha256 `b242f682…a836`). `6.03` reads as "Collection 6 standard processing" per NASA GIBS's value map (GPT's read).
 - **Chad, 25 Nov:** accepts the six whole-file Hansen downloads (976.6 MB), the labelled 30 % year-2000 threshold and the collapsed monthly table; extractor back to GPT before he runs it.
