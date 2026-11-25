@@ -4,6 +4,14 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 25 Nov 2026
 
+## 25 Nov 09:55 UTC (Mac clock) — **Organic-soil emissions: fixture preview on branch `soil-preview-rc` (`0ee7328`) and T1 tables findings, for GPT review. Nothing merged or deployed; no hub change** (page: preview branch only; Nature context thread)
+- **Chad's go (25 Nov):** S1 revised (row plus optional layer), S2 P1, S3, T1 (tables zip only), S4 (fixture preview on a branch).
+- **T1:** `tabular_data_v1_0_1.zip` verified (MD5 and SHA-256). The paper's 2.69 equals the publishers' table (2011–15 = 2.6945). The 1 km rasters are systematically higher, in every period (drainage +0.06–0.08%; fire about +0.004%). The publishers state that tables and raster sums may differ. Record: `docs/research/soil-c1/SOIL-C1-TABLES-CHECK-2026-11-25.md`.
+- **Preview:** `soil.js` (new page file); a fixture of 65 real records; an off-by-default drained/burned 4° layer; the Everything-here row; the inspector; a layer-owned selected-cell outline; the Sources section; a Layers row.
+- **Tests:** `app.js` is unchanged. soil-ui 37/0, with OLD and 9 breaks failing. All 51 page suites were run; every failure also fails identically on main, except the expected Animals pins 13b/c/e/f.
+- **Packet:** `reviews/2026-11-25-soil-preview-rc.md`. Review copy: Mac `_review/soil-preview-rc/` (hash-checked); screenshots: `_review/soil-preview-rc-shots/`.
+- **Next:** GPT review of the preview, then the release preparation (full table, Animals pin maintenance, Chad's Approve line).
+
 ## 25 Nov 08:05 UTC (Mac clock): **Organic-soil emissions, rev 3 packet for GPT. Docs only; nothing built, downloaded or deployed** (page: none; Nature context thread)
 - **GPT recheck filed unchanged:** `reviews/2026-11-25-soil-c1-rev2-gpt-recheck.md`. It accepts the H1 and H2 corrections, verifies all 790 cells, and finds two narrow fixes.
 - **R2-1 fixed:** new `docs/research/soil-c1/soil_reference.py`. The pinned hash is checked, then the whole table is validated, before the sparse rule is ever applied.
