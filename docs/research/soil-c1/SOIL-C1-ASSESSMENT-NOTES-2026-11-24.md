@@ -144,3 +144,37 @@ No soil card, hub route, upload or deployment is approved.
 | Product | Version pinned | Last checked | Proposed cadence |
 |---|---|---|---|
 | Glen et al. 2026 model outputs (Zenodo concept 22137129) | 1.0.1 | 2026-11-24 14:33:44 UTC | **Monthly** while the 30 m open release is "being prepared" (readme); then **quarterly**. Also on any erratum to the paper. Check: one GET `/api/records/22137129/versions`. A new version is reviewed (diff of global and per-cell sums) before any pinned data is replaced; 1.0.1 is kept. |
+
+## Amendment rev 2 (25 Nov 2026, 07:52 UTC Mac clock): corrections after GPT's HOLD (`reviews/2026-11-25-soil-c1-assessment-gpt-review.md`)
+
+The text above is kept as written on 24 Nov. These corrections take precedence over it.
+
+- **§2, zero semantics:**
+  - The source rule is "zero where no organic soil is mapped". A zero 1 km value can also be a modelled zero where organic soil is mapped.
+  - In a 4° aggregate, a zero means "0 assigned by this model for that component in this period". It does not establish zero real-world emissions, and it does not identify a cause.
+  - "No organic soil mapped" is decided only by the `has_mapped_organic_soil` flag, from the unrounded extent sum.
+- **§2 and §4, "missing area":**
+  - What was measured is the overlap area of 1 km source cells flagged NaN, now named `incomplete_source_footprint_km2`.
+  - A source cell is flagged when *any* organic-soil source area in it lacks emissions, so the footprint can include non-organic area. It is not the organic-soil area lacking estimates.
+  - The drained and burned NaN masks are identical, verified cell for cell by `soil_build.py`; an equal-area check alone was not enough.
+- **§4, rounding defect (GPT H1):**
+  - The 24 Nov table rounded `organic_km2` to one decimal, and 42 cells with mapped organic soil became 0.0.
+  - The 24 Nov per-map files (three decimals) had also lost one cell, `33_54` (0.00025 km²).
+  - The rev 2 table decides states before rounding and keeps 6 significant figures. All 43 cells are restored.
+  - The 24 Nov derivative `g4-cells-v1.0.1.json` is superseded and kept.
+- **§4, method files:**
+  - `cells4.py` wrote per-map files; the final table was assembled by an unsaved step.
+  - Both are replaced by `soil_build.py` (one run from the verified inputs, with fail-closed checks) and `soil_controls.py` (58 controls, all passed).
+  - `cells4.py` is kept for the record.
+- **§4, "exact":** the word applies to the geometric overlap weights, under the assumption that each 1 km cell total is uniform within its cell. It does not mean ground truth or a recovery of the 30 m data.
+- **§4, totals:**
+  - The 2011–15 gap (2.696 from the rasters against the paper's top of 2.69) is not explained; 2.696 rounds to 2.70, so rounding does not reconcile it.
+  - 1,145.5 against 1,144 Mha is close agreement, not an established CEA-against-geodesic explanation.
+  - Both stay open until the bounded tables check (proposal rev 2 §6) on Chad's go.
+- **§4, periods:** the 24 Nov text said period jumps "follow" the paper's caution. The paper cautions about temporal inference; it does not establish that every jump is an input artefact. Page wording now follows GPT G5.
+- **§4, memory:** `peak_rss_MB` was `ru_maxrss/1024` on Linux, i.e. MiB. The rev 2 builder peaked at 1,629 MiB because it reads three rasters per pass.
+- **§5, version check:** re-checked 2026-11-25 07:51 UTC (browser pane, `/api/records/22137130/versions`).
+  - Total 1, version 1.0.1, `is_last: true`, `license.id: cc-by-4.0`.
+  - File MD5s unchanged, including `tabular_data_v1_0_1.zip` MD5 `2a4dd44b561d0e168b57856a9da2689a`.
+  - The release manifest was re-read in full; its SHA-256 for the zip and the extent match the verified files.
+  - The licence file itself was not re-read (the pane refused to open it as a page); its last full read was 24 Nov.

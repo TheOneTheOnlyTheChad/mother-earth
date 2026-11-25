@@ -4,6 +4,18 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 25 Nov 2026
 
+## 25 Nov 07:55 UTC (Mac clock) — **Organic-soil emissions (Nature context Workstream B): corrected assessment packet (rev 2) for GPT recheck after its HOLD. Docs only; nothing built, uploaded or deployed** (page: none; Nature context thread)
+- **GPT review filed unchanged:** `reviews/2026-11-25-soil-c1-assessment-gpt-review.md` (HOLD; supports corrected S1, P1 and the cadence).
+- **Fixes:**
+  - H1: states are decided before rounding, with explicit flags, and values keep 6 significant figures. All 43 small-area cells are restored: GPT's 42, plus `33_54`, which the per-map files had also lost.
+  - H2: the incomplete source-raster footprint is renamed; drained and burned masks are verified identical cell for cell; neutral zero wording; softened period wording.
+  - Fail-closed input checks added.
+  - New builder `docs/research/soil-c1/soil_build.py` and `soil_controls.py`: 58 passed, 0 failed. Rebuilt from the verified local inputs (no download): totals unchanged.
+- **Version re-checked:** 07:51 UTC, 1.0.1 only.
+- **Files:** `docs/concepts/NATURE-CONTEXT-SOIL-PROPOSAL.md` rev 2; notes amendment rev 2. Mac review copy only: `_review/soil-c1-assessment/rev2/`.
+- **Prepared, waiting on Chad's go (T1):** tables check, `tabular_data_v1_0_1.zip` only (842 KB).
+- **Next:** GPT recheck; Chad's S1–S3, T1, then S4.
+
 ## 25 Nov 07:07 UTC (clock reading) — **Animals journey context C1a CLOSED OUT: GPT's live smoke PASS filed unchanged; branch deleted; Mac tidied and synced; handover written. Corridor and reply-dependent work parked.** (page: none; Animals thread)
 - **GPT's live smoke:** PASS, no rollback (`reviews/2026-11-25-animals-journey-context-c1a-gpt-live-smoke.md`, `d2802bbb…162b1a`). Served hashes match; deferred loading seen; figures, disclosures, 390 px fit, keyboard, Sources paragraph and no switch activation confirmed; no console errors.
 - **Open, recorded:** real phone, Safari, screen reader, print, true 200 % zoom. `kept-ui`'s three World View failures exist on main without this work.
