@@ -4,6 +4,10 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 25 Nov 2026
 
+## 25 Nov 12:18 UTC (clock reading) — **Animals: second IWC reply filed. Use the website's values (15,580 stands; 16,580 possibly a typo). Display permission passed to a copied IWC colleague, unanswered. Whale example parked.** (page: none; Animals thread)
+- **Record:** `docs/research/animals-source-audit/ENQUIRIES-EXPANSION.md` rev 1.6, summary only; full text kept privately on the Mac. Not yet reviewed by GPT.
+- **Open:** explicit permission to show the sentence, figure and classes on our page, with its conditions. No follow-up or duplicate; silence grants nothing.
+
 ## 25 Nov 12:12 UTC (clock reading) — **Animals: Chad has replied to the IWC (lower value; display permission and conditions). Waiting. Whale example parked.** (page: none; Animals thread)
 - **Record:** `docs/research/animals-source-audit/ENQUIRIES-EXPANSION.md` rev 1.5. Sent by Chad, his statement; Claude saw no message. No follow-up or duplicate; sending and silence grant nothing.
 

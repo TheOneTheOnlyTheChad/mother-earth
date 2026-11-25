@@ -12,12 +12,14 @@
 
 *Rev 1.5, 25 Nov 2026 12:12 UTC (clock reading; Claude, same thread): Chad says he has replied to the IWC ("replied", his message of 25 Nov). Recorded under D and in the table. Claude did not send, see or check any message. Nothing else changed.*
 
+*Rev 1.6, 25 Nov 2026 12:18 UTC (clock reading; Claude, same thread): a second IWC reply is recorded under D as a factual summary (full text kept privately). It says to use the values on the website, and passes the display-permission question to a colleague who was copied. Not reviewed by GPT when written. Permission is still open; nothing is cleared.*
+
 **All three are SENT. Never describe any of them as unsent. No duplicate and no follow-up unless Chad decides. Sending is not permission, and silence is not permission.**
 
 | | Enquiry | To | Subject line as Chad gave it | Status |
 |---|---|---|---|---|
 | C | African penguins | Dr Richard Sherley (University of Exeter) | "African penguin count data and one historical journey for Mother Earth" | **SENT by Chad, 20 Nov 2026.** No reply reported |
-| D | IWC | the IWC Secretariat | "Permission and clarification: Western Indian Ocean humpback status on Mother Earth" | **SENT by Chad, 20 Nov 2026.** **First reply 25 Nov 2026: reference year, quantiles and a source given; a statement on links. Metadata closed; lower value and display permission open.** **Chad REPLIED to the IWC, 25 Nov 2026 (two questions: the lower value; display permission and conditions). No answer reported.** See "Replies" |
+| D | IWC | the IWC Secretariat | "Permission and clarification: Western Indian Ocean humpback status on Mother Earth" | **SENT by Chad, 20 Nov 2026.** **First reply 25 Nov 2026: reference year, quantiles and a source given; a statement on links. Metadata closed; lower value and display permission open.** **Chad REPLIED to the IWC, 25 Nov 2026 (two questions: the lower value; display permission and conditions).** **Second reply 25 Nov 2026: use the website's values; permission question passed to a copied colleague, not yet answered.** See "Replies" |
 | E | Cape Vidal | Christopher Wilkinson (University of Pretoria) | "Cape Vidal humpback estimates: proposed attributed chart on Mother Earth" | **SENT by Chad, 20 Nov 2026.** **First reply 23 Nov 2026: proposes a chat or call on Thursday. No question answered; no permission given.** See "Replies" |
 
 ## What each asked (Chad's summary)
@@ -79,6 +81,21 @@
 **Not read.** Paper SC/66A/SH03.
 
 **Still open for D:** whether the reply covers displaying the five items or only linking; the 15,580 / 16580 difference; display guidelines and the acknowledgement wording; how the two dates are presented; any condition on scope or duration. She invites further questions. Any answer or further question to the IWC is Chad's to decide and send; nothing is sent or chased by Claude.
+
+### D, IWC: second reply, 25 Nov 2026
+
+**How it reached this record.** Chad pasted it into the Claude thread on 25 Nov 2026 ("just got another reply"). Claude has not seen the inbox. The paste showed it as received "2:14 PM (2 minutes ago)" in Chad's mail view, time zone not stated; the workspace clock read 12:18 UTC when this was written. Same sender as the first reply, same subject line, addressed to Chad and the same three other recipients. Its text is not reproduced here; the full email is kept privately with the first (Mac `research/animals-correspondence/2026-11-25-iwc/`).
+
+**What it says (factual summary).**
+- **The values:** to use the values on the website; the 16,580 in her first email could have been a typo on her side.
+- **Display permission:** she names a copied IWC colleague as better placed to answer the second question. She does not answer it herself.
+
+**What follows (Claude's reading, for GPT).**
+- **The lower value:** the graphics page's figures stand: 18,111 (15,580-20,700), as recorded by audit B on 20 Nov and re-read by GPT and by Claude's fetch on 25 Nov. The 16,580 is kept in this record with its provenance and is not used. She gives no separate document to cite; the website is the source she points to.
+- **Permission:** still open. The question has been passed on inside the IWC to someone already on the thread, so Chad's reply already sits with that person. **No follow-up or duplicate unless Chad decides. Silence is not permission.**
+- No answer yet on wording, citation, conditions or how the non-commercial restriction applies.
+
+**State for D:** metadata closed; lower value settled as the website's 15,580, subject to GPT's review; display permission open and awaiting the IWC colleague. Whale example parked.
 
 ### E, Cape Vidal: first reply, 23 Nov 2026
 
