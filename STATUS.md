@@ -4,6 +4,26 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 25 Nov 2026
 
+## 25 Nov 12:20 UTC (Mac clock) — **Organic-soil emissions: release candidate `soil-release-rc` `d2d597b` for GPT review, on Chad's go. Not merged or deployed; no hub change** (Nature context thread)
+- **Version check before freezing:** 10:40 UTC, v1.0.1 only.
+- **Payload `86071bf`:**
+  - full 790-record table `c5c01ff5…30cf`;
+  - fixture and cutter retired, and a fixture table refused;
+  - fixture wording removed;
+  - Sources file note and REGISTER entry.
+- **Animals maintenance `d2d597b`:**
+  - 13b/13c/13e held to SOIL_MAIN;
+  - 13m literal 11-file manifest (af89de2..86071bf) and 13n maintenance binding;
+  - 13f counts 17 rows;
+  - 13j/13k/BASE_MAIN/TL_MAIN unchanged;
+  - negative controls demonstrated.
+- **Tests:**
+  - soil-ui 47/0, with OLD and 14 breaks failing;
+  - 51 suites: 42 pass (animals-tab-ui 284/0; Key/mobile suites run with restored fixtures);
+  - 9 fail identically on main;
+  - hub-alignment 6/0.
+- **Packet:** `reviews/2026-11-25-soil-release-rc.md`, with evidence in `reviews/evidence/2026-11-25-soil-release-rc/`. Review copy: Mac `_review/soil-release-rc/`.
+
 ## 25 Nov 12:18 UTC (clock reading) — **Animals: second IWC reply filed. Use the website's values (15,580 stands; 16,580 possibly a typo). Display permission passed to a copied IWC colleague, unanswered. Whale example parked.** (page: none; Animals thread)
 - **Record:** `docs/research/animals-source-audit/ENQUIRIES-EXPANSION.md` rev 1.6, summary only; full text kept privately on the Mac. Not yet reviewed by GPT.
 - **Open:** explicit permission to show the sentence, figure and classes on our page, with its conditions. No follow-up or duplicate; silence grants nothing.
