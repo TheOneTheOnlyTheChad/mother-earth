@@ -20,6 +20,8 @@
 
 *Rev 1.9, 25 Nov 2026 15:49 UTC (clock reading; Claude, same thread): GPT's review of the IWC correspondence (relayed by Chad) is summarised under D. GPT reads the third reply as permission for the whole attributed summary the question described, in that context only. The IWC enquiry is closed for this candidate. Nothing is built or released.*
 
+*Rev 1.10, 25 Nov 2026 15:52 UTC (clock reading; Claude, same thread): Chad's account of a phone call with the IWC's Media and Communications Manager is recorded under D, labelled as his. Nothing else changed.*
+
 **All three are SENT. Never describe any of them as unsent. No duplicate and no follow-up unless Chad decides. Sending is not permission, and silence is not permission.**
 
 | | Enquiry | To | Subject line as Chad gave it | Status |
@@ -138,7 +140,9 @@
 - **Description of Mother Earth:** Chad's personal control centre. Hosting and access are not to be called private because the intended use is personal; the actual access state is recorded separately. On 25 Nov 2026 it was public (above).
 - **No further IWC enquiry is needed for this candidate.** Implementation stays parked while Tides is active. A build, its review and any release each need Chad's go.
 
-**State for D after GPT's review:** closed for this candidate. Permission for the attributed five-line summary above, credit to the International Whaling Commission and a link to the status graphics page; contextual scope only. Whether to correct the "private" description with the IWC remains Chad's decision; GPT asks for no further enquiry. Whale example parked: Cape Vidal is still open, and building waits on Chad's go.
+**Chad's call with the IWC, 25 Nov 2026 (Chad's account, as he gave it to Claude; Claude was not on the call).** She had tried to phone him and he called her back. He corrected the description of the page as private. By his account she said she is fine with it, because Mother Earth is not being advertised publicly. Time of the call not on record. A call leaves no record of its own: this line is Chad's account, not the IWC's words. The written permission above is unchanged by it.
+
+**State for D after GPT's review:** closed for this candidate. Permission for the attributed five-line summary above, credit to the International Whaling Commission and a link to the status graphics page; contextual scope only. The "private" description was corrected by Chad on the phone (his account, above); GPT asks for no further enquiry. Whale example parked: Cape Vidal is still open, and building waits on Chad's go.
 
 ### E, Cape Vidal: first reply, 23 Nov 2026
 
