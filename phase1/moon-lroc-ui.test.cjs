@@ -145,6 +145,18 @@ let br = null;
     ok('B7 locator visible straight after switching on, with no pause and no camera move', s.locVisible && rb && rb.disp !== 'none' && s.front, { s, rb });
     await T.close(); }
 
+  // ---------- B8: deterministic check that the locator follows the live camera, not the library's answer (which can be stale; found
+  // by a smoke run on the preview before 3ed8f82: hidden after switching on with reduced motion and no pause). The page's registered callback is
+  // called directly with a wrong library answer in both directions.
+  { const T = await mk();
+    await T.p.click('#mg-lroc'); await waitState(T.p, 'shown'); await T.p.waitForTimeout(200);
+    const r1 = await T.p.evaluate(() => { const g = MoonGlobe.globe(), fn = g.htmlElementVisibilityModifier(), el = document.querySelector('.mgl-ring'); fn(el, false); return { vis: el.style.visibility, s: MoonLroc.state() }; });
+    ok('B8a site facing the camera, library says hidden: the locator stays visible', r1.vis === 'visible' && r1.s.locVisible && r1.s.front, r1);
+    await T.p.evaluate(s => MoonGlobe.point(s.lat, s.lng + 180), SITE); await T.p.waitForTimeout(200);
+    const r2 = await T.p.evaluate(() => { const g = MoonGlobe.globe(), fn = g.htmlElementVisibilityModifier(), el = document.querySelector('.mgl-ring'); fn(el, true); return { vis: el.style.visibility, s: MoonLroc.state() }; });
+    ok('B8b site on the far side, library says visible: the locator stays hidden', r2.vis === 'hidden' && !r2.s.locVisible && !r2.s.front, r2);
+    await T.close(); }
+
   // ---------- D: late results, failure, retry, timeout, wrong size
   { const T = await mk({ assets: { site: { delay: 1500 } } });
     await T.p.click('#mg-lroc'); await waitState(T.p, 'shown');
