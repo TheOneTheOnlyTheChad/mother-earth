@@ -7,6 +7,7 @@
 <meta name="description" content="Lunar Reconnaissance Orbiter: where its published trajectory places it, with the source and time beside every position.">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
 <link rel="stylesheet" href="style.css?v=202612250800">
+<link rel="stylesheet" href="moonsci.css?v=202612260500">
 </head>
 <body class="doc craft" data-body="moon">
 <header class="top">
@@ -57,12 +58,23 @@
       <button type="button" id="mg-lro" aria-pressed="false">Show LRO’s dated path</button>
       <button type="button" id="mg-lit" aria-pressed="false">Lit as now</button>
       <button type="button" id="mg-earth" aria-pressed="false" hidden>As seen from Earth now</button>
+      <button type="button" id="mg-height" aria-pressed="false">Show height (LOLA)</button>
+      <button type="button" id="mg-height-centre" hidden>Read height at centre</button>
     </div>
     <p id="mg-lit-read" class="mglro" aria-live="off" hidden></p>
+    <div id="mg-height-leg" class="mgh" hidden>
+      <p><b>What LRO measured: height</b> <span class="ev">Measured</span></p>
+      <div class="mgh-bar" role="img" aria-label="Colour scale from dark blue at minus 9 kilometres to pale blue at plus 11 kilometres"></div>
+      <div class="mgh-ticks" aria-hidden="true"><span style="left:0">−9 km</span><span style="left:20%">−5</span><span style="left:45%">0</span><span style="left:70%">+5</span><span style="left:100%">+11 km</span></div>
+      <p><span class="mgh-wh" aria-hidden="true"></span>Withheld (north of 89.5°N): inconsistencies were found in the source products.</p>
+      <p class="dim">Height above or below a 1,737.4 km reference sphere, not above “sea level” or the local surface. LOLA laser altimeter on the Lunar Reconnaissance Orbiter; data taken 2009–2016, compiled into a 0.25° grid (about 7.6 km north–south and at the equator, narrower east–west towards the poles). Each colour is one grid cell’s value; readouts are rounded to the metre, which is not a measure of accuracy. Not live, and not measured at the spacecraft position shown on this page.</p>
+    </div>
+    <p id="mg-height-read" class="mglro" aria-live="polite" hidden></p>
     <p id="mg-both" class="mgboth" role="note" hidden>Lighting uses the current UTC minute. The LRO path is a dated example from 10–11 June 2026.</p>
     <p id="mg-lro-read" class="mglro" aria-live="polite" hidden></p>
     <p class="cscale"><span>Use Zoom in and Zoom out, or pinch on supported devices, to look closer: the Moon grows inside its box. The map holds about 5 km to a pixel at the equator, so it blurs up close.</span>
     <span>Opens evenly lit so the whole surface can be seen: that is not how the Moon is lit today. “Lit as now” shades it from the calculated direction of the Sun at this device’s current UTC minute.</span>
+    <span>“Show height (LOLA)” replaces the picture with a colour map of measured height (2009–2016 laser data) and switches sunlight off while it is shown.</span>
     <span>Appearance map from NASA’s Scientific Visualization Studio, made from Lunar Reconnaissance Orbiter data: tuned for looks, not measurement. Poleward of 70° it is filled from a lower-resolution map.</span>
     <span>Drawn to fill the view. Sizes are not comparable between the Earth, Moon and Sun pages. The globe and the spacecraft drawing below are separate views. “Show LRO’s dated path” puts the 10–11 June 2026 example on the globe, at the time chosen in the drawing; no current position is shown.</span></p>
     <noscript><p class="cunavail">The globe needs JavaScript.</p></noscript>
@@ -104,6 +116,7 @@
       <li><b>Moon globe:</b> colour map <code>lroc_color_2k.jpg</code> (2025 version) from NASA’s Scientific Visualization Studio, “CGI Moon Kit”. Our copy is served from this site, unchanged. Credit: NASA’s Scientific Visualization Studio.</li>
       <li><b>On the globe:</b> the same one-minute states, each turned once into the Moon’s mean Earth frame (<code>MOON_ME_DE440_ME421</code>) at its own time, with NAIF’s SPICE toolkit and JPL’s DE440 Moon orientation. Checked against our own evaluation of DE440 and against NASA/JPL Horizons. Altitude is above a sphere of 1,737.4 km, not above the terrain. <a href="sources.html#skycraft">Details</a></li>
       <li><b>Lit as now:</b> calculated, not observed. The directions of the Sun and the Earth over the Moon come from a table we built with NAIF’s SPICE toolkit from JPL’s DE440 positions and Moon orientation, every six hours from 1 June 2026 to 1 January 2028 UTC, in the same frame as the map; the page interpolates between entries (within 0.005° of the direct calculation at every midpoint). Checked against our own evaluation of DE440 and against NASA/JPL Horizons. The time is this device’s clock. A smooth sphere and a point Sun: no relief shadows, no earthshine, no eclipses. The night side is shown faintly as a display aid. <a href="sources.html#moonlight">Details</a></li>
+      <li><b>Height (optional):</b> LOLA gridded topography <code>LDEM_4_FLOAT</code>, product version V3.0, data set LRO-L-LOLA-4-GDR-V1.0 (PDS4 <code>urn:nasa:pds:lro_lola_rdr:data_gridded:ldem_4_float::1.0</code>), LOLA Science Team, NASA GSFC; bundle DOI <a href="https://doi.org/10.17189/tnyt-7007" target="_blank" rel="noopener">10.17189/tnyt-7007</a> (Smith &amp; Neumann 2023). Laser data from 13 July 2009 to 29 November 2016, height relative to a 1,737.4 km sphere on a 0.25° grid. PDS data are in the public domain. We round each cell to whole metres and draw one colour per cell; values north of 89.5°N are withheld because the float and integer versions of this grid disagree there by up to 1.4 km.</li>
       <li><b>Moon radius:</b> 1,737.4 km (NASA/JPL Horizons, “Radius (IAU)”).</li>
     </ul>
     <p class="dim">Full register of sources: <a href="sources.html">Sources &amp; Details</a>.</p>
@@ -111,6 +124,7 @@
 </main>
 <script src="craft.js?v=202612071000"></script>
 <script src="moonlight.js?v=202612071100"></script>
-<script src="moonglobe.js?v=202612071200"></script>
+<script src="moonglobe.js?v=202612260500"></script>
+<script src="moonsci.js?v=202612260500"></script>
 </body>
 </html>
