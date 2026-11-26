@@ -11,7 +11,7 @@
  *     leaves it and keeps "Lit as now"; height mode kept; clicks pass through to the height readout; LRO path independent
  *  G. keyboard; narrow 360/390/721 px; served assets equal SOURCE.json; appearance map unchanged; WebGL draw calls per frame unchanged
  * Run: node phase1/moon-lroc-ui.test.cjs [base-url]   (static server on the repo, default 127.0.0.1:8899)
- * BREAK=turn|late|offlate|pe|novis|earthloc|fp|ptr|bar|nd|retry|offcam|eager|size must each fail. */
+ * BREAK=turn|late|offlate|pe|novis|earthloc|stale|fp|ptr|bar|nd|retry|offcam|eager|size must each fail. */
 const { chromium } = require('playwright'); const fs = require('fs'); const path = require('path'); const crypto = require('crypto');
 const BASE = process.argv[2] || 'http://127.0.0.1:8899'; const BREAK = process.env.BREAK || '';
 const ROOT = path.join(__dirname, '..');
@@ -29,7 +29,8 @@ function patchJs(s) {
   if (BREAK === 'late') B('if (tok !== S.tok || !S.on || S.view !== view) return;', 'if (!S.on) return;');
   if (BREAK === 'offlate') B('if (tok !== S.tok || !S.on || S.view !== view) return;', 'if (tok !== S.tok && S.view !== view) return;');
   if (BREAK === 'novis') B("el.style.visibility = S.locVisible ? 'visible' : 'hidden';", "el.style.visibility = 'visible';");
-  if (BREAK === 'earthloc') B('S.earth = earthView(); S.locVisible = vis && !S.earth;', 'S.earth = false; S.locVisible = vis;');
+  if (BREAK === 'earthloc') B('S.earth = earthView(); S.locVisible = front() && !S.earth;', 'S.earth = false; S.locVisible = front();');
+  if (BREAK === 'stale') B('S.locVisible = front() && !S.earth;', 'S.locVisible = vis && !S.earth;');
   if (BREAK === 'fp') B('left: FP.x * 100', 'left: (FP.x + 0.02) * 100');
   if (BREAK === 'ptr') B("left: PTR.x * 100 + '%', top: PTR.y * 100 + '%'", "left: PTR.y * 100 + 3 + '%', top: PTR.x * 100 + '%'");
   if (BREAK === 'bar') B("bar.style.width = px.toFixed(1) + 'px';", "bar.style.width = '100px';");
@@ -68,7 +69,7 @@ let br = null;
     const p = await ctx.newPage(); const errs = [];
     p.on('pageerror', e => errs.push(String(e)));
     await p.goto(BASE + '/moon.html'); await p.waitForFunction(() => document.getElementById('mg-globe').dataset.ready === '1', null, { timeout: 30000 });
-    await p.waitForTimeout(300);
+    if (!opt.noPause) await p.waitForTimeout(300);
     return { ctx, p, hits, errs, close: () => ctx.close() };
   };
   const st = p => p.evaluate(() => MoonLroc.state());
@@ -135,6 +136,13 @@ let br = null;
       return { area: await h('assets/moon/lroc/a11-area-4m.jpg'), site: await h('assets/moon/lroc/a11-site-0p5m.jpg'), mask: await h('assets/moon/lroc/a11-area-4m-mask.png'), moon: await h('assets/moon/lroc_color_2k.jpg') }; });
     ok('G1 served LROC files equal SOURCE.json', served.area[1] === SRC.files['a11-area-4m.jpg'].sha256 && served.site[1] === SRC.files['a11-site-0p5m.jpg'].sha256 && served.mask[1] === SRC.files['a11-area-4m-mask.png'].sha256, served);
     ok('G2 appearance map unchanged', served.moon[1] === MOONSRC.sha256 && served.moon[0] === MOONSRC.bytes, served.moon);
+    await T.close(); }
+
+  // ---------- B7: switched on at once after the globe is ready (reduced motion): the locator must show without any later camera move
+  { const T = await mk({ noPause: true });
+    await T.p.click('#mg-lroc'); await T.p.waitForTimeout(800);
+    const s = await st(T.p), rb = await ringBox(T.p);
+    ok('B7 locator visible straight after switching on, with no pause and no camera move', s.locVisible && rb && rb.disp !== 'none' && s.front, { s, rb });
     await T.close(); }
 
   // ---------- D: late results, failure, retry, timeout, wrong size

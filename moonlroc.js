@@ -35,12 +35,16 @@
       : 'Ring: locator for the Apollo 11 site (marks the place, not the image’s footprint). The globe’s picture is about 5 km a pixel, so the detail is shown below.';
     if (loc.textContent !== t) loc.textContent = t;
   }
+  /** Is the site on the camera's side of the sphere? Worked out from the live camera each time (visible when camera · site > R²), not from
+   *  the library's cached behind-the-globe answer, which can still describe the camera from before the turn when the locator is first placed. */
+  function front() { const g = G(); if (!g) return false; const c = g.camera().position, q = g.getCoords(SITE.lat, SITE.lng, 0);
+    return c.x * q.x + c.y * q.y + c.z * q.z > q.x * q.x + q.y * q.y + q.z * q.z; }
   function drawLocator() {
     const g = G(); if (!g) return false;
     if (!S.ring) { S.ring = document.createElement('div'); S.ring.className = 'mgl-ring'; S.ring.setAttribute('aria-hidden', 'true'); }
     g.htmlElementsData([SITE]).htmlLat('lat').htmlLng('lng').htmlAltitude(0).htmlTransitionDuration(0).htmlElement(() => S.ring)
       // the library's HTML renderer rewrites style.display on every frame, so hiding uses visibility
-      .htmlElementVisibilityModifier((el, vis) => { S.earth = earthView(); S.locVisible = vis && !S.earth; el.style.visibility = S.locVisible ? 'visible' : 'hidden'; locLine(); });
+      .htmlElementVisibilityModifier((el, vis) => { S.libVis = vis; S.earth = earthView(); S.locVisible = front() && !S.earth; el.style.visibility = S.locVisible ? 'visible' : 'hidden'; locLine(); });
     return true;
   }
   function clearLocator() { const g = G(); if (g) g.htmlElementsData([]); S.locVisible = false; }
@@ -98,5 +102,5 @@
   // re-runs and hides or restores the locator; nothing else is needed here.
 
   window.MoonLroc = { state: () => ({ on: S.on, view: S.view, state: S.state, why: S.why, tok: S.tok, earth: S.earth, locVisible: S.locVisible, shown: S.shown,
-    ring: S.ring ? { visibility: S.ring.style.visibility, inDom: document.body.contains(S.ring) } : null }), SITE, FP, PTR, TIMEOUT_MS };   // test aids
+    ring: S.ring ? { visibility: S.ring.style.visibility, inDom: document.body.contains(S.ring) } : null, libVis: S.libVis, front: front() }), SITE, FP, PTR, TIMEOUT_MS };   // test aids
 })();
