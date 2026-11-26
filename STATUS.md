@@ -4,6 +4,18 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 26 Nov 2026
 
+## 26 Nov 15:34 UTC (clock reading) — **Moon item 4 (LROC regional detail): Apollo 11 assessed; proposal rev 1 for GPT's review. Docs only; nothing built, no page or hub change** (Moon/LRO science, LROC thread)
+- **Chad's go:** a docs-only assessment of one bounded, well-documented site; bounded downloads with a checkpoint per file; no merge or deployment. Sun and Parker wait.
+- **Access:** repo push re-attached on Chad's authorization; the Mac folders are connected. Downloads access for pane saves was refused, so no source file was retained (proposal D5).
+- **Product:** LROC NAC orthophotos of M150368601 L/R (22 Jan 2011 20:48:53–20:49:11 UTC), Apollo 11 NAC DTM set, at 0.50 m and 2.00 m. The archive host now redirects to the PDS Imaging Node (`pds.mcp.nasa.gov`, PDS4 labels v2.0).
+- **Acquisitions, each checkpointed and pushed before the next:**
+  1. a 17,285,120-byte range of the 0.5 m file (`3a89ad5`)
+  2. the whole 2 m file, 59,023,560 B, MD5 match (`2604505`)
+- **Registration:** the LM's brightest pixel is 0.6 m and 2.0 m from LROC's published LM position; its shadow falls east.
+- **Globe link:** the globe is about 5.3 km a pixel, so the proposal is a marker plus a separate dated panel. Assets measured at about 225 KB + 360 KB, on demand.
+- **Records:** proposal `docs/concepts/MOON-LROC-REGION-PROPOSAL.md` rev 1; checklist rev 11 (§4 partly assessed). Evidence views on the Mac in `_source-data/moon-lro-science-lroc/`.
+- **Next:** GPT's review, then Chad's D1–D5. The build needs his separate go.
+
 ## 26 Nov 15:07 UTC (clock reading) — **Moon temperature RELEASED: merge `0622e80`, page only; 44/44 served; live layer check PASS; item 3 closed** (Moon/LRO science, Diviner thread)
 - **GPT's release review:** PASS for `310ca1e`, page only. Filed unchanged (`reviews/2026-11-26-moon-diviner-release-rc-gpt-review.md`, `43e75389…`).
 - **Chad's own Approve line** named `310ca1e`. Merge `0622e80` (14:50:35 UTC commit time); pushed 14:51:04 UTC. It differs from `310ca1e` only in three docs that main already had (checklist, STATUS, HANDOVER). No served byte changed after review. No hub, R2, D1 or collector change.
