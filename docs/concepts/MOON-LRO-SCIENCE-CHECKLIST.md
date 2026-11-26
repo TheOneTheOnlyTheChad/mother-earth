@@ -1,6 +1,6 @@
 # Moon globe and LRO science — spec checklist
 
-Rev 11 · 26 Nov 2026, 15:34 UTC (clock reading; rev 10 15:07, rev 9 14:42, rev 8 13:07, rev 7 11:58, rev 6 10:22, rev 5 09:54, rev 4 09:42, rev 3 09:20, rev 2 08:59, rev 1 08:31 UTC) · written by Claude on Chad's instruction (26 Nov) · **persistent record; update it as each item moves** · docs only.
+Rev 12 · 26 Nov 2026, 15:54 UTC (clock reading; rev 11 15:34, rev 10 15:07, rev 9 14:42, rev 8 13:07, rev 7 11:58, rev 6 10:22, rev 5 09:54, rev 4 09:42, rev 3 09:20, rev 2 08:59, rev 1 08:31 UTC) · written by Claude on Chad's instruction (26 Nov) · **persistent record; update it as each item moves** · docs only.
 
 **What this is.** The record of every item in GPT's original brief, `docs/concepts/MOON-LRO-SCIENCE-BRIEF-GPT-2026-11-25.md`. It also covers the scope Chad added on 26 Nov: every page that shows the Moon. It is **not** the narrowed height proposal (`docs/concepts/MOON-LRO-SCIENCE-PROPOSAL.md` rev 2.1), which covered only the first release.
 
@@ -20,7 +20,7 @@ Rev 11 · 26 Nov 2026, 15:34 UTC (clock reading; rev 10 15:07, rev 9 14:42, rev 
 | 1 | Existing all-round appearance, orientation, polar disclosure, lighting, dated LRO path ("Existing Moon view", "Existing LRO view", requirement 1) | **done: preserved** |
 | 2 | LOLA elevation-first layer ("Recommended first feature", requirements 2–4) | **done: released and closed** |
 | 3 | Diviner temperature ("Recommended first feature", second paragraph) | **done: released and closed** (merge `0622e80`) |
-| 4 | LROC regional detailed imagery | **partly assessed**: Apollo 11 assessment and proposal rev 1 with GPT (docs only) |
+| 4 | LROC regional detailed imagery | **partly assessed**: Apollo 11 proposal rev 2 with GPT for recheck (docs only); source retention pending (D5) |
 | 5 | CRaTER radiation | to assess |
 | 6 | LEND neutron and hydrogen products | to assess |
 | 7 | LAMP far-ultraviolet products | to assess |
@@ -225,7 +225,21 @@ Rev 11 · 26 Nov 2026, 15:34 UTC (clock reading; rev 10 15:07, rev 9 14:42, rev 
 - **Open:**
   - the frame of the orthophotos is not read from the RDR SIS (proposal §3); invisible at globe scale
   - source retention for the build: Downloads access was refused this session (proposal D5)
-- **Decisions needed (after GPT):** D1–D5 in proposal §11.
+- **Update (15:54 UTC, clock reading): proposal rev 2 with GPT for recheck. Docs only.**
+  - GPT's rev 1 review filed unchanged (`reviews/2026-11-26-moon-lroc-proposal-rev1-gpt-review.md`): concept and product supported; revise before build (R1–R4).
+  - Chad: D1 Apollo 11, D2 both views, D3 pointer off by default, D4 camera left where it is on switch-off.
+  - Rev 2 changes:
+    - claims narrowed to local agreement at one landmark
+    - pixel convention and the PDS4 x-sign settled by `phase1/moonsci/lroc/lroc_geom.py` (PASS; half-pixel limit in the 0.5 m product stated)
+    - source-pixel checks by `phase1/moonsci/lroc/lroc_pixels.js` (outputs recorded byte-exact); 2 m test corrected to a local maximum
+    - all five special codes, the 2 × 2 valid-count rule, dropped column 2,111, crop bounds, stretch and encoder
+    - locator and Earth-view behaviour
+    - honest checkpoints (lines 3–5, NOT RETAINED)
+  - Open:
+    - the volume RDR SIS read (frame); ME is supported by LROC's coordinate list and page and by a quoted SIS v1.2
+    - D5 source retention: Downloads access refused twice by the automatic approval check; needs Chad to name the folder
+    - D6: the 2 × 2 rule and no-data style
+- **Decisions needed:** D5 and D6 (proposal §12); then Chad's build go after GPT's recheck.
 - **Other sites:** one at a time later, each with its own product check and landmark test.
 
 ## 5. CRaTER radiation — to assess
@@ -336,7 +350,7 @@ Each stays `option` until Chad classifies it as "assess" or "not pursued", with 
 1. **Diviner:** assessment and proposal first, not a build. *(26 Nov: released, merge `0622e80`; item 3 done and closed.)*
 2. Then the remaining items **one at a time**, in the order Chad chooses.
 
-**Remaining open items after Diviner:** 4 (partly assessed: Apollo 11 proposal rev 1 with GPT), 5, 6, 7, 8, 10a (to assess); 9 (only inside the item it serves); 12a–c (options to classify); 11 (carried). Suggested order (Claude's suggestion, for Chad to decide): LROC regional example (4), then the Sky Moon decision (10a), then CRaTER (5), LEND (6), LAMP (7) and Mini-RF (8). Pairing (9) and the options (12) are taken up only inside the item they serve or when Chad classifies them.
+**Remaining open items after Diviner:** 4 (partly assessed: Apollo 11 proposal rev 2 with GPT), 5, 6, 7, 8, 10a (to assess); 9 (only inside the item it serves); 12a–c (options to classify); 11 (carried). Suggested order (Claude's suggestion, for Chad to decide): LROC regional example (4), then the Sky Moon decision (10a), then CRaTER (5), LEND (6), LAMP (7) and Mini-RF (8). Pairing (9) and the options (12) are taken up only inside the item they serve or when Chad classifies them.
 
 ## Change log
 
@@ -351,3 +365,4 @@ Each stays `option` until Chad classifies it as "assess" or "not pursued", with 
 - Rev 9 (26 Nov 2026, 14:42 UTC): §3: GPT's rev 2 recheck (PASS), the release candidate (`310ca1e`). No other item moved.
 - Rev 10 (26 Nov 2026, 15:07 UTC): §3 released and closed (merge `0622e80`, 44/44 served, live layer check); §1, §2, §9 and §11 updated for the release; order of work updated. No other item moved.
 - Rev 11 (26 Nov 2026, 15:34 UTC): §4 partly assessed: Apollo 11 LROC orthophoto, two checkpointed acquisitions, proposal rev 1 for GPT (`docs/concepts/MOON-LROC-REGION-PROPOSAL.md`). No other item moved.
+- Rev 12 (26 Nov 2026, 15:54 UTC): §4: GPT's rev 1 review (revise before build), Chad's D1–D4, proposal rev 2 with the geometry and pixel tooling. No other item moved.

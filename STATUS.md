@@ -4,6 +4,27 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 26 Nov 2026
 
+## 26 Nov 15:54 UTC (clock reading) — **Moon item 4 (LROC): proposal rev 2 for GPT's recheck, answering R1–R4. Docs only; nothing built; source bytes not yet retained** (Moon/LRO science, LROC thread)
+- **GPT's rev 1 review:** concept and Apollo 11 product supported; revise before build. Filed unchanged (`reviews/2026-11-26-moon-lroc-proposal-rev1-gpt-review.md`, `0e76683a…`).
+- **Chad:** D1 Apollo 11, D2 both views, D3 pointer off by default, D4 camera left where it is on switch-off. He asked for a docs-only rev 2.
+- **R1:**
+  - `phase1/moonsci/lroc/lroc_geom.py` (PASS, 0 failures; output committed): DSMAP's "+1" convention fits best in both products; the 0.5 m bounds alone can't separate it from half a pixel off (0.25 m), which is stated.
+  - The PDS4 upper-left x is pixel (1,1)'s centre with the sign flipped.
+  - Negative controls are detected.
+  - Claims narrowed to local agreement at the descent stage.
+  - LROC's ±15 m orbital uncertainty recorded; the 0.3 m column is undefined.
+  - Frame: ME per LROC's list and page and a quoted SIS v1.2; the volume SIS could not be opened.
+- **R2:**
+  - `phase1/moonsci/lroc/lroc_pixels.js` versions 1 and 2, outputs byte-exact.
+  - 0.5 m: the crop's brightest pixel is the LM, 0.6 m from the published point.
+  - 2 m: the LM is only a local maximum, 2.0 m away (the window maximum is a crater 1.6 km west).
+  - Only −32768 occurs.
+  - 2 × 2 valid-count histogram measured; column 2,111 dropped; stretch and Pillow encoder specified.
+- **R3:** locator (depth-hidden, click-through, not the footprint), Earth view behaviour, loading tokens, Retry.
+- **R4:** checkpoint lines 3–4 (verification re-reads; timing deviation disclosed) and line 5, NOT RETAINED. Downloads access was refused a second time by the automatic approval check ("Unauthorized Access").
+- **Records:** proposal rev 2 (`f0dac02`), checklist rev 12, evidence-view hashes corrected.
+- **Next:** GPT's recheck; Chad's D5 (name Downloads access or add the folder) and D6; then his build go.
+
 ## 26 Nov 15:34 UTC (clock reading) — **Moon item 4 (LROC regional detail): Apollo 11 assessed; proposal rev 1 for GPT's review. Docs only; nothing built, no page or hub change** (Moon/LRO science, LROC thread)
 - **Chad's go:** a docs-only assessment of one bounded, well-documented site; bounded downloads with a checkpoint per file; no merge or deployment. Sun and Parker wait.
 - **Access:** repo push re-attached on Chad's authorization; the Mac folders are connected. Downloads access for pane saves was refused, so no source file was retained (proposal D5).
