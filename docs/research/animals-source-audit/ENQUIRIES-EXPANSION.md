@@ -22,7 +22,7 @@
 
 *Rev 1.10, 25 Nov 2026 15:52 UTC (clock reading; Claude, same thread): Chad's account of a phone call with the IWC's Media and Communications Manager is recorded under D, labelled as his. Nothing else changed.*
 
-*Rev 1.11, 25 Nov 2026 (header added in rev 1.12; the entry itself was written at 15:55 UTC by commit time): Chad's confirming email to the IWC after the call is recorded as sent under D.*
+*Rev 1.11, 25 Nov 2026 (header added in rev 1.12; the entry itself landed in commit 5753123, commit time 15:53:06 UTC): Chad's confirming email to the IWC after the call is recorded as sent under D.*
 
 *Rev 1.12, 26 Nov 2026 08:20 UTC (clock reading; Claude, same thread): a further exchange on scope is recorded under D. Chad asked whether the permission covers the figure, range and two classes; by Chad's and GPT's account the IWC's Media and Communications Manager confirmed it does, in writing. Her reply's text is not in front of Claude. Nothing is built or released.*
 
