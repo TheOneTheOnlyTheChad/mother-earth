@@ -4,6 +4,18 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 26 Nov 2026
 
+## 26 Nov 09:54 UTC (clock reading) — **Diviner: GPT passes the first-band data; pane-job fix (tooling v2) for GPT's recheck; D4b on hold. Branch only** (Moon/LRO science, Diviner thread)
+- **GPT's review** is filed unchanged as `reviews/2026-11-26-moon-diviner-first-band-trial-gpt-review.md` (`74dd5fe5…9b43`).
+  - **Data PASS:** GPT independently re-read the extraction, matched 38,400 sampled values, rebuilt all 28,800 cell results and reproduced the plane SHA-256.
+  - **HOLD:** pane_job-1 let a failed run export, and let an earlier band export after a later run failed early.
+- **Fix** on branch `moon-diviner-trial` `83dc53a`: pane_job-2 (`1ca0e93e…1601`).
+  - It clears and identifies each run, checks size and MD5 before any reduction, keeps nothing on failure, cancels the stream, and allows exports only for the current verified run and band.
+  - `test_pane_job.cjs`: 56 pass, covering wrong MD5, wrong size (both ways), a parse failure, network and HTTP failures, band A then failed B, exports during a run, and a retry.
+  - GPT's two findings reproduce against pane_job-1.
+  - The other suites are unchanged: 466 and 165 pass.
+  - `TOOLING.md` records v1 (`0d5ae9b`, band 00n10n) and v2.
+- **Unchanged:** band 00n10n's checkpoint and evidence. No new download, no page change, no merge. The other 17 bands are held. Checklist rev 5.
+
 ## 26 Nov 09:42 UTC (clock reading) — **Diviner first-band trial (00N–10N) PASS; report to GPT and Chad; the other 17 bands wait for D4b. Branch only, no page change** (Moon/LRO science, Diviner thread)
 - **GPT's rev 2 recheck:** PASS for the first-band trial, with five implementation notes. Filed unchanged as `reviews/2026-11-26-moon-diviner-proposal-rev2-gpt-recheck.md`.
 - **Chad (26 Nov):** accepted D1, D2, D3, D5, D6 and D7 with GPT's notes. D8 (a): retain the lossless all-bin `tbol` extraction on his Mac, browser downloads approved. Go for D4a only.
