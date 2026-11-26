@@ -1,0 +1,34 @@
+A. sample hashes match SAMPLES.md
+B1. min/max km -8.87882137298584 10.504142761230469 | NaN 0
+B2. max cell centre 5.375 N, 201.375 E  value 10.504 km (cell spans lat 5.250..5.500, lon 201.250..201.500)
+B2. min cell centre -70.375 N, 187.625 E  value -8.879 km (cell spans lat -70.500..-70.250, lon 187.500..187.750)
+B3. exact 0.0 values: 1010 rows [0]
+    row 0 lat +89.875: mean    -18.2 m  min   -469.7  max    162.4
+    row 1 lat +89.625: mean   -671.3 m  min  -1423.3  max    223.4
+    row 2 lat +89.375: mean   -901.5 m  min  -1499.5  max    186.9
+    row 3 lat +89.125: mean  -1092.2 m  min  -2756.6  max     27.0
+    row 716 lat -89.125: mean   -291.9 m  min  -1802.4  max   1092.4
+    row 717 lat -89.375: mean     20.4 m  min  -1177.5  max   1743.8
+    row 718 lat -89.625: mean   -351.5 m  min  -2780.4  max   1610.3
+    row 719 lat -89.875: mean     31.1 m  min  -2166.6  max   1671.2
+B4. returns per cell min/median/max 64 6225.0 26671 | cells with 0 returns 0
+B5. seam |col0 - col1439| mean km 0.181  typical neighbour |d| km 0.228
+B6. mean row-to-row |d| km: all 0.347  at 45N 0.322  at equator 0.27  at 45S 0.33
+B7. correlation height vs picture brightness, shift in 0.25 deg cells (lon): {-3: 0.5034, -2: 0.5083, -1: 0.5151, 0: 0.5197, 1: 0.5134, 2: 0.5066, 3: 0.502}
+    (lat): {-3: 0.5014, -2: 0.5062, -1: 0.5135, 0: 0.5197, 1: 0.5137, 2: 0.5058, 3: 0.5001}  east-west mirrored: 0.339  north-south flipped: 0.1102
+B8. whole-metre rounding: max error m 0.5002
+    16-bit PNG of whole metres (+10000 offset): 1535833 B;  int16 raw gzip -9: 1778840 B
+    colour picture 1440x720: {'PNG': 1157752, 'WEBP': 131288, 'JPEG': 174149}
+    colour picture 2048x1024: {'PNG': 1852886, 'WEBP': 172860, 'JPEG': 275530}
+C. gcp_00n10n_rows0-19199.tab: lon -179.75..-175.25 lat 0.25..9.75 local-time bins 96
+   tbol -9999 (no observations) 39.8%; -9998 0; range 92.4833..396.5908 K
+   negative channel brightness temperatures (label: below channel sensitivity): {'t3': 3712, 't4': 4021, 't5': 2295, 't6': 0, 't7': 0, 't8': 0, 't9': 0}
+   window 11.5-12.5 h: cells with tbol 200 of 200; mean-of-bins range 379.2..392.8 K; mean spread inside window 3.29 K
+   window 23.5-0.5 h: cells with tbol 200 of 200; mean-of-bins range 99.4..105.4 K; mean spread inside window 0.85 K
+   single 15-min bin at each whole hour, cells with tbol (of 200): [0, 180, 123, 186, 132, 94, 116, 0, 148, 111, 190, 134, 200, 0, 188, 146, 0, 95, 0, 108, 0, 199, 149, 200]
+C. gcp_80n90n_rows0-19199.tab: lon -179.75..-175.25 lat 80.25..89.75 local-time bins 96
+   tbol -9999 (no observations) 7.5%; -9998 0; range 32.3083..290.9744 K
+   negative channel brightness temperatures (label: below channel sensitivity): {'t3': 6443, 't4': 7027, 't5': 2807, 't6': 710, 't7': 415, 't8': 0, 't9': 0}
+   window 11.5-12.5 h: cells with tbol 200 of 200; mean-of-bins range 61.1..261.3 K; mean spread inside window 26.61 K
+   window 23.5-0.5 h: cells with tbol 200 of 200; mean-of-bins range 46.1..101.9 K; mean spread inside window 11.79 K
+   single 15-min bin at each whole hour, cells with tbol (of 200): [200, 178, 200, 194, 200, 200, 200, 200, 200, 200, 100, 200, 101, 197, 200, 200, 193, 200, 196, 195, 200, 130, 200, 156]

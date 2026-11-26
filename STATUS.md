@@ -4,6 +4,15 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 26 Nov 2026
 
+## 26 Nov 04:10 UTC (clock reading) — **Moon globe and LRO science: data assessment and proposal rev 1 filed for GPT's review. Docs only; nothing built; no hub change** (page: none; Moon/LRO science thread)
+- **Filed unchanged:** GPT's brief `docs/concepts/MOON-LRO-SCIENCE-BRIEF-GPT-2026-11-25.md` (sha256 `212c7573…6d0e`, commit `6acbe54`).
+- **Chad's go (26 Nov):** archive recheck, bounded small samples, data assessment and docs-only proposal; elevation first, Diviner separately; keep the Moon's appearance, lighting and dated LRO behaviour; Sky texture only as an optional, separately scoped suggestion; measured sample costs apart from estimated integration costs; no production changes. Scope: every page that shows the Moon (Chad, 26 Nov).
+- **Archive recheck (Claude's reads, pane, 03:56–04:05 UTC):** Release 67 (15 Sep 2026), LOLA to 13 Jun 2026, Diviner to 15 Jun 2026 confirmed. The Diviner `-9999` warning is about RDR records from 17 Apr 2019 only.
+- **Elevation:** LOLA `LDEM_4_FLOAT` V3.0 (DOI 10.17189/tnyt-7007; data 2009-07-13 to 2016-11-29; km relative to a 1737.4 km sphere; 0.25° pixel-registered, 0–360°E). Registration checked against the published high and low points and against the page's own Moon picture (correlation peak at zero offset). Every cell has ≥ 64 returns. **Found:** the top row (89.875°N) holds 1,010 fill zeros, and the top two rows differ from the int16 version by up to 1.4 km, so 89.5–90°N is shown as no value.
+- **Diviner:** Global Cumulative Product (DOI 10.17189/wj0s-w188; 2009–2015; `tbol` per 0.5° × 15 min local time; `-9999` = empty bin). Assessed on two 2.17 MB ranges; proposed as stage 2 (needs an offline build of about 230 MB of ranged requests, or the whole 2.8 GB).
+- **Records:** `docs/concepts/MOON-LRO-SCIENCE-PROPOSAL.md` rev 1; `docs/research/moon-lro-science/` (`SAMPLES.md`, `assess_samples.py`, output). Samples not committed (hashes recorded).
+- **Next:** GPT reviews rev 1. Then Chad's decisions D1–D5 and his own go before any branch build.
+
 ## 26 Nov 03:22 UTC (clock reading) — **Tides thread closed out. Live: Tides `54642c5` + dedication `1cc3f87`; main `cf7b4b9` before this commit. Nothing pending on a branch; no hub change** (page: none; Tides thread)
 - **Close-out checklist (START-HERE §9):** Mac `_review/` empty (Tides copies in `_to_delete/20261125-tides-close-out/`); branches `tides-rc`, `tides-nav-rc`, `tides-dedication-rc` deleted on the GitHub page (only other threads' branches remain: `animals-assessment-rc`, `cape-town-public-proposal`, `cape-town-station-rc`, `earth-from-space-fixtures-rc`, `earth-from-space-rc`, `earth-from-space-stage-d-docs-r2`, `widths-preview-rc`); Mac synced at the final commit, preserve-first; worktrees clean and pushed.
 - **Current served comparison:** `reviews/evidence/2026-11-25-tides-dedication-manifest.json` (37 files). The release manifest stays as the release record, so `phase1/tides/release_manifest.mjs --check` reports `tides.html` different by design.
