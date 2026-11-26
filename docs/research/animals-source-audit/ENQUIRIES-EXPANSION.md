@@ -22,6 +22,10 @@
 
 *Rev 1.10, 25 Nov 2026 15:52 UTC (clock reading; Claude, same thread): Chad's account of a phone call with the IWC's Media and Communications Manager is recorded under D, labelled as his. Nothing else changed.*
 
+*Rev 1.11, 25 Nov 2026 (header added in rev 1.12; the entry itself was written at 15:55 UTC by commit time): Chad's confirming email to the IWC after the call is recorded as sent under D.*
+
+*Rev 1.12, 26 Nov 2026 08:20 UTC (clock reading; Claude, same thread): a further exchange on scope is recorded under D. Chad asked whether the permission covers the figure, range and two classes; by Chad's and GPT's account the IWC's Media and Communications Manager confirmed it does, in writing. Her reply's text is not in front of Claude. Nothing is built or released.*
+
 **All three are SENT. Never describe any of them as unsent. No duplicate and no follow-up unless Chad decides. Sending is not permission, and silence is not permission.**
 
 | | Enquiry | To | Subject line as Chad gave it | Status |
@@ -143,6 +147,10 @@
 **Chad's call with the IWC, 25 Nov 2026 (Chad's account, as he gave it to Claude; Claude was not on the call).** She had tried to phone him and he called her back. He corrected the description of the page as private. By his account she said she is fine with it, because Mother Earth is not being advertised publicly. Time of the call not on record. A call leaves no record of its own: this line is Chad's account, not the IWC's words. The written permission above is unchanged by it.
 
 **Chad's confirming email after the call, 25 Nov 2026.** Chad told Claude "ok sent" on 25 Nov 2026 (workspace clock 15:53 UTC when recorded). Claude drafted a confirming email to the IWC's Media and Communications Manager in the thread; which text he sent is not on record here. The draft confirmed the correction (the page can currently be reached by anyone with the link and is not advertised publicly) and that the status summary may appear on it with credit and a link. **SENT. No reply needed or chased.**
+
+**Scope confirmed in writing, 26 Nov 2026.** Chad wrote to the IWC's Media and Communications Manager asking whether her yes also covers the 2015 abundance estimate with its 5th–95th percentile range (18,111; 15,580–20,700), Relative Abundance "Very Good" and 1995–2015 change "Strongly Increased", credited and linked in the same way, offering to show only the sentence otherwise. Chad pasted that question to Claude on 26 Nov. **Her reply confirmed that it does**: so Chad told Claude, and GPT's review of the full thread (relayed by Chad, 26 Nov) reads her reply as explicitly authorising those four elements. **Provenance:** her reply's own text has not been seen by Claude; Chad holds it and GPT read it. It is to be kept privately with the rest of the correspondence once Chad supplies it.
+
+**GPT, 26 Nov 2026 (relayed by Chad, summary):** the reply closes the scope question with a direct written answer, strengthening the earlier contextual permission. Record it against the exact whale-summary candidate; no further permission clarification is needed for those elements. Keep 2015 as the estimate year and 1995–2015 as the change period. The International Whaling Commission credit and the status-page link stay as agreed. Permission does not authorise a build or release. The full correspondence stays private; the project record carries the outcome and the attribution requirements.
 
 **State for D after GPT's review:** closed for this candidate. Permission for the attributed five-line summary above, credit to the International Whaling Commission and a link to the status graphics page; contextual scope only. The "private" description was corrected by Chad on the phone (his account, above); GPT asks for no further enquiry. Whale example parked: Cape Vidal is still open, and building waits on Chad's go.
 
