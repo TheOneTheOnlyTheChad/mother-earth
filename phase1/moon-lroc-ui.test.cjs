@@ -14,7 +14,7 @@
  *  H. startup readiness (GPT preview review R1): opened before the globe is ready (delayed library), off before ready, on/off/on before
  *     ready, library failure, and a deadline passed before a late start: one turn exactly when ready, none after off or the deadline,
  *     no endless polling, the picture panel working throughout
- * BREAK=turn|late|offlate|pe|novis|earthloc|stale|fp|ptr|bar|nd|retry|offcam|eager|size|noready|nodeadline|latestart|offguard must each fail. */
+ * BREAK=turn|late|offlate|pe|novis|earthloc|stale|fp|ptr|bar|nd|retry|offcam|eager|size|noready|nodeadline|latestart|offwait must each fail. */
 const { chromium } = require('playwright'); const fs = require('fs'); const path = require('path'); const crypto = require('crypto');
 const BASE = process.argv[2] || 'http://127.0.0.1:8899'; const BREAK = process.env.BREAK || '';
 const ROOT = path.join(__dirname, '..');
@@ -34,7 +34,8 @@ function patchJs(s) {
     B('if (MG() && MG().point) { MG().point(SITE.lat, SITE.lng); S.turns++; }', ''); }
   if (BREAK === 'nodeadline') B('if (globeFailed() || Date.now() - t0 > GLOBE_WAIT_MS)', 'if (false)');
   if (BREAK === 'latestart') B("if (globeFailed() || Date.now() - t0 > GLOBE_WAIT_MS) { stopWait(); S.loc = 'unavailable'; locLine(); return true; }", "if (globeFailed() || Date.now() - t0 > GLOBE_WAIT_MS) { S.loc = 'unavailable'; locLine(); return false; }");
-  if (BREAK === 'offguard') B('if (tok !== S.entryTok || !S.on) { stopWait(); return true; }', '');
+  // switching off does not end the wait: both protections removed (either alone is enough, so removing one is not a behaviour change)
+  if (BREAK === 'offwait') { B('if (tok !== S.entryTok || !S.on) { stopWait(); return true; }', ''); B("S.entryTok++; stopWait(); S.loc = 'off';", "S.loc = 'off';"); }
   if (BREAK === 'late') B('if (tok !== S.tok || !S.on || S.view !== view) return;', 'if (!S.on) return;');
   if (BREAK === 'offlate') B('if (tok !== S.tok || !S.on || S.view !== view) return;', 'if (tok !== S.tok && S.view !== view) return;');
   if (BREAK === 'novis') B("el.style.visibility = S.locVisible ? 'visible' : 'hidden';", "el.style.visibility = 'visible';");
@@ -46,7 +47,7 @@ function patchJs(s) {
   if (BREAK === 'nd') B('nd.hidden = !a;', 'nd.hidden = a;');
   if (BREAK === 'retry') B("retry.hidden = state !== 'failed';", 'retry.hidden = true;');
   if (BREAK === 'offcam') B("setState('off', ''); img.removeAttribute('src');", "setState('off', ''); if (MG() && MG().point) MG().point(0, 0); img.removeAttribute('src');");
-  if (BREAK === 'eager') B('S.earth = earthView(); locLine(); load(S.view);', "S.earth = earthView(); locLine(); preload(V.site.url); load(S.view);");
+  if (BREAK === 'eager') B('enter(); load(S.view);', 'enter(); preload(V.site.url); load(S.view);');
   if (BREAK === 'size') B("(w && (im.naturalWidth !== w || im.naturalHeight !== h)) ? rej('the picture was not the expected size') : res(im)", 'res(im)');
   return s;
 }
