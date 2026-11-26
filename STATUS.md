@@ -4,6 +4,30 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 26 Nov 2026
 
+## 26 Nov 11:58 UTC (clock reading) — **Moon temperature (Diviner): page preview `moon-diviner-ui` built, for GPT's review. Branch only; not merged, not deployed** (Moon/LRO science, Diviner thread)
+- **Chad:**
+  - accepted the D4b checkpoint-timing deviation; future acquisitions write a durable checkpoint per band before proceeding
+  - froze the masks (70°/80°) and the scales (281–395 K / 70–105 K)
+  - go for the page-only preview after Claude's Powell read
+- **Powell et al. 2023 §2.4–2.5** read by Claude in full in the browser pane (Chad passed the publisher's human check). SAMPLES §6.8.
+- **Branch `moon-diviner-ui`** (from main `f63b4fe`):
+  - `c3bc497` Powell read
+  - `47dc4f1` page file, builder and GHRM comparison
+  - `947dd14` payload
+  - `29bb0ee` Animals pins
+  - `5faf2db` packet `reviews/2026-11-26-moon-diviner-ui-rc.md`
+- **Page file** `assets/moon/diviner/gcp-tbol-nm-R1.bin.gz`, 720,037 B: built from the 18 retained extractions; equal to the pane planes and the global-report digest; `--check` byte-identical.
+- **Tests:**
+  - `moon-diviner-ui` 157/0, with 17 of 17 breaks caught
+  - `moon-height-ui` 110/0, with 12 of 12
+  - Animals 294/0
+  - moon-globe 67, moon-lit 138, moon-lro-path 68, moon-light 27, tides-nav 2,882, desktop-overflow 286, mobile-pass 131, skycraft-ui 77
+  - tides-ui T1a is the Tides branch's own scope check
+  - smoke-fixes: the same 11 failures as main
+- **GHRM comparison** at 20 sites: background within 0.05–0.82 K; high-contrast median +8.75 K (up to +16.7 K); registration controls PASS. For GPT (packet §4).
+- **Correction:** the released height suite's breaks `late` and `nocache` matched no code; fixed (packet §6).
+- **Not done:** `sources.html` and REGISTER (release candidate); merge; deploy. No hub, R2, D1 or collector change. The GHRM site blocks are kept on the Mac (`_source-data/moon-lro-science-2026-11-26/diviner/ghrm-sites-20-R1.f32`); a copy stays in `~/Downloads`.
+
 ## 26 Nov 10:22 UTC (clock reading) — **Diviner D4b: all 17 remaining bands fetched and verified; §6.4 global report to GPT and Chad. Branch only, no page change** (Moon/LRO science, Diviner thread)
 - **GPT's v2 recheck:** PASS, the hold is closed. Filed unchanged as `reviews/2026-11-26-moon-diviner-pane-job-v2-gpt-recheck.md` (`10b097c1…1801421`).
 - **Acquisition** (Chad's go for D4b), tooling v2 `83dc53a` with hash checks in the pane. 09:59:17–10:14:26 UTC (page clock), one band at a time:
