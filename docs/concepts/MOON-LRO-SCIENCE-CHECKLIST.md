@@ -1,6 +1,6 @@
 # Moon globe and LRO science — spec checklist
 
-Rev 9 · 26 Nov 2026, 14:42 UTC (clock reading; rev 8 13:07, rev 7 11:58, rev 6 10:22, rev 5 09:54, rev 4 09:42, rev 3 09:20, rev 2 08:59, rev 1 08:31 UTC) · written by Claude on Chad's instruction (26 Nov) · **persistent record; update it as each item moves** · docs only.
+Rev 10 · 26 Nov 2026, 15:07 UTC (clock reading; rev 9 14:42, rev 8 13:07, rev 7 11:58, rev 6 10:22, rev 5 09:54, rev 4 09:42, rev 3 09:20, rev 2 08:59, rev 1 08:31 UTC) · written by Claude on Chad's instruction (26 Nov) · **persistent record; update it as each item moves** · docs only.
 
 **What this is.** The record of every item in GPT's original brief, `docs/concepts/MOON-LRO-SCIENCE-BRIEF-GPT-2026-11-25.md`. It also covers the scope Chad added on 26 Nov: every page that shows the Moon. It is **not** the narrowed height proposal (`docs/concepts/MOON-LRO-SCIENCE-PROPOSAL.md` rev 2.1), which covered only the first release.
 
@@ -19,8 +19,8 @@ Rev 9 · 26 Nov 2026, 14:42 UTC (clock reading; rev 8 13:07, rev 7 11:58, rev 6 
 |---|---|---|
 | 1 | Existing all-round appearance, orientation, polar disclosure, lighting, dated LRO path ("Existing Moon view", "Existing LRO view", requirement 1) | **done: preserved** |
 | 2 | LOLA elevation-first layer ("Recommended first feature", requirements 2–4) | **done: released and closed** |
-| 3 | Diviner temperature ("Recommended first feature", second paragraph) | **release candidate `moon-diviner-ui` at `310ca1e` with GPT for release review (not merged, not deployed)** |
-| 4 | LROC regional detailed imagery | to assess |
+| 3 | Diviner temperature ("Recommended first feature", second paragraph) | **done: released and closed** (merge `0622e80`) |
+| 4 | LROC regional detailed imagery | to assess (**next item, if Chad keeps the suggested order**) |
 | 5 | CRaTER radiation | to assess |
 | 6 | LEND neutron and hydrogen products | to assess |
 | 7 | LAMP far-ultraviolet products | to assess |
@@ -46,6 +46,11 @@ Rev 9 · 26 Nov 2026, 14:42 UTC (clock reading; rev 8 13:07, rev 7 11:58, rev 6 
   - GPT's preview review included an independent rendered desktop-browser check (`reviews/2026-11-26-moon-height-rc-gpt-review.md`).
   - GPT's release review compared retained files byte for byte (`reviews/2026-11-26-moon-height-release-rc-gpt-review.md`).
   - Live smoke after release (`reviews/2026-11-26-moon-height-release.md`).
+- **Preserved again through the Diviner release (26 Nov, merge `0622e80`):**
+  - `assets/moon/lroc_color_2k.jpg` unchanged, in the 44-file served manifest, matched live at 15:01:09 UTC.
+  - One coordinator now serves height and temperature. Lighting is saved once on entry and restored on leaving: checked live in both cases (Lit off before entry stays off; Lit on before entry comes back on). The Earth view does not reopen by itself.
+  - No readout comes from the picture: the temperature readout comes from the separate Diviner grid.
+  - The four Moon suites passed on the release tree (`reviews/2026-11-26-moon-diviner-release-rc.md`; moon-lit 138/0 when run alone).
 - **Limits:** see item 11.
 - **Next:** none. Any later item that touches `moon.html`, `moonglobe.js`, `moonlight.js` or `craft.js` must keep these suites green and move the Animals pins.
 
@@ -73,18 +78,47 @@ Rev 9 · 26 Nov 2026, 14:42 UTC (clock reading; rev 8 13:07, rev 7 11:58, rev 6 
 - **Accepted costs (Chad, 26 Nov):** a 2,578,646 B optional download on first use, and the extra polar-cap draw.
   - The download is the grid (1,776,231 B) plus the texture (802,415 B).
   - Idle draws per 5 s in the release-candidate run: height off 239, on 484.
-- **Current served comparison:** `reviews/evidence/2026-11-26-moon-height-manifest.json` (42 files), checked with `node phase1/moonsci/served_manifest.mjs --check` (local tree) and `--pane` (live site). The Tides manifests stay as their release records.
-- **Animals pins:** `MH_MAIN` `83f7c32` / `MH_PARENT` `97815dd` hold `moon.html`, `moonglobe.js` and `sources.html` (checks 13e, 13q–13s in `phase1/animals-tab-ui.test.cjs`).
+- **Served comparison at the height release:** `reviews/evidence/2026-11-26-moon-height-manifest.json` (42 files; kept as that release's record; superseded as the current comparison by the Diviner release's 44-file manifest, item 3), checked with `node phase1/moonsci/served_manifest.mjs --check` (local tree) and `--pane` (live site). The Tides manifests stay as their release records.
+- **Animals pins:** `MH_MAIN` `83f7c32` / `MH_PARENT` `97815dd` held `moon.html`, `moonglobe.js` and `sources.html` at the height release (checks 13e, 13q–13s in `phase1/animals-tab-ui.test.cjs`); since the Diviner release the current pins for those files are `DV_MAIN` / `DV_PARENT` (item 3).
 - **Tests:** `phase1/moon-height-ui.test.cjs` (110; 12 deliberate breaks); build check `python3 phase1/moonsci/build_lola.py --check`. *Erratum (26 Nov, 12:31 UTC): at the release code, breaks `late` and `nocache` matched nothing, so 10 of the 12 were established; see the erratum in `reviews/2026-11-26-moon-height-release-rc.md`, corrected on branch `moon-diviner-ui`.*
 - **Review cadence:** yearly and at each build, check for a newer version against the PDS errata and the LOLA Data Node. Last checked 26 Nov 2026.
 - **Next:** none for this layer. Options in item 12.
 
-## 3. Diviner temperature — release candidate with GPT for release review
+## 3. Diviner temperature — done: released and closed
+
+- **Product:** Diviner Global Cumulative Product `LRO-L-DLRE-5-GCP-V1.0`, `tbol` (bolometric brightness temperature: an equivalent blackbody temperature, not the physical temperature of any one surface); bundle `urn:nasa:pds:lro_diviner_derived1` v5.0, DOI 10.17189/wj0s-w188; observations 5 Jul 2009 – 1 Apr 2015.
+- **What the page shows:** two maps, "around local noon" and "around local midnight". Each 0.5° cell is our unweighted mean of the available quarter-hour bins within an hour of local noon or midnight, with the bin count and the range between bins. Noon is withheld poleward of 70° and midnight poleward of 80°, as our display policy. Scales are frozen at 281–395 K (noon) and 70–105 K (midnight), viridis, with clipping shown. Evenly lit; one science-mode coordinator shared with height; Moon tab only.
+- **Release:**
+  - Merge `0622e80` of `moon-diviner-ui` at `310ca1e` (26 Nov 2026, 14:50:35 UTC commit time), on Chad's own Approve line. Page only; no hub change.
+  - All 44 of 44 files of GPT's reviewed manifest (`7bf9576a…`) matched on the live site at 15:01:09 UTC. Live layer check passed at 15:02:32 UTC (noon → midnight → height → off, from Lit off and from Lit on; readouts equal the served file).
+  - Rollback: `git revert -m 1 0622e80`.
+- **Reviews (all filed unchanged in `reviews/`):**
+  - proposal rev 1 review `2026-11-26-moon-diviner-proposal-rev1-gpt-review.md`; rev 2 recheck `…-proposal-rev2-gpt-recheck.md`
+  - first-band trial review `…-first-band-trial-gpt-review.md`; pane job v2 recheck `…-pane-job-v2-gpt-recheck.md`
+  - global report review `…-global-report-gpt-review.md`
+  - preview review `…-ui-gpt-review.md`; rev 2 recheck `…-ui-rev2-gpt-recheck.md`
+  - release review `…-release-rc-gpt-review.md`
+- **Packets and records:** first-band trial `reviews/2026-11-26-moon-diviner-first-band-trial.md`; global report `…-global-report.md` (with erratum); preview packets `…-ui-rc.md` (with errata) and `…-ui-rc-rev2.md`; release candidate `…-release-rc.md`; **release record `reviews/2026-11-26-moon-diviner-release.md`**.
+- **Source records:** REGISTER entry "NASA PDS — LRO Diviner Global Cumulative Product (`tbol`)…" (marked live); the `sources.html#moontemp` section; `assets/moon/diviner/SOURCE.json`; evidence in `docs/research/moon-lro-science/` (SAMPLES §6, including Claude's Powell read §6.8; `diviner-acq/` checkpoints and tooling notes; `diviner-ghrm/` comparison).
+- **Acquisition tooling and evidence** (from the not-for-merge branch `moon-diviner-trial`, now all on main byte for byte): `phase1/moonsci/diviner/` (streaming parser, hashing, pane job, references, tests, `global_report.py`, `trial_compare.py`, `ghrm_compare.py`) and `phase1/moonsci/build_diviner.py`. The 18 retained extractions stay on the Mac only (`_source-data/moon-lro-science-diviner-gcp/`); nothing binary from PDS is committed except the page file.
+- **Accepted costs:** a 720,037 B optional download on first use of the temperature layer (the two maps are drawn in the browser from it).
+- **Accepted deviation (Chad, 26 Nov):** checkpoints for 17 bands were written after the run. **Standing rule: future acquisitions write a durable checkpoint per band before proceeding.**
+- **Known scientific caveat (on the page, in Sources, SOURCE.json and REGISTER):** at 10 sharp warm features our midnight value reads warmer than the GHRM mosaic (median +8.7 K); background sites agree within 0.05–0.82 K. Registration controls pass; the cause is not isolated. No correction applied.
+- **Current served comparison:** `reviews/evidence/2026-11-26-moon-diviner-manifest.json` (44 files), checked with `node phase1/moonsci/served_manifest.mjs --check` (local tree). For the live site, build the expected list from the reviewed manifest file, not from a later tree (GPT, release review step 3).
+- **Animals pins:** `DV_MAIN` `cc75407` / `DV_PARENT` `5efe200` hold `moon.html`, `moonglobe.js` and `sources.html` (checks 13e, 13t, 13u).
+- **Tests:** `phase1/moon-diviner-ui.test.cjs` (178; 19 deliberate breaks), `phase1/moon-height-ui.test.cjs` (110; 12 breaks); every break must report its pattern found, and missing-pattern failures are counted apart from behavioural ones. Build check `python3 -I phase1/moonsci/build_diviner.py --ext <extractions> --check`.
+- **Review cadence:** every six months and at each build, check for a newer GCP version or errata (REGISTER). Last checked 26 Nov 2026.
+- **Carried wording note (GPT, release review):** Sources' "switching it off brings sunlight back" is shorthand for restoring the prior lighting choice. Fix it in the next documentation update that touches `sources.html`; the code is correct.
+- **Not proposed for this display, with revisit conditions (proposal §11):** single mapping-cycle maps, single bins and dawn/dusk (a diurnal feature), GHRM high-resolution midnight, polar PCP, an RDR dated interval for 10–11 June 2026 (see item 9).
+- **Next:** none for this layer. The history below is kept as it was written.
+
+### History of item 3
 
 - **Brief asked:** a bounded Diviner example, either one documented map product or a short dated observation interval.
   - Keep channel brightness temperature apart from derived or bolometric temperature, and record local time, viewing geometry and aggregation.
   - No generic "Moon temperature now", and no apparent thermal response synchronised to the day/night control.
   - Check the `-9999` warning against the exact product. Missing is never 0 K.
+- **Update (15:07 UTC clock reading): released.** GPT's release review PASS (filed unchanged); Chad's own Approve line; merge `0622e80`; 44 of 44 served files at 15:01:09 UTC; live layer check passed; REGISTER live; branches `moon-diviner-ui` and `moon-diviner-trial` closed at close-out.
 - **Update (14:42 UTC clock reading): release candidate with GPT for release review. Not merged, not deployed.**
   - **GPT's rev 2 recheck:** PASS; R1 closed (`reviews/2026-11-26-moon-diviner-ui-rev2-gpt-recheck.md`, filed unchanged). Chad's go for the release candidate.
   - **Branch `moon-diviner-ui`, final commit `310ca1e`:** fresh main `5efe200` merged in; release payload `cc75407`; Animals pins `8b233d9`; packet `reviews/2026-11-26-moon-diviner-release-rc.md`.
@@ -234,7 +268,7 @@ Rev 9 · 26 Nov 2026, 14:42 UTC (clock reading; rev 8 13:07, rev 7 11:58, rev 6 
   - Spacecraft position, nadir point and detector footprint are different things. Use source footprints or enough pointing metadata, and never infer a footprint from the drawn marker.
   - For any pairing, verify the epoch, timescale and Moon-fixed frame against the definitive ephemeris.
   - Keep multi-year grids apart from individual pass records.
-- **Status:** nothing paired; no footprint shown or inferred (proposal §9). The height layer is a multi-year grid, kept visibly apart from the dated path.
+- **Status:** nothing paired; no footprint shown or inferred (proposal §9). The height layer (2009–2016) and the temperature layer (2009–2015) are multi-year grids, kept visibly apart from the dated path; both say they are not measured at the spacecraft position shown.
 - **Rule carried forward:** pair only where a selected science example benefits **and** its actual time, frame and pointing are compatible. Science displays that are not synchronised remain valid on their own.
 - **Lead to check, not a finding:**
   - Release 67 lists Diviner RDR data through 15 Jun 2026 and LOLA RDR through 13 Jun 2026 (SAMPLES §1). Those periods include the dated LRO example (10–11 June 2026).
@@ -271,6 +305,7 @@ Rev 9 · 26 Nov 2026, 14:42 UTC (clock reading; rev 8 13:07, rev 7 11:58, rev 6 
   - The height release adds about one draw per frame for the polar cap (release-candidate run: 239 off, 484 on).
   - Draw counts are not a measure of energy, CPU cost or perceived performance.
   - **Idle pausing was not delivered.** It remains a separate, later question for Chad (proposal §5). No release has claimed it.
+- **Diviner release (26 Nov):** the same four checks are still not done (real phone, Safari, screen reader, verified hardware renderer). Used instead: headless Chrome with SwiftShader at narrow widths (minor scale ticks hidden below 520 px, tested), the browser pane on the live site for the functional layer check. Keyboard: the temperature button, mode radios, centre-read button and readout were tested. The extra polar-cap draw belongs to height only (`h.cap(target === 'height')`); the temperature layer adds none. Its draw cost was not measured separately.
 - **Next:** record real-device checks separately whenever they are done. Every later item reports its own limits.
 
 ## 12. Options to classify — not automatic builds
@@ -290,10 +325,10 @@ Each stays `option` until Chad classifies it as "assess" or "not pursued", with 
 
 ## Order of work (Chad, 26 Nov)
 
-1. **Diviner:** assessment and proposal first, not a build. *(26 Nov: proposal rev 2 passed; all 18 bands acquired; masks and scales frozen; preview `moon-diviner-ui` with GPT.)*
+1. **Diviner:** assessment and proposal first, not a build. *(26 Nov: released, merge `0622e80`; item 3 done and closed.)*
 2. Then the remaining items **one at a time**, in the order Chad chooses.
 
-Suggested order (Claude's suggestion, for Chad to decide): LROC regional example (4), then the Sky Moon decision (10a), then CRaTER (5), LEND (6), LAMP (7) and Mini-RF (8). Pairing (9) and the options (12) are taken up only inside the item they serve or when Chad classifies them.
+**Remaining open items after Diviner:** 4, 5, 6, 7, 8, 10a (to assess); 9 (only inside the item it serves); 12a–c (options to classify); 11 (carried). Suggested order (Claude's suggestion, for Chad to decide): LROC regional example (4), then the Sky Moon decision (10a), then CRaTER (5), LEND (6), LAMP (7) and Mini-RF (8). Pairing (9) and the options (12) are taken up only inside the item they serve or when Chad classifies them.
 
 ## Change log
 
@@ -306,3 +341,4 @@ Suggested order (Claude's suggestion, for Chad to decide): LROC regional example
 - Rev 7 (26 Nov 2026, 11:58 UTC): §3: Chad's freeze and acceptance, Claude's Powell read, the `moon-diviner-ui` preview (head `cdc9aed`). No other item moved.
 - Rev 8 (26 Nov 2026, 13:07 UTC): §3: GPT's preview and global-report reviews, the R1 fix and wording (preview rev 2, head `34368ee`); §2 erratum on the height breaks. No other item moved.
 - Rev 9 (26 Nov 2026, 14:42 UTC): §3: GPT's rev 2 recheck (PASS), the release candidate (`310ca1e`). No other item moved.
+- Rev 10 (26 Nov 2026, 15:07 UTC): §3 released and closed (merge `0622e80`, 44/44 served, live layer check); §1, §2, §9 and §11 updated for the release; order of work updated. No other item moved.

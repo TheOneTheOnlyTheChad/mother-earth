@@ -4,6 +4,23 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 26 Nov 2026
 
+## 26 Nov 15:07 UTC (clock reading) — **Moon temperature RELEASED: merge `0622e80`, page only; 44/44 served; live layer check PASS; item 3 closed** (Moon/LRO science, Diviner thread)
+- **GPT's release review:** PASS for `310ca1e`, page only. Filed unchanged (`reviews/2026-11-26-moon-diviner-release-rc-gpt-review.md`, `43e75389…`).
+- **Chad's own Approve line** named `310ca1e`. Merge `0622e80` (14:50:35 UTC commit time); pushed 14:51:04 UTC. It differs from `310ca1e` only in three docs that main already had (checklist, STATUS, HANDOVER). No served byte changed after review. No hub, R2, D1 or collector change.
+- **Served check:** 44 of 44 files match GPT's reviewed manifest (`7bf9576a…`) at 15:01:09 UTC. The expected list was built from the reviewed manifest file, not from the tree.
+- **Live layer check, 15:02:32 UTC:**
+  - noon → midnight → height → off, starting once with Lit off and once with Lit on
+  - lighting restored to the choice made before entry, in both cases
+  - centre readouts (noon 394.5 K, n 2; midnight 101.6 K, n 4, range 1) equal the served file decoded independently
+  - no console errors
+- **Record:** `reviews/2026-11-26-moon-diviner-release.md`. REGISTER entry marked live. Checklist rev 10: item 3 done and closed; items 1, 2, 9 and 11 updated.
+- **Close-out:**
+  - branches `moon-diviner-ui` (merged) and `moon-diviner-trial` deleted on the GitHub branches page. Every file on the trial branch was on main byte for byte first.
+  - Remote branches now: `main` plus other threads' branches (animals-assessment-rc, cape-town-public-proposal, cape-town-station-rc, earth-from-space-fixtures-rc, earth-from-space-rc, earth-from-space-stage-d-docs-r2, widths-preview-rc), left alone.
+- **Carried:** GPT's wording note (Sources' "switching it off brings sunlight back" → "restores your earlier lighting choice") for the next documentation update to `sources.html`.
+- **Not verified:** real phone, Safari, screen reader, hardware renderer.
+- **Next:** Chad picks the next Moon checklist item. The suggested order starts with LROC regional imagery (item 4). Sun and Parker wait for the full Moon close-out.
+
 ## 26 Nov 14:42 UTC (clock reading) — **Moon temperature release candidate (`310ca1e`) for GPT's release review. Not merged, not deployed** (Moon/LRO science, Diviner thread)
 - **GPT's rev 2 recheck:** PASS, R1 closed. Filed unchanged (`reviews/2026-11-26-moon-diviner-ui-rev2-gpt-recheck.md`, `544184b2…`).
 - **Chad's go for the RC:** Sources, REGISTER, manifest, narrow Animals pins, final validation. No merge or deployment.
