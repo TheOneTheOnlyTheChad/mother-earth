@@ -4,6 +4,24 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 26 Nov 2026
 
+## 26 Nov 08:32 UTC (clock reading) — **Moon spec stays open: checklist created against GPT's original brief; next thread starts with Diviner (assessment and proposal, not a build). Docs only; no page or hub change** (Moon/LRO science thread)
+- **Chad's correction (26 Nov):** the close-out covers the **height release**, not the whole Moon/LRO spec. The Sun and Parker work waits until every Moon item has a recorded outcome and Chad accepts the Moon close-out.
+- **Checklist:** `docs/concepts/MOON-LRO-SCIENCE-CHECKLIST.md` rev 1, reconciled against `docs/concepts/MOON-LRO-SCIENCE-BRIEF-GPT-2026-11-25.md`. Each item records its status, evidence, next bounded assessment, blockers and the decision needed.
+  - Done: appearance, lighting and dated path preserved; LOLA height released.
+  - Next: Diviner.
+  - To assess: LROC regional, CRaTER, LEND, LAMP, Mini-RF, and pairing/footprints (only where an example benefits).
+  - Sky Moon: to assess and decide. Tides Moon: closed decision, unchanged.
+  - Options to classify: higher-resolution LOLA, laser returns, terrain displacement.
+  - Current LRO prediction: outside scope unless Chad expands it.
+  - Verification limits carried with every item.
+- **Wording corrected:** STATUS 08:16 "Next", and HANDOVER "MOON HEIGHT, CLOSED OUT".
+- **Cleanup confirmed:**
+  - The local `moon-height-rc` branch and its remote-tracking ref are gone; other threads' branches were left alone.
+  - The preview screenshots were moved out of `_to_delete` into the Mac's `research/moon-lro-science/moon-height-rc-preview-screenshots/`.
+  - The LOLA and Diviner samples stay in `_source-data/moon-lro-science-2026-11-26/` (hashes match `SAMPLES.md`).
+  - The Mac copy is synced preserve-first to `5bd1e9a` (the Animals thread's docs commits included), and the 42-file `--check` passes on the Mac and in the workspace.
+- **Next:** the next thread assesses Diviner and returns a proposal for GPT's review (checklist §3).
+
 ## 26 Nov 08:26 UTC (clock reading) — **Animals: scopes separated (Chad). The IWC-only whale summary is CLEARED and no longer depends on Cape Vidal; it waits only on Chad's implementation go and its place in the queue (Moon first). Cape Vidal becomes a later, separate addition with its own permission and review.** (page: none; Animals thread)
 - **Records:** `docs/research/animals-source-audit/WHALE-RECOVERY.md` §5 (commit `7691916`) and `ENQUIRIES-EXPANSION.md` rev 1.14. HANDOVER: this thread's own line added.
 
@@ -11,7 +29,7 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 - **Record:** `docs/research/animals-source-audit/ENQUIRIES-EXPANSION.md` rev 1.12, provenance corrected in rev 1.13 (08:22 UTC): her direct written reply, "Please feel free to use the additional information as described below" (10:03 SAST as relayed), kept privately. This IWC reply and the ATAP reply are the two emails of 26 Nov; none outstanding.
 - **Whale example:** IWC side complete; parked on Cape Vidal and Chad's go.
 
-## 26 Nov 08:16 UTC (clock reading) — **Moon height closed out. Live: Moon height `d6a26b6`; main `96a931d` before this commit. Nothing pending in this thread** (Moon/LRO science thread)
+## 26 Nov 08:16 UTC (clock reading) — **Moon height release closed out. Live: Moon height `d6a26b6`; main `96a931d` before this commit. Nothing pending for this release (the Moon spec stays open)** (Moon/LRO science thread)
 - **Close-out checklist (START-HERE §9):**
   - Mac `_review/` is empty. The branch tree is in `_to_delete/20261126-moon-height-close-out/_review-moon-height-rc`.
   - Branch `moon-height-rc` deleted on the GitHub branches page; local branch deleted too.
@@ -22,7 +40,7 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 - **Animals suite pins:** `MH_MAIN` `83f7c32` (13e `moon.html` and `sources.html`, 13q–13s). Any later change to `moon.html`, `moonglobe.js` or `sources.html` must move those pins.
 - **Not in this release (Moon/LRO brief):** Diviner (parked); the Sky zoom-out Moon (parked for its own round); the Tides Moon is unchanged by decision; LRO prediction and current position are out of scope.
 - **Not verified:** real phone, Safari, screen reader, hardware renderer.
-- **Next:** Chad names the next thread. The Sun and Parker spec is the separate feature waiting. Handover block: HANDOVER "MOON HEIGHT, CLOSED OUT".
+- **Next** (corrected 08:32 UTC on Chad's instruction; the original line said the Sun and Parker spec was next): the Moon spec continues; the next thread starts with the Diviner assessment and proposal (see the 08:32 UTC entry). Handover block: HANDOVER "MOON HEIGHT, CLOSED OUT".
 
 ## 26 Nov 08:14 UTC (clock reading) — **Animals: first substantive ATAP reply (Dr Taryn Murray, SAIAB) filed. Offers SAIAB-owned datasets for discussion, duckbill rays (published, Critically Endangered) suggested first; leervis being written up; diamond rays a sub-sample; the eagle ray NOT available. No data, terms or permission yet.** (page: none; Animals thread)
 - **Record:** `docs/research/animals-source-audit/ENQUIRIES-ANIMALS.md` rev 4, factual summary; the full email kept privately on the Mac.
