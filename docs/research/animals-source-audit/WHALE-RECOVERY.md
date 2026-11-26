@@ -104,7 +104,8 @@ From the IWC's "Copyright disclaimer" page (`iwc.int/disclaimer`), read in full:
 ## 5. What this means for the module
 
 - The whale recovery card can be designed now: stock, wording, fields and the second panel are fixed.
-- It cannot be shown until two things are settled:
+- **Scopes separated, 26 Nov 2026 (Chad's decision):** the whale recovery example is now two candidates. **(a) IWC-only whale summary:** cleared by the IWC's written permission (below and `ENQUIRIES-EXPANSION.md` rev 1.13). It does not depend on Cape Vidal. It waits only on Chad's implementation go and its place in the queue (Moon first). **(b) Cape Vidal panel:** assessed and added later, with its own permission and review. The two-item list that follows is kept as history; item 2 no longer blocks (a).
+- It cannot be shown until two things are settled (history; superseded for the IWC-only summary on 26 Nov):
   1. **IWC permission** to display the status sentence, the figure with its range, the growth class and period, with the IWC's display guidelines and acknowledgement; and, in the same message, what year the figure refers to and what the range is.
   2. **Cape Vidal:** the values are verified by GPT. What is open is reuse of five attributed values in a newly drawn chart (§4). IWC permission would not clear this separate material.
 - If the IWC's answer on the figure is slow or negative, GPT's point applies: the dated status statement could still be used with permission, and the number left unavailable.
