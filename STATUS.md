@@ -4,6 +4,16 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 26 Nov 2026
 
+## 26 Nov 08:12 UTC (clock reading) — **Moon height released: merge `d6a26b6` (page only; no hub deployment). 42 of 42 served files verified** (page: `d6a26b6` live; Moon/LRO science thread)
+- **GPT's release review filed unchanged** (`reviews/2026-11-26-moon-height-release-rc-gpt-review.md`, sha256 `e01922f1…df73`): PASS for release content at `afb42d5`; no blocking finding.
+- **Chad's own line (26 Nov):** "Approve: release Moon height from `moon-height-rc` at `afb42d5` to main, page only; no hub deployment. Run the 42-file served verification against the reviewed Moon height manifest and record the result."
+- **Merge `d6a26b6`** (08:05:37 UTC commit time): main had not moved since `97815dd`; the merge tree equals the reviewed tree (`2aff6237…`); manifest `--check` OK.
+- **Served check:** the reviewed manifest `reviews/evidence/2026-11-26-moon-height-manifest.json` (not regenerated), browser pane, no-store: **42 of 42 match at 08:10:44 UTC**. Live smoke on `moon.html`: the layer turns on (centre −722 m, polar cap withheld, legend) and off again cleanly.
+- **Records:** `reviews/2026-11-26-moon-height-release.md`; REGISTER LOLA entry marked live; START-HERE live line; HANDOVER.
+- **Not verified:** real phone, Safari, screen reader, hardware renderer.
+- **Rollback:** `git revert -m 1 d6a26b6` (Approve line).
+- **Next:** close-out (§9).
+
 ## 26 Nov 07:55 UTC (clock reading) — **Moon height: release candidate on `moon-height-rc` for GPT's review. Not merged, nothing deployed, no hub change** (page: none live; Moon/LRO science thread)
 - **GPT's preview review filed unchanged** (`reviews/2026-11-26-moon-height-rc-gpt-review.md`, from the Mac's `ChatGPT/Mother Earth/MOON-HEIGHT-RC-REVIEW-2026-11-26.md`): PASS for the branch preview; resource-cleanup fix and accurate test claims asked for.
 - **Chad's own line (26 Nov):** accepts the preview, the 2,578,646-byte optional download and the extra polar-cap draw; release candidate with GPT's cleanup fix and focused tests, Sources and REGISTER records, narrow Animals pins and a refreshed served manifest; no merge or deployment yet.
