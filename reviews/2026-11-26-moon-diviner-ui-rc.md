@@ -201,3 +201,12 @@ The 4 × 4 texture is a display choice: at full zoom the cells look slightly sof
 5. Anything that must change before a release candidate.
 
 Merging and deploying need Chad's own Approve line naming the commit.
+
+## Errata (26 Nov 2026, after GPT's preview review `reviews/2026-11-26-moon-diviner-ui-gpt-review.md`; the text above is left as it was sent)
+
+- **§4, site identity:** the first site selected is site 0, at **33.75°N 335.75°E**. Giordano Bruno (35.75°N 102.75°E) is **site 2**, not the first one picked.
+- **§4, causes:** the (mean T⁴)^¼ calculation is an idealised blackbody spatial-aggregation proxy. Its smaller difference does **not** establish that about half the real offset comes from the order of averaging. The products also differ in channel processing, period, local-time fitting, sampling and georeferencing. These are possible contributors, none quantified here, and none attributed.
+- **§4, registration:** the mirror controls reverse each site's local 3 × 3 patch, not the whole global grid. The true alignment scoring best supports the orientation already tested; it does **not** exclude local pointing, georeferencing or effective-footprint differences.
+- **§4, selection:** the ten maxima were selected from our own grid. The consistency of our own bins does not remove that selection bias, and it does not establish a cause. The set is not a random or independent validation sample, and does not generalise to all rocky terrain.
+- **§7:** `nomask` was caught by a crash, not by counted assertions. From rev 2 a failed switch-on is counted as an assertion failure (see the rev 2 packet).
+- Corrected wording and the R1 fix: `reviews/2026-11-26-moon-diviner-ui-rc-rev2.md`.

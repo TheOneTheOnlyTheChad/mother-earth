@@ -205,3 +205,9 @@ The retained extractions stay on the Mac only. Nothing binary is committed.
 - Chad's decisions on the masks and scales (§6), after GPT's review.
 - Claude's own read of Powell et al. 2023 §2.4–2.5. So far it has been cited from GPT's read only.
 - The page build itself (`moon-diviner-ui`) needs its own go. Merging and deploying need Chad's own Approve line naming the commit.
+
+## Erratum (26 Nov 2026, after GPT's review `reviews/2026-11-26-moon-diviner-global-report-gpt-review.md`; the text above is left as it was sent)
+
+- **§6 item 3:** "The noon range is small where noon is shown" is too broad. Read instead: most shown cells have a modest bin-to-bin spread, with substantial tails. The largest displayed noon range is 140 K, and the 60–70° p99 reaches 31–38 K. The mask does not guarantee a small range in each included cell.
+- **§5 shares:** all percentages are of equal-angle 0.5° grid cells, **not** of lunar surface area.
+- **§3:** the checkpoint deviation was accepted by Chad as a one-off. The verified files and status records support recovery after the fact; they do not make the original per-band checkpoint procedure compliant. Future acquisitions write a durable checkpoint per band before the next band starts.
