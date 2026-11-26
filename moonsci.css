@@ -1,0 +1,14 @@
+/* Moon height layer legend and readout (moonsci.js). Moon page only; style.css is unchanged. */
+body.craft .mgh{max-width:560px;margin:6px auto 4px;font-size:13px;line-height:1.5}
+body.craft .mgh[hidden],body.craft #mg-height-centre[hidden]{display:none}
+body.craft .mgh-bar{position:relative;height:12px;border-radius:2px;margin:4px 0 0;
+  background:linear-gradient(90deg,#0e3d7e,#0f4a96,#1757ac,#1b64be,#2370cd,#257de0,#338ced,#519ced,#6aabf1,#84b9f3,#9dc8f7,#b6d5f8,#cce3fd)}
+body.craft .mgh-ticks{position:relative;height:18px;font-size:12px;color:var(--dim)}
+body.craft .mgh-ticks span{position:absolute;transform:translateX(-50%);white-space:nowrap}
+body.craft .mgh-ticks span:first-child{transform:none}
+body.craft .mgh-ticks span:last-child{transform:translateX(-100%)}
+body.craft .mgh-wh{display:inline-block;width:22px;height:12px;vertical-align:-2px;margin-right:6px;border-radius:2px;
+  background:#8c8c8c;box-shadow:inset 0 0 0 1px #5a5a5a}
+body.craft .mgh p{margin:4px 0}
+/* while height is shown the lighting buttons are disabled: say so visually as well as to assistive technology */
+body.craft .mgctl button:disabled{opacity:.45;cursor:not-allowed}

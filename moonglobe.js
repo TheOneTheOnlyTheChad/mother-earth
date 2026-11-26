@@ -4,6 +4,7 @@
  * at the device clock's current UTC minute; arithmetic and table in moonlight.js. No live spacecraft. One overlay, off by default: LRO's DATED path (10–11 June 2026) in the Moon-fixed frame
  * (docs/concepts/MOON-LRO-DATED-PATH-PROPOSAL.md rev 2; catalogue assets/moon/craft-moon-me-2026-06-R1.json, sha256 pinned below).
  * The spacecraft drawing below (craft.js) owns the time: the overlay follows its selected minute and its 120-sample window.
+ * Optional height layer (moonsci.js) uses the small `height` hook below to swap the texture, lock the lighting buttons and get clicks.
  * Texture convention relied on (verified by phase1/moon-globe.test.cjs against named landmarks):
  *   longitude-latitude image, 0° longitude at the centre, east to the right, north up. */
 (() => {
@@ -262,11 +263,30 @@
     if (lit.on && !lit.timer) lit.timer = setInterval(() => { const m = ML ? ML.minute(Date.now()) : NaN; if (!Object.is(m, lit.minute) || lit.state === 'loading') tickLit(); }, 1000);
     if (!lit.on && lit.timer) { clearInterval(lit.timer); lit.timer = 0; }
   }
-  if (litB) litB.addEventListener('click', async () => { lit.on = !lit.on; tickLit();
-    if (lit.on && lit.err === undefined) { if (!litReady) litReady = loadLit().then(e => { lit.err = e; }); await litReady; tickLit(); } });
-  if (earthB) earthB.addEventListener('click', () => { if (lit.state !== 'on') return; if (lit.earth) leaveEarth(); else enterEarth(); });
+  /** Set "Lit as now" on or off (the button and the height layer's restore both come here, so both behave the same). */
+  async function litTo(on) { lit.on = on; tickLit();
+    if (lit.on && lit.err === undefined) { if (!litReady) litReady = loadLit().then(e => { lit.err = e; }); await litReady; tickLit(); } }
+  if (litB) litB.addEventListener('click', () => { if (!litB.disabled) litTo(!lit.on); });
+  if (earthB) earthB.addEventListener('click', () => { if (lit.state !== 'on' || earthB.disabled) return; if (lit.earth) leaveEarth(); else enterEarth(); });
   document.addEventListener('visibilitychange', () => { if (!document.hidden && lit.on) tickLit(); });
-  const hookLit = () => { globe.controls().addEventListener('start', () => { if (lit.earth) leaveEarth(); }); if (lit.on) tickLit(); };   // a drag or pinch begins: ordinary camera first
+  // ---------- Height layer hook (moonsci.js; MOON-LRO-SCIENCE-PROPOSAL rev 2.1 §4.3): texture swap, lighting lock, clicks. Nothing else.
+  const hgt = { click: null };
+  const height = { ready: () => !!globe, texture: url => { if (globe) globe.globeImageUrl(url || TEX); },
+    lit: () => ({ on: lit.on, earth: lit.earth }), litOff: () => { if (lit.earth) leaveEarth(); if (lit.on) litTo(false); },
+    litRestore: on => { if (on && !lit.on) litTo(true); }, lock: on => { for (const b of [litB, earthB]) if (b) b.disabled = !!on; },
+    onClick: cb => { hgt.click = cb; }, centre: () => globe ? globe.pointOfView() : null,
+    // the withheld cap north of 89.5 N, drawn on top in plain grey (the only use of the polygon layer on this page); top only, no sides or
+    // outline, so it costs one small extra draw per frame while height is shown
+    cap: on => { if (!globe) return; globe.polygonsData(on ? [{ type: 'Feature', geometry: { type: 'Polygon', coordinates: [[[-180, 89.5], [-180, 90], [180, 90]].concat(Array.from({ length: 37 }, (_, k) => [180 - 10 * k, 89.5]))] } }] : [])
+      .polygonCapColor(() => '#8c8c8c').polygonSideColor(() => null).polygonStrokeColor(() => null).polygonAltitude(0.001).polygonsTransitionDuration(0); } };
+  const hookLit = () => { globe.controls().addEventListener('start', () => { if (lit.earth) leaveEarth(); }); if (lit.on) tickLit();
+    // The clicked point is worked out from the click itself (globe.toGlobeCoords at the pointer), not from the library's hover state,
+    // which is updated once per frame and can still hold the previous position when a tap or quick click arrives. A press that
+    // moved more than 6 px (a drag) is not a click.
+    let down = null;
+    el.addEventListener('pointerdown', e => { down = { x: e.clientX, y: e.clientY }; });
+    el.addEventListener('click', e => { if (!hgt.click || !globe) return; if (down && Math.hypot(e.clientX - down.x, e.clientY - down.y) > 6) return;
+      const r = el.getBoundingClientRect(), q = globe.toGlobeCoords(e.clientX - r.left, e.clientY - r.top); if (q) hgt.click(q.lat, q.lng); }); };   // a drag or pinch begins: ordinary camera first
   const startedLit = setInterval(() => { if (globe) { clearInterval(startedLit); hookLit(); } else if (dead) clearInterval(startedLit); }, 200);
 
   window.MoonGlobe = { view: () => globe ? globe.pointOfView() : null, point: (lat, lng) => set(lat, lng, alt()), lights: () => globe ? globe.lights().map(l => l.type) : null,   // test aids
@@ -275,5 +295,5 @@
       cam: globe ? { fov: globe.camera().fov, far: globe.camera().far, dist: globe.camera().position.length(), maxDistance: globe.controls().maxDistance } : null }),
     lightTick: () => tickLit(), shade: v => { if (lit.uni) lit.uni.mgOn.value = v ? 1 : 0; }, screen: (lat, lng) => globe ? globe.getScreenCoords(lat, lng, 0) : null,
     lro: () => ({ on: ov.on, err: ov.err, loaded: !!ov.data, drawn: ov.drawn ? { ...ov.drawn, behind: behind(ov.drawn.marker) } : null }),
-    toGlobe, globe: () => globe };
+    toGlobe, globe: () => globe, height };
 })();

@@ -1,0 +1,63 @@
+{
+ "layer": "Moon height (moon.html, optional): What LRO measured: height",
+ "kind": "derived page files from a measurement-derived grid (laser altimetry compiled by the LOLA team); not live",
+ "source": {
+  "product_id": "LDEM_4_FLOAT",
+  "product_version": "V3.0",
+  "data_set_id": "LRO-L-LOLA-4-GDR-V1.0",
+  "lidvid": "urn:nasa:pds:lro_lola_rdr:data_gridded:ldem_4_float::1.0",
+  "bundle_doi": "10.17189/tnyt-7007",
+  "citation": "Smith, D.E.; Neumann, G.A. (2023). Lunar Reconnaissance Orbiter LOLA Processed (RDR) Data Products. NASA PDS. https://doi.org/10.17189/tnyt-7007",
+  "url": "https://pds-geosciences.wustl.edu/lro/lro-l-lola-3-rdr-v1/lrolol_1xxx/data/lola_gdr/cylindrical/float_img/ldem_4_float.img",
+  "bytes": 4147200,
+  "sha256": "6eaee9376442dc851b8f8e94790499ec339d923367d7b8608a4316088b85bd45",
+  "last_modified": "Wed, 06 Sep 2017 16:12:35 GMT",
+  "label": {
+   "url": "https://pds-geosciences.wustl.edu/lro/lro-l-lola-3-rdr-v1/lrolol_1xxx/data/lola_gdr/cylindrical/float_img/ldem_4_float.lbl",
+   "bytes": 5125,
+   "sha256": "37315910c3064d66623180fe49e91abc6c0c6b43b064042d2ac8002d997479d4"
+  },
+  "data_period": "2009-07-13T17:33:17 to 2016-11-29T05:48:19 (through mission phase LRO_ES_52); product created 2017-09-15",
+  "quantity": "height relative to a 1737.4 km reference sphere (km, float32); not a geoid height, not altitude",
+  "grid": "1440 x 720, 0.25 deg spacing, equirectangular, pixel registered, planetocentric; 0-360 E from column 0; frame MEAN EARTH/POLAR AXIS OF DE421",
+  "rights": "PDS Geosciences FAQ (read 26 Nov 2026): 'Data sets archived in the PDS are in the public domain'; cite appropriately (bundle DOI + LIDVID)"
+ },
+ "comparison_product_for_withheld_rows": {
+  "product_id": "LDEM_4",
+  "product_version": "V3.0",
+  "url": "https://pds-geosciences.wustl.edu/lro/lro-l-lola-3-rdr-v1/lrolol_1xxx/data/lola_gdr/cylindrical/img/ldem_4.img",
+  "bytes": 2073600,
+  "sha256": "c04632eba6449af49e3108ed7c25b3b1c450600abd3690df4fc815853a1af476",
+  "label": {
+   "bytes": 5107,
+   "sha256": "b5a197b4d417e3b5e0e84f8fe15f9a1d2203b8eb5d7213236c0ffbc86e940cc6"
+  },
+  "finding": "agrees with LDEM_4_FLOAT within one 0.5 m step in every cell of rows 2-719; rows 0-1 disagree in 1,038 cells by up to 1,423 m (docs/research/moon-lro-science/SAMPLES.md)"
+ },
+ "withheld": {
+  "rule": "rows 0-1 (north of 89.5 N) stored as -32768 and drawn as a grey cap",
+  "wording": "Values north of 89.5°N are withheld because inconsistencies were found in the source products."
+ },
+ "build": {
+  "script": "phase1/moonsci/build_lola.py",
+  "script_sha256": "149eceeea506d448f4982a250154f6fbd853652095fb1ca47f73ea21d6b87410",
+  "check": "python3 -I phase1/moonsci/build_lola.py --src <dir> --check"
+ },
+ "files": {
+  "ldem4-m-R1.i16.gz": {
+   "bytes": 1776231,
+   "sha256": "af4450019840918da4a62812f4969ad07a0c77bf3f878ef59ca7e8961cc7d43d",
+   "decompressed_bytes": 2073600,
+   "decompressed_sha256": "392bceff7827ceb8cf6a8e9292f3903d317d4da590765f5152cda8587db4c155",
+   "format": "int16 little-endian, row-major 720 x 1440, source order (row 0 at 90 N, column 0 at 0 E), whole metres rounded in float64 (half to even), -32768 = withheld; gzip -9, mtime 0"
+  },
+  "ldem4-colour-R1.png": {
+   "bytes": 802415,
+   "sha256": "e9281ca2a92cec0deb93e3f46837d6a0053056f4f14fd1f3ed945be8d4e63a58",
+   "format": "2048 x 1024 indexed PNG, 0 deg at the centre; each pixel the colour of the 0.25 deg cell containing its centre; one-hue blue ramp from -9 km (dark) to +11 km (light), 254 colours (about 79 m per step); withheld cap grey #8c8c8c"
+  }
+ },
+ "review_cadence": "check for a newer version yearly and at each build (PDS errata, LOLA Data Node listing)",
+ "last_checked": "2026-11-26",
+ "page_rules": "fetched only when the user switches height on; both files checked (compressed and decompressed pins) before use; readout gives the containing cell's value, no interpolation; rounding to the metre is precision, not accuracy"
+}
