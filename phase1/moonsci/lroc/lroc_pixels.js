@@ -10,7 +10,8 @@
   const R = 1737400, C = Math.cos(Math.PI / 180), rad = d => d * Math.PI / 180;
   const G = {
     p50: { s: 0.49999999999999, L0: 74989.5, S0: 9497505.5, NS: 8440, HDR: 16880 },
-    p2: { s: 2.0000000000006, L0: 18747.5, S0: 2374376.5, NS: 2111, NL: 13978, HDR: 4222, BYTES: 59023560, MD5: '187f3d1dac32aff7f00c512ec4907cdf' },
+    p2: { s: 2.0000000000006, L0: 18747.5, S0: 2374376.5, NS: 2111, NL: 13978, HDR: 8444,   // lroc_pixels-3: the PDS3 header is 2 records (LABEL_RECORDS 2, ^IMAGE 3); the PDS4 label's 4,222 B offset is wrong. Versions 1-2 read the 2 m image one line early (superseded by lroc_source_check.py)
+    BYTES: 59023560, MD5: '187f3d1dac32aff7f00c512ec4907cdf' },
   };
   const LM = [0.67416, 23.47314];
   const CK1 = { range: [567049840, 584334959], sha256: '3bd1b8627c8ba81d33a3ac756ec999b7276ec40356f1b3d3c99d57defc71a2fa', L1: 33593, N: 1024 };
@@ -97,5 +98,5 @@
       root.LROCPX.result = out;
     } catch (e) { out.phase = 'failed'; out.error = String(e); root.LROCPX.result = out; }
   }
-  root.LROCPX = { run, result: null, VERSION: 'lroc_pixels-2' };
+  root.LROCPX = { run, result: null, VERSION: 'lroc_pixels-3' };
 })(typeof window !== 'undefined' ? window : globalThis);

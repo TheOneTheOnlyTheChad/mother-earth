@@ -1,0 +1,28 @@
+PASS 0.5 m range: 17,285,120 B, SHA-256 = checkpoint 1
+PASS 2 m file: 59,023,560 B, MD5 = label
+PASS 2 m attached header carries the Nov 2011 pixel-centre NOTE
+  2 m PDS3: RECORD_BYTES 4222, LABEL_RECORDS 2, ^IMAGE 3 -> image offset 8444 B (PDS4 label says 4222)
+PASS 2 m image offset from the PDS3 header is 8,444 B and the file size matches exactly
+PASS 2 m PDS4 label offset (4,222 B) does NOT match: one 4,222-byte line early (recorded label error)
+PASS 0.5 m PDS3 header file: 16,880 B, SHA-256 = retention line 3
+PASS 0.5 m PDS3: LABEL_RECORDS 1, ^IMAGE 2, RECORD_BYTES 16880 -> offset 16,880 B (agrees with its PDS4 label)
+  census 0.5 m range {'valid': 8396224, 'min': 23, 'max': 493, 'special': {'-32768': 246336, '-32767': 0, '-32766': 0, '-32765': 0, '-32764': 0}}
+  census 2 m whole {'valid': 28560833, 'min': 4, 'max': 502, 'special': {'-32768': 946725, '-32767': 0, '-32766': 0, '-32765': 0, '-32764': 0}}
+PASS only -32768 occurs among the special codes (both files)
+PASS 0.5 m census equals the pane (missing 246,336)
+PASS the pane 2 m census (missing 944,614; max 24,407) is reproduced only by the wrong 4,222-B offset  corrected: missing 946725, max 502
+PASS site crop int16 SHA-256 equals the pane
+PASS the pane area window hash is reproduced only by the wrong offset (proves the one-line shift)
+  corrected area window int16 SHA-256 4cd6d42d1286901a1091636fc3c7792f62a3668bffbd4cb0d1a3b8aedd74138f
+PASS site crop has no special values
+  0.5 m: crop max 446 ties 1 offset m (E,N) (np.float64(-0.326), np.float64(0.46)) | local 12 m max (446, 1, (-0.326, 0.46))
+  2 m: local 12 m max (268, 1, (0.924, 0.21))
+PASS 0.5 m: the crop maximum is unique and within 1 m of the published LM
+PASS 0.5 m: local maximum equals the pane result (446 at -0.326 E, +0.46 N)
+PASS the pane 2 m local maximum (268 at +0.924 E, -1.79 N) is reproduced only by the wrong offset
+PASS 2 m (correct offset): local maximum within 2 m of the published LM  (268, 1, (0.924, 0.21))
+PASS 2 m: the area maximum is NOT the LM (control: it is over 1 km away)  (np.float64(-1571.076), np.float64(12.21))
+  2x2 valid-count histogram (correct offset) [30579, 10, 1999, 10, 1022402]  (pane, shifted: [30586, 2, 1999, 2, 1022411])
+PASS 2x2 histogram accounts for all 1,055,000 output pixels
+  rule >= 2 of 4: no-data output pixels 30589 ; averaged partial blocks 2009
+RESULT PASS 0 failures

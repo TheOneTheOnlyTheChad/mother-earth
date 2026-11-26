@@ -1,5 +1,9 @@
 """LROC Apollo 11 orthophoto geometry checks (Moon item 4, proposal rev 2 R1). Build tooling; never served.
 
+Closure (26 Nov 2026): the k = 1 convention tested below is DEFINED by the attached PDS3 headers' NOTE and the volume
+RDR SIS v1.6 §6.4 (LROC, adopted Nov 2011: the centre of the upper-left pixel is (1.0, 1.0); offsets run from it to the
+projection origin, positive right/below). The bounds test below is a consistency check, not the basis.
+
 Independent of the pane script: constants are transcribed from the PDS4 labels and the attached PDS3
 headers (read 26 Nov 2026; GPT independently confirmed the 0.5 m label's values), and anchors come from
 outside this code: the producer's bounding coordinates in the same labels, and LROC's published LM/PSE

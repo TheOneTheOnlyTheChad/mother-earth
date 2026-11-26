@@ -1,6 +1,14 @@
 # Moon globe: LROC regional detail — assessment and proposal
 
-Rev 2 · 26 Nov 2026 · written by Claude · **docs only: nothing built, no page or hub change, nothing deployed** · for GPT's recheck
+Rev 2.1 · 26 Nov 2026 · written by Claude · **docs only: nothing built, no page or hub change, nothing deployed** · for GPT's recheck
+
+**Rev 2.1 (closure):**
+- Sources retained on the Mac (retention lines 1–8).
+- Volume RDR SIS v1.6 read directly: frame closed, pixel convention defined.
+- A one-line offset error in the earlier 2 m pane figures is found and corrected.
+- Chad's D5 and D6 are recorded.
+
+The corrections are marked *(2.1)* below. The report is `reviews/2026-11-26-moon-lroc-retention-frame-closure.md`.
 
 **Reviews.** Rev 1 (`9397993`) was reviewed by GPT on 26 Nov: concept and Apollo 11 product supported; **revise before build approval** (R1–R4). The review is filed unchanged as `reviews/2026-11-26-moon-lroc-proposal-rev1-gpt-review.md` (`0e76683a…`). §13 maps each point to its answer.
 
@@ -12,7 +20,9 @@ Checklist item §4 of `docs/concepts/MOON-LRO-SCIENCE-CHECKLIST.md`. It answers 
 - **`docs/research/moon-lro-science/lroc/checkpoints.jsonl`:**
   - lines 1–2: the two acquisitions
   - lines 3–4: verification re-reads
-  - line 5: retention state, which is **NOT RETAINED** (§8)
+  - line 5: retention state, which was **NOT RETAINED** at rev 2 (§8)
+  - *(2.1)* retention lines 1–8: each source file retained on the Mac and re-hashed, one at a time
+- *(2.1)* **`phase1/moonsci/lroc/lroc_source_check.py`** (numpy, on the retained files) and its output `docs/research/moon-lro-science/lroc/lroc_source_check_output-2026-11-26.txt`: PASS, 0 failures. It supersedes the pane's 2 m figures.
 - **`phase1/moonsci/lroc/lroc_geom.py`** (geometry, independent of the pane code) and its output **`docs/research/moon-lro-science/lroc/lroc_geom_output-2026-11-26.txt`**: PASS, 0 failures.
 - **`phase1/moonsci/lroc/lroc_pixels.js`** (pane source-pixel checks on unstretched DN):
   - version 1 output: `lroc_pixels_output-2026-11-26.json`, SHA-256 `2ccbe61e…`
@@ -34,11 +44,11 @@ Checklist item §4 of `docs/concepts/MOON-LRO-SCIENCE-CHECKLIST.md`. It answers 
   - public domain as PDS products; credit NASA/GSFC/Arizona State University
 - **Registration claim, narrowed (R1):** the descent stage gives **local agreement at one named landmark, within the image sampling**. LROC's published Lunar Module position is 0.67416°N, 23.47314°E.
   - **0.5 m product:** the single brightest pixel of the whole 512 m site crop (DN 446, no ties) is 0.6 m from that position (−0.33 m east, +0.46 m north).
-  - **2 m product:** the LM is a local feature only; a bright crater rim 1.6 km west is brighter. Its brightest pixel within 12 m is 2.0 m away (+0.92 m east, −1.79 m north).
+  - **2 m product:** the LM is a local feature only; a bright crater rim 1.6 km west is brighter. Its brightest pixel within 12 m is **0.95 m** away (+0.92 m east, +0.21 m north). *(2.1: corrected from 2.0 m, which came from reading the 2 m image one line early.)*
   - **Shadow:** in both products it falls 7 m east.
   - **Not established here:** absolute positional accuracy, registration elsewhere in the strip, and registration against the globe's picture. LROC states an orbital position uncertainty of ±15 m for the method behind its coordinate list (§4.4).
 - **The globe cannot show the detail (unchanged; numbers corrected):** at the closest zoom one screen pixel is about 1.45 km. The 4.2 × 28 km strip is about **3 × 19 screen pixels**, and the 512 m site view about 0.35 of a pixel. So the globe gets a **locator**, a fixed-size symbol that marks the place and is **not the footprint**. The images go in a separate dated panel (§6).
-- **Processing and retention:** an explicit build contract (§7), and one remaining practical blocker for the build, retention of the source bytes (§8, D5).
+- **Processing and retention:** an explicit build contract (§7). *(2.1)* The build inputs are retained on the Mac (§8), so nothing blocks a build.
 
 ## 1. What stays unchanged
 
@@ -92,7 +102,7 @@ Checklist item §4 of `docs/concepts/MOON-LRO-SCIENCE-CHECKLIST.md`. It answers 
 
 - **Measured in every array checked:** only −32768 occurs. The four saturation codes count zero in the 17 MB range, the site crop, the area window and the whole 2 m file (`lroc_pixels` outputs).
 - **The builder must still handle them.** Saturation codes are kept as their own category: invalid for averaging, shown as "saturated (no value)" if they ever appear, never as no coverage. If any appears in a build window, the build stops for review.
-- **One valid-range outlier:** the whole 2 m file's valid maximum is DN 24,407, far above the typical 23–493. It lies outside both proposed windows: the area window's maximum is 427 and the site crop's 446. It is recorded, not interpreted.
+- *(2.1)* **There is no valid-range outlier.** The "DN 24,407" reported in rev 2 was header text, read as pixels at the wrong offset (§4.2). At the correct offset the whole 2 m file's valid range is DN 4–502.
 
 **Pixel values** are display brightness (DN). The README says: "These orthophotos do not include scale and offset information". They are never called reflectance or radiance.
 
@@ -117,7 +127,8 @@ Checklist item §4 of `docs/concepts/MOON-LRO-SCIENCE-CHECKLIST.md`. It answers 
 - **k = 1** (DSMAP's "+1" form) fits best in both products.
 - **0.5 m product:** the north and south bounds land exactly on the array edges (line 0.500 and 55,908.500). The longitudes sit 0.47 px (0.23 m) inside.
 - **2 m product:** the bounds sit about half a pixel inside (worst 0.62 px). k = 1 is separated from the next convention by 0.38 px.
-- **Limit, stated plainly:** in the 0.5 m product the bounds alone do **not** separate k = 1 from k = 0.5, which is half a pixel (0.25 m). The latitudes favour one and the longitudes the other. We adopt k = 1 from DSMAP's text and the 2 m product. The residual ambiguity is below the landmark agreement (§4.2) and far below anything the page shows.
+- **The bounds alone are not enough:** in the 0.5 m product they do not separate k = 1 from k = 0.5, which is half a pixel (0.25 m).
+- *(2.1)* **Closed by definition.** Both retained PDS3 headers, and the volume SIS v1.6 §6.4, state that the centre of the upper-left pixel is (line, sample) = (1.0, 1.0), and that the offsets run from it to the projection origin, positive right/below ("adopted in November 2011 by the LROC team"). For this product that is exactly k = 1. The bounds test stays as a consistency check.
 
 **PDS4 upper-left values:**
 - `upperleft_corner_y` 37,494.75 m equals the y of the **centre** of pixel (1,1).
@@ -141,10 +152,16 @@ Checklist item §4 of `docs/concepts/MOON-LRO-SCIENCE-CHECKLIST.md`. It answers 
 - The darkest 3 × 3 mean (DN 39.9), within 16 m east, is 7.2 m east.
 - **Control:** the same 12 m search 40 m north-west peaks at DN 277, which is lower.
 
-**2 m product, area window** (lines 7,527–9,526, samples 1–2,110):
-- The window maximum (DN 427) is a bright crater rim 1,571 m west, **not** the LM. So "brightest pixel" is not the 2 m test.
-- **Local test:** the brightest pixel within 12 m (DN 268, no ties) is +0.92 m east, −1.79 m north. The shadow 3 × 3 minimum is 6.9 m east.
+**2 m product, area window** (lines 7,527–9,526, samples 1–2,110). *(2.1: corrected figures, from `phase1/moonsci/lroc/lroc_source_check.py` on the retained file at the PDS3 image offset of 8,444 B.)*
+- The window maximum is a bright crater rim about 1.57 km west, **not** the LM. So "brightest pixel" is not the 2 m test.
+- **Local test:** the brightest pixel within 12 m (DN 268, no ties) is +0.92 m east, +0.21 m north. The shadow 3 × 3 minimum (DN 88.1) is 6.9 m east.
 - **Control:** 40 m north-west, the same search peaks at DN 261, which is lower but close. **Within ±12 m, the 2 m product supports the LM's position at about the 2 m sample scale; it is not a strong discriminator.**
+- **Offset error, corrected (2.1):**
+  - The 2 m file's PDS3 header is two records long (LABEL_RECORDS 2, ^IMAGE 3), so the image starts at byte 8,444. The PDS4 label gives 4,222.
+  - `lroc_pixels.js` versions 1 and 2 used 4,222 and so read the 2 m image one line (2 m) early.
+  - The Python check reproduces each of the pane's 2 m numbers exactly only at the wrong offset, which proves the cause.
+  - The 0.5 m figures are unaffected: one header record, and both labels agree on 16,880 B.
+  - `lroc_pixels.js` version 3 uses 8,444.
 
 **What this shows:** local agreement at one named landmark, within the image sampling. It supports orientation and crop placement.
 
@@ -178,7 +195,11 @@ Both were read through the fetch tool's quoting, not as full PDFs.
 
 **Consistency, not proof:** the orthophoto puts the LM within 0.6 m of LROC's ME-frame coordinate. The ME–principal-axis offset is of order a kilometre, far larger. That is consistent with the orthophoto being in ME, but the two come from the same team's processing, so it is not independent proof.
 
-**Open (R1):** the volume SIS read. It can be closed once the PDF is retained with the sources (§8). At globe scale (1.45 km a screen pixel) the frame question changes nothing visible; in the panel it would change only the stated basis, not the picture.
+*(2.1)* **Closed:** the volume's `DOCUMENT/RDRSIS.PDF` was retained (MD5 = ETag) and read directly. It is the LROC RDR SIS **version 1.6, 22 August 2020**.
+- **§5.5:** "The coordinate system used is the mean Earth/polar axis system, using planetocentric latitude and east positive longitude direction". The Moon's ephemeris uses de421.bsp and its Euler angles.
+- **§5.3:** NAC DTM orthophotos are stored as 16-bit signed values.
+- **Table 2 (page 17):** NAC_DTM is "Digital Terrain Models (DTM) and orthophotos created from geometric stereo observations".
+- **Appendix B** still carries the 2008 equations and the "1734.4 km" typo. §6.4 and the products' own header notes define the pixel convention used here.
 
 ## 5. Rights and attribution
 
@@ -253,7 +274,7 @@ Both were read through the fetch tool's quoting, not as full PDFs.
 **Downsampling (area only):**
 - Each output pixel is a 2 × 2 block. Invalid codes (−32768…−32764) are **excluded before averaging**.
 - Output = mean of the valid DN if **at least 2 of 4** are valid; otherwise no data.
-- Measured valid counts per block, 0 to 4: 30,586 / 2 / 1,999 / 2 / 1,022,411. So 30,588 output pixels are no data and 2,001 partial blocks are averaged.
+- Measured valid counts per block, 0 to 4 *(2.1, correct offset)*: 30,579 / 10 / 1,999 / 10 / 1,022,402. So 30,589 output pixels are no data and 2,009 partial blocks are averaged. Chad accepted this rule and the hatched style (D6).
 
 **No-data mask:**
 - JPEG cannot carry an exact categorical mask, so the area view gets a 1-bit PNG mask of the same size, drawn as a hatched overlay.
@@ -282,7 +303,9 @@ Both were read through the fetch tool's quoting, not as full PDFs.
 
 ## 8. Retention of build inputs — R4
 
-**Current state:** fetched and checked, **NOT RETAINED** (checkpoints line 5).
+*(2.1)* **Now retained** (checkpoint retention lines 1–8): each file was saved by the pane to Downloads, checked there, copied into `_source-data/moon-lro-science-lroc/`, re-hashed and recorded before the next was saved. The Downloads copies are in `~/Downloads/_to_delete-lroc/`. Chad granted Downloads access (26 Nov). The text below records the state before that.
+
+**State before retention:** fetched and checked, **NOT RETAINED** (checkpoints line 5).
 - "Complete" in lines 1–2 means fetched and checked, not stored.
 - The 0.5 m range is not verified by the archive MD5, which covers the whole file. Its provenance is the 206 status, the exact Content-Range, the total length equal to the label size, the ETag equal to the label MD5, and our SHA-256 `3bd1b862…a2fa`. It was re-fetched twice with the same hash.
 
@@ -368,15 +391,17 @@ No other download is needed: the 944 MB 0.5 m file is never fetched whole.
 - **D3:** pointer offered, off by default
 - **D4:** switch-off leaves the camera where it is
 
-**Open:**
-- **D5:** source retention route (§8)
-- **D6 (new, small):** the 2 × 2 rule "at least 2 of 4 valid", and the no-data style (hatched overlay). Both are recommended; Chad may prefer another style.
+**Also decided (2.1):**
+- **D5:** Downloads route granted; sources retained
+- **D6:** at least 2 of 4 valid, with the hatched no-data overlay
+
+Nothing is open. A build waits for GPT's recheck and Chad's build go.
 
 ## 13. GPT's rev 1 review: where each point is answered
 
 | GPT | Answer |
 |---|---|
-| R1 frame, conventions, x-sign, narrowed claim, reproducible checks, independent anchors, negative controls, bounds as bounding box | §3, §4.1 (`lroc_geom.py`), §4.2 (`lroc_pixels.js`), §4.4. Frame: directly read sources name none; ME supported by LROC's list and page and by the SIS v1.2 quote. The volume SIS read stays open until retention (§8). Claims narrowed in §0 and §4. DTM figures marked vertical. |
+| R1 frame, conventions, x-sign, narrowed claim, reproducible checks, independent anchors, negative controls, bounds as bounding box | §3, §4.1 (`lroc_geom.py`), §4.2 (`lroc_pixels.js`; corrected by `lroc_source_check.py`), §4.4. *(2.1)* Frame closed by the volume SIS v1.6 §5.5; convention defined by the header notes and SIS §6.4. Claims narrowed in §0 and §4. DTM figures marked vertical. |
 | R2 build test, special values incl. −32764, 2 × 2 valid rule, odd column, crop bounds, stretch and encoder, native pixel spacing ≠ screen, 3 × 19 px | §3 table, §7, §9; the caption wording in §6 |
 | R3 Earth view, locator vs footprint, occlusion, clicks, loading, late responses, keyboard, focus, LRO path, measured draw cost, scale bars | §6, §9 |
 | R4 retention and honest checkpoints, ETag ≠ MD5, Downloads as an authorisation issue | §8; checkpoints lines 3–5 |
