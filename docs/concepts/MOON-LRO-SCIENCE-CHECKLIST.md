@@ -79,7 +79,7 @@ Rev 4 · 26 Nov 2026, 09:42 UTC (clock reading; rev 3 09:20, rev 2 08:59, rev 1 
 - **Review cadence:** yearly and at each build, check for a newer version against the PDS errata and the LOLA Data Node. Last checked 26 Nov 2026.
 - **Next:** none for this layer. Options in item 12.
 
-## 3. Diviner temperature — assessed; proposal rev 2 with GPT for recheck
+## 3. Diviner temperature — proposal passed; first-band trial PASS; D4b waits
 
 - **Brief asked:** a bounded Diviner example, either one documented map product or a short dated observation interval.
   - Keep channel brightness temperature apart from derived or bolometric temperature, and record local time, viewing geometry and aggregation.
