@@ -240,9 +240,11 @@
     let res = null, err = null;
     try { res = await LAYER[target].prepare(target, ctl); } catch (e) { err = e; }
     clearTimeout(tm);
-    if (tok !== MS.tok || !MS.pend || MS.pend.tok !== tok || ctl.signal.aborted) { if (res) res.drop(); return; }   // superseded, cancelled, timed out or left: a late answer changes nothing
+    if (tok !== MS.tok || !MS.pend || MS.pend.tok !== tok) { if (res) res.drop(); return; }   // superseded, cancelled, timed out or left: a late answer changes nothing
     MS.pend = null;
     if (err) { syncRadio(); LAYER[target].failed(err, target); paint(); return; }
+    // a result is never committed from an aborted request (GPT review R1; an ordinary failure may abort its sibling fetch, so this applies to results only)
+    if (ctl.signal.aborted) { res.drop(); syncRadio(); LAYER[target].failed(new Why('it took too long or was cancelled'), target); paint(); return; }
     // one step: remember (only on entering), leave the Earth view, sunlight off and locked, then the texture
     const from = MS.active;
     if (!from) { MS.saved = h.lit(); MS.entry = target; h.litOff(); h.lock(true); }

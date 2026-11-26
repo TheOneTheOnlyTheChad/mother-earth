@@ -64,7 +64,7 @@ const setCell = (b, m, i, v, n, r) => { b.writeUInt16LE(v, OFF.value[m] + 2 * i)
       if (BREAK === 'celsius') B('const s = x - 2731.5,', 'const s = x - 2730,');
       // R1 (GPT preview review): the deadline must end the request, and the commit gate must refuse an aborted request
       const DL = "const tm = setTimeout(() => { if (MS.pend && MS.pend.tok === tok) { cancel(); LAYER[target].failed(new Why('it took too long'), target); } }, TIMEOUT_MS);";
-      if (BREAK === 'deadline') { B(DL, 'const tm = setTimeout(() => ctl.abort(), TIMEOUT_MS);'); B(' || ctl.signal.aborted) { if (res) res.drop(); return; }', ') { if (res) res.drop(); return; }'); }   // the reviewed code
+      if (BREAK === 'deadline') { B(DL, 'const tm = setTimeout(() => ctl.abort(), TIMEOUT_MS);'); B("    if (ctl.signal.aborted) { res.drop(); syncRadio(); LAYER[target].failed(new Why('it took too long or was cancelled'), target); paint(); return; }\n", ''); }   // the reviewed code
       if (BREAK === 'deadlinetimer') B(DL, 'const tm = setTimeout(() => ctl.abort(), TIMEOUT_MS);');   // the gate alone: the pending request never settles
       if (BREAK && !globalThis.__brkLogged) { globalThis.__brkLogged = 1; console.log('BREAK applied (pattern found): ' + BREAK); }
       r.fulfill({ status: 200, contentType: 'application/javascript', body: s }); });
@@ -128,7 +128,9 @@ const setCell = (b, m, i, v, n, r) => { b.writeUInt16LE(v, OFF.value[m] + 2 * i)
       && /Temperature map could not be loaded: it took too long\. The globe is unchanged\./.test(t), { s, t });
     await p.evaluate(() => { window.__hold.blob = false; }); await press(p, '#mg-temp'); await p.evaluate(() => window.__release()); await p.waitForTimeout(500);
     ok('G1 retry succeeds while the stale result is released', await waitActive(p, 'temp-noon') && (await sci(p)).commits === 1 && !/could not be loaded/.test(await text(p, '#mg-temp-read')));
-    ok('G1 the late PNG became an object URL that was released, never cached or shown: exactly one live URL (the retry\'s)', (await live(p)) === 1 && (await p.evaluate(() => window.__u.made.length)) === 2 && (await p.evaluate(() => window.__u.revoked.length)) === 1);
+    await p.waitForFunction(() => window.__u.made.length >= 2 && window.__u.revoked.length >= 1, null, { timeout: 15000 }).catch(() => {});   // the late PNG finishes in its own time
+    ok('G1 the late PNG became an object URL that was released, never cached or shown: exactly one live URL (the retry\'s)', (await live(p)) === 1 && (await p.evaluate(() => window.__u.made.length)) === 2 && (await p.evaluate(() => window.__u.revoked.length)) === 1
+      && (await texUrl(p)) === (await p.evaluate(() => window.__u.made.filter(u => !window.__u.revoked.includes(u))[0])), await p.evaluate(() => window.__u));
     await ctx.close(); }
   { // G2 temperature replacement noon -> midnight, PNG held: noon stays, radio back on noon, saved lighting kept
     const { ctx, p } = await mk({ hold: true }); await litOn(p);
