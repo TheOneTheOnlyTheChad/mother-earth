@@ -7,7 +7,7 @@
 <meta name="description" content="Lunar Reconnaissance Orbiter: where its published trajectory places it, with the source and time beside every position.">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
 <link rel="stylesheet" href="style.css?v=202612250800">
-<link rel="stylesheet" href="moonsci.css?v=202612260500">
+<link rel="stylesheet" href="moonsci.css?v=202612261100">
 </head>
 <body class="doc craft" data-body="moon">
 <header class="top">
@@ -60,6 +60,12 @@
       <button type="button" id="mg-earth" aria-pressed="false" hidden>As seen from Earth now</button>
       <button type="button" id="mg-height" aria-pressed="false">Show height (LOLA)</button>
       <button type="button" id="mg-height-centre" hidden>Read height at centre</button>
+      <button type="button" id="mg-temp" aria-pressed="false">Show temperature (Diviner)</button>
+      <button type="button" id="mg-temp-centre" hidden>Read temperature at centre</button>
+      <fieldset id="mg-temp-mode" class="mgt-mode"><legend>Temperature map</legend>
+        <label><input type="radio" name="mg-temp-mode" value="noon" checked disabled> around local noon</label>
+        <label><input type="radio" name="mg-temp-mode" value="midnight" disabled> around local midnight</label>
+      </fieldset>
     </div>
     <p id="mg-lit-read" class="mglro" aria-live="off" hidden></p>
     <div id="mg-height-leg" class="mgh" hidden>
@@ -70,11 +76,25 @@
       <p class="dim">Height above or below a 1,737.4 km reference sphere, not above “sea level” or the local surface. LOLA laser altimeter on the Lunar Reconnaissance Orbiter; data taken 2009–2016, compiled into a 0.25° grid (about 7.6 km north–south and at the equator, narrower east–west towards the poles). Each colour is one grid cell’s value; readouts are rounded to the metre, which is not a measure of accuracy. Not live, and not measured at the spacecraft position shown on this page.</p>
     </div>
     <p id="mg-height-read" class="mglro" aria-live="polite" hidden></p>
+    <div id="mg-temp-leg" class="mgh mgt" hidden>
+      <p><b data-t="title">What LRO measured: brightness temperature around local noon</b> <span class="ev">Measured</span></p>
+      <p data-t="scale" class="mgt-scale"></p>
+      <div data-t="bar" class="mgh-bar mgt-bar" role="img" aria-label=""></div>
+      <div data-t="ticks" class="mgh-ticks" aria-hidden="true"></div>
+      <p><span class="mgt-key mgt-nd" aria-hidden="true"></span>No valid data in this window</p>
+      <p><span class="mgt-key mgt-wh" aria-hidden="true"></span>Withheld by our display limit: poleward of 70° for noon, 80° for midnight</p>
+      <p data-t="line"></p>
+      <p class="dim">Bolometric brightness temperature is an equivalent blackbody temperature: it represents the thermal radiation Diviner measured, summed over wavelength. It is an effective radiative temperature. Where rock and soil, or sunlit and shaded slopes, share a cell, it is not the physical temperature of any one surface. Noon and midnight are each place’s own local time, not the Sun’s position now.</p>
+      <p class="dim">Differently processed Diviner maps can give different values, especially at sharp warm features. See <a href="#craft-sources">Sources</a> for our comparison.</p>
+      <p class="dim">The readout gives the number of quarter-hour bins used and, for two or more, the range between them: a spread, not an uncertainty. <span data-t="clip"></span> Values are rounded to 0.1 K; the rounding is not the accuracy.</p>
+    </div>
+    <p id="mg-temp-read" class="mglro" aria-live="polite" hidden></p>
     <p id="mg-both" class="mgboth" role="note" hidden>Lighting uses the current UTC minute. The LRO path is a dated example from 10–11 June 2026.</p>
     <p id="mg-lro-read" class="mglro" aria-live="polite" hidden></p>
-    <p class="cscale"><span>Use Zoom in and Zoom out, or pinch on supported devices, to look closer: the Moon grows inside its box. The map holds about 5 km to a pixel at the equator, so it blurs up close.</span>
+    <p class="cscale"><span>Use Zoom in and Zoom out, or pinch on supported devices, to look closer: the Moon grows inside its box. The appearance picture holds about 5 km to a pixel at the equator, so it blurs up close. The temperature map’s cells are 0.5° (about 15 km north–south and at the equator, narrower east–west towards the poles).</span>
     <span>Opens evenly lit so the whole surface can be seen: that is not how the Moon is lit today. “Lit as now” shades it from the calculated direction of the Sun at this device’s current UTC minute.</span>
     <span>“Show height (LOLA)” replaces the picture with a colour map of measured height (2009–2016 laser data) and switches sunlight off while it is shown.</span>
+    <span>“Show temperature (Diviner)” replaces it with a map of brightness temperature around each place’s own local noon or midnight (2009–2015 data), also with sunlight off. Only one map is shown at a time.</span>
     <span>Appearance map from NASA’s Scientific Visualization Studio, made from Lunar Reconnaissance Orbiter data: tuned for looks, not measurement. Poleward of 70° it is filled from a lower-resolution map.</span>
     <span>Drawn to fill the view. Sizes are not comparable between the Earth, Moon and Sun pages. The globe and the spacecraft drawing below are separate views. “Show LRO’s dated path” puts the 10–11 June 2026 example on the globe, at the time chosen in the drawing; no current position is shown.</span></p>
     <noscript><p class="cunavail">The globe needs JavaScript.</p></noscript>
@@ -117,6 +137,7 @@
       <li><b>On the globe:</b> the same one-minute states, each turned once into the Moon’s mean Earth frame (<code>MOON_ME_DE440_ME421</code>) at its own time, with NAIF’s SPICE toolkit and JPL’s DE440 Moon orientation. Checked against our own evaluation of DE440 and against NASA/JPL Horizons. Altitude is above a sphere of 1,737.4 km, not above the terrain. <a href="sources.html#skycraft">Details</a></li>
       <li><b>Lit as now:</b> calculated, not observed. The directions of the Sun and the Earth over the Moon come from a table we built with NAIF’s SPICE toolkit from JPL’s DE440 positions and Moon orientation, every six hours from 1 June 2026 to 1 January 2028 UTC, in the same frame as the map; the page interpolates between entries (within 0.005° of the direct calculation at every midpoint). Checked against our own evaluation of DE440 and against NASA/JPL Horizons. The time is this device’s clock. A smooth sphere and a point Sun: no relief shadows, no earthshine, no eclipses. The night side is shown faintly as a display aid. <a href="sources.html#moonlight">Details</a></li>
       <li><b>Height (optional):</b> LOLA gridded topography <code>LDEM_4_FLOAT</code>, product version V3.0, data set LRO-L-LOLA-4-GDR-V1.0 (PDS4 <code>urn:nasa:pds:lro_lola_rdr:data_gridded:ldem_4_float::1.0</code>), LOLA Science Team, NASA GSFC; bundle DOI <a href="https://doi.org/10.17189/tnyt-7007" target="_blank" rel="noopener">10.17189/tnyt-7007</a> (Smith &amp; Neumann 2023). Laser data from 13 July 2009 to 29 November 2016, height relative to a 1,737.4 km sphere on a 0.25° grid. PDS data are in the public domain. We round each cell to whole metres and draw one colour per cell; values north of 89.5°N are withheld because the float and integer versions of this grid disagree there by up to 1.4 km. <a href="sources.html#moonheight">Details</a>.</li>
+      <li><b>Temperature (optional):</b> Diviner Global Cumulative Product, data set LRO-L-DLRE-5-GCP-V1.0, field <code>tbol</code> (“Bolometric average calibrated brightness temperature”), Diviner team, UCLA; bundle DOI <a href="https://doi.org/10.17189/wj0s-w188" target="_blank" rel="noopener">10.17189/wj0s-w188</a> (Paige, Sullivan &amp; Williams 2022). Nadir observations from 5 July 2009 to 1 April 2015, binned by the team into 0.5° cells and quarter hours of local time from the mean radiances of channels 3–9. PDS data are in the public domain. Shown here: <b>our</b> unweighted mean of the available bins between 11:30 and 12:30, or 23:30 and 00:30, local time, with the number of bins and the range between them. Poleward of 70° (noon) and 80° (midnight) the map is withheld by our display policy. Fixed colour scales: noon 281–395 K, midnight 70–105 K (the 1st and 99th percentiles of the shown grid cells, rounded outward to whole kelvin; shares are of 0.5° grid cells, not of surface area). General meaning of bolometric temperature: Powell et al. 2023, <i>JGR Planets</i> 128, e2022JE007532, §2.5. <b>Comparison:</b> at ten selected high-contrast midnight sites, this map’s cell values differed from a separately processed high-resolution Diviner midnight mosaic by −1.9 to +16.7 K (median +8.7 K); ten background sites differed by less than 1 K. The products use different processing, sampling and periods; the causes of the differences have not been isolated. This comparison is not an accuracy estimate. <a href="sources.html#moontemp">Details</a>.</li>
       <li><b>Moon radius:</b> 1,737.4 km (NASA/JPL Horizons, “Radius (IAU)”).</li>
     </ul>
     <p class="dim">Full register of sources: <a href="sources.html">Sources &amp; Details</a>.</p>
@@ -125,6 +146,6 @@
 <script src="craft.js?v=202612071000"></script>
 <script src="moonlight.js?v=202612071100"></script>
 <script src="moonglobe.js?v=202612260500"></script>
-<script src="moonsci.js?v=202612260500"></script>
+<script src="moonsci.js?v=202612261400"></script>
 </body>
 </html>

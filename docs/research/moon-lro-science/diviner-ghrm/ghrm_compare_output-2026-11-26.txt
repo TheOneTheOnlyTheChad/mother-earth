@@ -1,0 +1,40 @@
+ghrm blocks sha256 94cba44ba69c8a3c9c119375b631b010a99c246db0eb1e19ee03c2206c8945e5
+== GHRM midnight (fitted at 00:00, 2009-2022, 128 ppd) against our GCP midnight window (mean of up to 4 bins 23:30-00:30, 2009-2015)
+  site  0  +33.75  335.75E (contrast +25.4 K): centre cell GHRM  110.18 K, ours  124.90 K, diff +14.72 K; GHRM (mean T^4)^1/4  114.93 K, diff  +9.97 K; hottest GHRM pixel  178.0 K; 3x3 mean |diff|  2.52 K
+  site  1   -2.75   29.25E (contrast +24.4 K): centre cell GHRM  109.79 K, ours  126.50 K, diff +16.71 K; GHRM (mean T^4)^1/4  114.70 K, diff +11.80 K; hottest GHRM pixel  188.6 K; 3x3 mean |diff|  2.30 K
+  site  2  +35.75  102.75E (contrast +24.1 K): centre cell GHRM  139.41 K, ours  149.00 K, diff  +9.59 K; GHRM (mean T^4)^1/4  142.74 K, diff  +6.26 K; hottest GHRM pixel  188.1 K; 3x3 mean |diff|  5.29 K
+  site  3   +9.75   38.75E (contrast +20.8 K): centre cell GHRM  112.67 K, ours  123.80 K, diff +11.13 K; GHRM (mean T^4)^1/4  118.02 K, diff  +5.78 K; hottest GHRM pixel  182.8 K; 3x3 mean |diff|  2.48 K
+  site  4  +60.25  341.25E (contrast +20.3 K): centre cell GHRM  106.80 K, ours  114.70 K, diff  +7.90 K; GHRM (mean T^4)^1/4  110.79 K, diff  +3.91 K; hottest GHRM pixel  180.0 K; 3x3 mean |diff|  2.25 K
+  site  5  +55.75  314.75E (contrast +19.7 K): centre cell GHRM  106.95 K, ours  112.20 K, diff  +5.25 K; GHRM (mean T^4)^1/4  112.56 K, diff  -0.36 K; hottest GHRM pixel  163.9 K; 3x3 mean |diff|  1.29 K
+  site  6  +17.25   26.25E (contrast +19.4 K): centre cell GHRM  122.91 K, ours  121.00 K, diff  -1.91 K; GHRM (mean T^4)^1/4  125.31 K, diff  -4.31 K; hottest GHRM pixel  170.6 K; 3x3 mean |diff|  1.37 K
+  site  7  +17.25  338.25E (contrast +19.1 K): centre cell GHRM  105.64 K, ours  121.80 K, diff +16.16 K; GHRM (mean T^4)^1/4  109.56 K, diff +12.24 K; hottest GHRM pixel  184.6 K; 3x3 mean |diff|  3.61 K
+  site  8  +10.75   26.75E (contrast +18.6 K): centre cell GHRM  118.97 K, ours  121.30 K, diff  +2.33 K; GHRM (mean T^4)^1/4  120.88 K, diff  +0.42 K; hottest GHRM pixel  163.7 K; 3x3 mean |diff|  1.19 K
+  site  9   +2.75   17.25E (contrast +17.9 K): centre cell GHRM  120.24 K, ours  120.80 K, diff  +0.56 K; GHRM (mean T^4)^1/4  121.75 K, diff  -0.95 K; hottest GHRM pixel  168.7 K; 3x3 mean |diff|  0.25 K
+  site 10  -59.75   45.25E (background): centre cell GHRM   87.84 K, ours   88.20 K, diff  +0.36 K; GHRM (mean T^4)^1/4   87.93 K, diff  +0.27 K; hottest GHRM pixel  116.7 K; 3x3 mean |diff|  0.60 K
+  site 11  -29.75  135.25E (background): centre cell GHRM   98.14 K, ours   98.40 K, diff  +0.26 K; GHRM (mean T^4)^1/4   98.16 K, diff  +0.24 K; hottest GHRM pixel  102.3 K; 3x3 mean |diff|  0.38 K
+  site 12   +0.25  225.25E (background): centre cell GHRM  100.75 K, ours  101.20 K, diff  +0.45 K; GHRM (mean T^4)^1/4  100.76 K, diff  +0.44 K; hottest GHRM pixel  115.2 K; 3x3 mean |diff|  0.62 K
+  site 13  +29.75  315.25E (background): centre cell GHRM   98.92 K, ours   99.20 K, diff  +0.28 K; GHRM (mean T^4)^1/4   98.96 K, diff  +0.24 K; hottest GHRM pixel  127.2 K; 3x3 mean |diff|  0.70 K
+  site 14  +59.75   25.25E (background): centre cell GHRM   88.82 K, ours   89.40 K, diff  +0.58 K; GHRM (mean T^4)^1/4   88.85 K, diff  +0.55 K; hottest GHRM pixel  103.6 K; 3x3 mean |diff|  0.79 K
+  site 15  -59.75  225.25E (background): centre cell GHRM   92.55 K, ours   92.60 K, diff  +0.05 K; GHRM (mean T^4)^1/4   92.78 K, diff  -0.18 K; hottest GHRM pixel  103.0 K; 3x3 mean |diff|  0.44 K
+  site 16  -29.75  315.25E (background): centre cell GHRM   99.18 K, ours  100.00 K, diff  +0.82 K; GHRM (mean T^4)^1/4   99.36 K, diff  +0.64 K; hottest GHRM pixel  145.5 K; 3x3 mean |diff|  0.86 K
+  site 17   +0.25   45.25E (background): centre cell GHRM  101.07 K, ours  101.20 K, diff  +0.13 K; GHRM (mean T^4)^1/4  101.09 K, diff  +0.11 K; hottest GHRM pixel  117.2 K; 3x3 mean |diff|  0.53 K
+  site 18  +29.75  135.25E (background): centre cell GHRM   98.97 K, ours   99.30 K, diff  +0.33 K; GHRM (mean T^4)^1/4   98.99 K, diff  +0.31 K; hottest GHRM pixel  103.2 K; 3x3 mean |diff|  0.68 K
+  site 19  +59.75  205.25E (background): centre cell GHRM   87.45 K, ours   88.00 K, diff  +0.55 K; GHRM (mean T^4)^1/4   87.54 K, diff  +0.46 K; hottest GHRM pixel   94.4 K; 3x3 mean |diff|  0.37 K
+
+  high-contrast: centre-cell difference (ours - GHRM): median +8.75 K, mean |diff| 8.63 K, range -1.91 .. +16.71 K
+  high-contrast: against the GHRM radiance-equivalent (mean T^4)^1/4: median +4.85 K, range -4.31 .. +12.24 K
+
+  background: centre-cell difference (ours - GHRM): median +0.35 K, mean |diff| 0.38 K, range +0.05 .. +0.82 K
+  background: against the GHRM radiance-equivalent (mean T^4)^1/4: median +0.29 K, range -0.18 .. +0.64 K
+
+== registration controls: mean |ours - GHRM| over each site's 3 x 3 block, averaged over sites
+   (the local3x3 mirrors reverse each site's own 3 x 3 patch, not the whole global grid; a passing result supports the orientation and does not exclude local pointing or effective-footprint differences)
+  high-contrast: true 2.26, N 6.31, S 6.01, E 6.54, W 5.45, 180 5.62, local3x3mirrorEW 4.01, local3x3mirrorNS 3.33 K
+  high-contrast: the true alignment scores best on average: True; best at 5 of 10 sites individually
+  background: true 0.60, N 1.31, S 1.55, E 1.01, W 1.04, 180 1.99, local3x3mirrorEW 1.01, local3x3mirrorNS 1.53 K
+
+The (mean T^4)^1/4 column is an idealised blackbody spatial-aggregation proxy. It does not establish how much of the inter-product difference is due to
+averaging order: the products also differ in channel processing, period, local-time fitting, sampling and georeferencing. The high-contrast sites are
+maxima of our own grid (selection bias); they are not a random or independent validation sample.
+
+RESULT: PASS (registration controls); differences reported without a tolerance and without attributing causes
