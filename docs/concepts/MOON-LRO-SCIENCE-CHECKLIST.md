@@ -1,6 +1,6 @@
 # Moon globe and LRO science — spec checklist
 
-Rev 3 · 26 Nov 2026, 09:20 UTC (clock reading; rev 2 08:59, rev 1 08:31 UTC) · written by Claude on Chad's instruction (26 Nov) · **persistent record; update it as each item moves** · docs only.
+Rev 4 · 26 Nov 2026, 09:42 UTC (clock reading; rev 3 09:20, rev 2 08:59, rev 1 08:31 UTC) · written by Claude on Chad's instruction (26 Nov) · **persistent record; update it as each item moves** · docs only.
 
 **What this is.** The record of every item in GPT's original brief, `docs/concepts/MOON-LRO-SCIENCE-BRIEF-GPT-2026-11-25.md`. It also covers the scope Chad added on 26 Nov: every page that shows the Moon. It is **not** the narrowed height proposal (`docs/concepts/MOON-LRO-SCIENCE-PROPOSAL.md` rev 2.1), which covered only the first release.
 
@@ -19,7 +19,7 @@ Rev 3 · 26 Nov 2026, 09:20 UTC (clock reading; rev 2 08:59, rev 1 08:31 UTC) ·
 |---|---|---|
 | 1 | Existing all-round appearance, orientation, polar disclosure, lighting, dated LRO path ("Existing Moon view", "Existing LRO view", requirement 1) | **done: preserved** |
 | 2 | LOLA elevation-first layer ("Recommended first feature", requirements 2–4) | **done: released and closed** |
-| 3 | Diviner temperature ("Recommended first feature", second paragraph) | **assessed; proposal rev 2 with GPT for recheck** (`docs/concepts/MOON-DIVINER-PROPOSAL.md`; rev 1: REVISE FIRST, concept supported) |
+| 3 | Diviner temperature ("Recommended first feature", second paragraph) | **proposal rev 2 passed by GPT; D1–D3, D5–D8 accepted by Chad; first-band trial (D4a) PASS, report with GPT and Chad; D4b waits** |
 | 4 | LROC regional detailed imagery | to assess |
 | 5 | CRaTER radiation | to assess |
 | 6 | LEND neutron and hydrogen products | to assess |
@@ -85,7 +85,14 @@ Rev 3 · 26 Nov 2026, 09:20 UTC (clock reading; rev 2 08:59, rev 1 08:31 UTC) ·
   - Keep channel brightness temperature apart from derived or bolometric temperature, and record local time, viewing geometry and aggregation.
   - No generic "Moon temperature now", and no apparent thermal response synchronised to the day/night control.
   - Check the `-9999` warning against the exact product. Missing is never 0 K.
-- **Status (26 Nov, 09:20 UTC clock reading):** assessed, docs only.
+- **Status (26 Nov, 09:42 UTC clock reading):** proposal rev 2 **passed** by GPT's recheck (`reviews/2026-11-26-moon-diviner-proposal-rev2-gpt-recheck.md`, PASS for the first-band trial, five implementation notes).
+  - **Chad (26 Nov):** accepted D1, D2, D3, D5, D6 and D7 with GPT's notes. Chose **D8 (a)** (retain the lossless all-bin extraction on his Mac; browser downloads approved). Gave the go for **D4a only**.
+  - **First-band trial 00N–10N: PASS.** The archive MD5 matched; the sample byte ranges are identical; the strict parse passed; the extraction and codes equal the independent reference on both sample patches; the extraction is stored on the Mac and re-hashed. Measured: 32.1 s, peak JS heap 41.9 MB, extraction 2.89 MB gzip.
+  - Report: `reviews/2026-11-26-moon-diviner-first-band-trial.md` on branch `moon-diviner-trial` `3380aaf` (tooling and evidence; not for merge). Checkpoint: `docs/research/moon-lro-science/diviner-acq/checkpoints.jsonl` on that branch.
+  - **New against the samples:** the whole band has 0.85% of noon cells and 0.34% of midnight cells with no valid data.
+  - **The download route works for one file per page;** a second automatic download did not arrive (base64 fallback used).
+  - **D4b (the other 17 bands) waits** for Chad's go after GPT and Chad have the report. No page build, merge or deployment.
+- **Earlier status (09:20 UTC):** assessed, docs only.
   - **Rev 1** (`9be23dd`, fixes `caa00ab`) reviewed by GPT: **REVISE FIRST**, with the GCP product and the noon/midnight concept supported. Review filed unchanged as `reviews/2026-11-26-moon-diviner-proposal-rev1-gpt-review.md`.
   - **Rev 2** answers R1–R5 (proposal §14 maps each point) and is with GPT for recheck.
   - Nothing is built, nothing has been fetched in bulk, and nothing is deployed.
@@ -248,3 +255,4 @@ Suggested order (Claude's suggestion, for Chad to decide): LROC regional example
 - Rev 1 (26 Nov 2026, 08:31 UTC): created after the height release close-out, reconciled against the original brief.
 - Rev 2 (26 Nov 2026, 08:59 UTC): §3 Diviner assessed and proposal rev 1 written (`docs/concepts/MOON-DIVINER-PROPOSAL.md`; evidence SAMPLES §6). Summary row 3 updated. No other item moved.
 - Rev 3 (26 Nov 2026, 09:20 UTC): §3 updated for GPT's rev 1 review (REVISE FIRST) and proposal rev 2. No other item moved.
+- Rev 4 (26 Nov 2026, 09:42 UTC): §3: GPT's rev 2 recheck (PASS), Chad's decisions, the first-band trial PASS (branch `moon-diviner-trial` `3380aaf`). No other item moved.

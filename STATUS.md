@@ -4,6 +4,26 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 26 Nov 2026
 
+## 26 Nov 09:42 UTC (clock reading) — **Diviner first-band trial (00N–10N) PASS; report to GPT and Chad; the other 17 bands wait for D4b. Branch only, no page change** (Moon/LRO science, Diviner thread)
+- **GPT's rev 2 recheck:** PASS for the first-band trial, with five implementation notes. Filed unchanged as `reviews/2026-11-26-moon-diviner-proposal-rev2-gpt-recheck.md`.
+- **Chad (26 Nov):** accepted D1, D2, D3, D5, D6 and D7 with GPT's notes. D8 (a): retain the lossless all-bin `tbol` extraction on his Mac, browser downloads approved. Go for D4a only.
+- **Tooling** on branch `moon-diviner-trial` (`0d5ae9b`, not for merge), in `phase1/moonsci/diviner/`:
+  - incremental MD5/SHA-256: 466 tests pass; a broken copy fails 433
+  - streaming parser, reducer and extractor: 165 tests pass, equal to an independent Python reference, 14 breaks refused
+  - the pane job, loaded from raw GitHub at the pinned commit with hash checks
+  - the extraction schema
+- **Trial (09:36:05–09:36:38 UTC, clock readings):**
+  - 156,211,313 B streamed in 32.1 s (4.86 MB/s); MD5 = archive list
+  - both sample byte ranges byte-identical to the committed samples
+  - 1,382,400 records strict-parsed (588,791 empty, 0 invalid, `tbol` 87.33–405.10 K)
+  - peak JS heap 41.9 MB (Chromium heap only)
+  - extraction 2,886,891 B gzip, browser-downloaded and copied into `_source-data/moon-lro-science-diviner-gcp/`, re-hash matched
+  - `trial_compare.py` PASS: 38,400 values and 400 × 2 cell codes equal the reference; §6.3 rules hold on 14,400 cells
+  - new against the samples: no valid data in 0.85% of noon and 0.34% of midnight cells
+  - the browser's second automatic download did not arrive (planes moved by base64)
+- **Records:** report `reviews/2026-11-26-moon-diviner-first-band-trial.md` and checkpoint `docs/research/moon-lro-science/diviner-acq/checkpoints.jsonl`, both on the branch (`3380aaf`). Checklist rev 4, §3.
+- **Not done:** the other 17 bands; the page build; Claude's read of Powell et al. 2023. No main page files changed; no hub, R2, D1 or collector change. A copy of the extraction stays in `~/Downloads` (the shell cannot delete it).
+
 ## 26 Nov 09:20 UTC (clock reading) — **Diviner proposal rev 2 for GPT's recheck, after GPT's rev 1 review (REVISE FIRST; concept supported). Docs only** (Moon/LRO science, Diviner thread)
 - **GPT's review** is filed unchanged as `reviews/2026-11-26-moon-diviner-proposal-rev1-gpt-review.md` (sha256 `6457efb2…a4b9e`).
 - **Proposal** `docs/concepts/MOON-DIVINER-PROPOSAL.md` rev 2; §14 maps R1–R5:
