@@ -123,3 +123,129 @@ So the current globe **redraws continuously while idle** (roughly 43–54 draws 
 ## 4. What was not fetched
 
 No full GCP band and no LOLA grid finer than 4 ppd (LDEM_16_FLOAT is 66,355,200 B; LDEM_64_FLOAT 1,061,683,200 B; their sizes are from the directory listing). No ODE job, no account, no email address. No CRaTER, LEND, LAMP, Mini-RF or LROC products. No hub request.
+
+## 6. Diviner assessment (26 Nov 2026, after the height release)
+
+All reads and fetches below are **Claude's own**, made in the browser pane on 26 Nov 2026 between 08:41 and 08:53 UTC. The clock readings are the HTTP `Date` header (08:43:45 GMT on the SIS fetch) and the page's `new Date()` after the fetches (08:46:15, 08:46:49, 08:47:10 UTC). Every file was hashed in the pane, copied to the workspace as gzip in base64 pieces, and its SHA-256 matched there. The numbers come from `assess_diviner.py` (beside this note): `python3 -I assess_diviner.py <samples-dir>`. Its output is in `assess_diviner_output-2026-11-26.txt`. The samples are **not committed**. A copy is on the Mac in `Documents/Mother Earth/_source-data/moon-lro-science-2026-11-26/diviner/`.
+
+### 6.1 Archive recheck: what Diviner products exist
+
+PDS Geosciences holds four Diviner archives: `lro-l-dlre-2-edr-v1` and `lro-l-dlre-4-rdr-v1` (raw and calibrated point data), the PDS4 bundle `urn:nasa:pds:lro_diviner_derived1` (v5.0, 2 Feb 2024; DOI 10.17189/wj0s-w188), and `urn:nasa:pds:lro_diviner_derived2` (created 2024; Emission Phase Function products only, not maps). Bundle 1 has seven data collections. The table lists each one's relevance to a Moon-globe temperature layer.
+
+| Collection | What it is (from the readme, labels and SIS v1.21) | Period | Grid | Relevant? |
+|---|---|---|---|---|
+| **GCP**, Global Cumulative Products | `tbol` and channels t3–t9 per 0.5° × 0.5° × 0.25 h local-time bin, all nadir data | 5 Jul 2009 – 1 Apr 2015 | global, 2 ppd, 96 local-time bins, ASCII, 2.81 GB | **Yes**: the only global product covering **all local times**, so noon and midnight come from one product |
+| **GHRM**, Global High-Resolution Mosaics (added Release 4, 2 Feb 2024) | `tbol`, tb6–tb9, `treg` at **midnight** (`m`) and **slope-adjusted midnight** (`sam`); `tbol`/`treg` anomaly; rock abundance. One float32 map each, missing = NaN | 5 Jul 2009 – 1 Aug 2022 | 128 ppd, **70°S–70°N**, 3,303,014,400 B each | **Yes, midnight only**: a published team product; used here as an independent cross-check |
+| **GDR Level 3 TBOL**, per mapping cycle (210 day maps and 210 night maps at each of 1, 4, 16, 64 and 128 ppd) | `tbol` binned over one 27-day mapping cycle, day (06–18 h) or night (18–06 h) | 5 Jul 2009 – Sep 2016 (last 4 ppd cycle starts 26 Sep 2016) | global; 4 ppd = 2,073,600 B | Assessed as the "short dated interval" option: see 6.4 |
+| GDR Level 2 | per-cycle channel brightness temperatures, errors, counts, **local time (LTIM)**, Julian date | same as above | 1–128 ppd | Companion local-time map for a cycle |
+| GDR Level 3 other | rock abundance, regolith (soil) temperature, Christiansen feature, RMS | 2009–2016 | 32 / 128 ppd | Not temperature maps of the requested kind (models or composition) |
+| PCP, Polar Cumulative Products | `tbol` over 80–90° caps, 240 m, by local time or subsolar longitude, summer/winter | 2009 – 17 Feb 2019 (seasonal south cap to 15 Mar 2020) | polar stereographic, ASCII | Polar only: a later, separate polar question |
+| PRP, Polar Resource Products | annual mean/max temperature and ice depth per polar mesh triangle (modelled) | first mapping year | mesh | Model-derived: not this layer |
+| RCP, Regional Cumulative Products | Lacus Mortis only, 128 ppd, 0.1 h | 2009 – 1 Mar 2021 | regional | Regional only |
+
+**Newer data:** the RDR archive (Release 67, data to 15 Jun 2026; SAMPLES §1) is still being added to. The **derived** bundles were last changed on 2 Feb 2024 (bundle 1) and 2024 (bundle 2). No newer GCP version exists: `gcpds.cat` still describes the 2009–2015 compilation, released 15 Mar 2017.
+
+### 6.2 What `tbol` is (from the product documentation)
+
+- **GCP label** (PDS4 `global_cumul_avg_cyl_00n10n_002.xml`, field 11 `tbol`): "Bolometric average calibrated brightness temperature (K)". Missing: `-9999` = "bins that contained no observations", `-9998` = invalid.
+- **GCP catalog** (`catalog/gcpds.cat`, Mark Sullivan 2017/2020) and **SIS v1.21 §8.1** (Diviner RDR and Derived Products SIS, 25 Oct 2023, `document/Diviner_RDR_SIS.pdf`, 1,829,904 B, sha256 `a2d2f02e…4a46`, read in full text in the workspace and not committed): radiances from the RDR are binned per channel (3–9) per bin, "to determine the mean brightness temperatures", and "the **mean radiance values for all the channels** were used to determine the bolometric brightness temperatures for each bin". So the bin's radiances are averaged first and then converted to `tbol`. It is not a mean of per-observation temperatures.
+- **SIS §2.2.6** sends the reader to Paige et al., Science 330, 479 (2010) for the bolometric method. That journal's full text was **not read** (it is not open access). Its definition sentence is reproduced on a third-party page that copies the paper's text (https://lunarnetworks.blogspot.com/2010/10/lro-diviner-lunar-radiometer.html, read 26 Nov). That copy says `tbol` is the wavelength-integrated radiance in all seven Diviner channels, expressed as the temperature of an equivalent blackbody. It equals the surface temperature only when the footprint is a uniform-temperature blackbody. **This sentence is a secondary copy and is labelled as such.** The spectral interpolation and extrapolation the team uses between and beyond the channels were not read and are not claimed.
+- **Consequences for wording:** `tbol` is a **brightness** temperature of the whole footprint (several km at 0.5°). In a footprint that mixes rocks and fine regolith, or sunlit and shadowed slopes, it is not the physical temperature of any one surface. It says nothing about the subsurface. The page must call it "bolometric brightness temperature" (short form "brightness temperature") and never "surface temperature now" or "how hot the ground is".
+- **Label error recorded:** the GCP label's reference DOI reads `10.1026/j.icarus.2016.08.012`. The Icarus DOI form is `10.1016/…`, so the label looks like a typo. Records will cite the paper by journal, volume and pages and say this.
+- **Level 3 TBOL label errors recorded** (4 ppd cycle label, e.g. `dgdr_tbol_avg_cyl_20160111d_004_img.lbl`): `NAME = "BOLOMETRIC TEMPERATURE"`, but `UNIT = NORMALIZED_RADIANCE`, and the `DESCRIPTION` paragraph is about "Visual Brightness (VB) for Channel 1". The values (25.16–397.86 K at DN × 0.02) match `DERIVED_MINIMUM`/`MAXIMUM` (25.1764 / 397.8657) to within one 0.02 K step, so the data are bolometric temperatures in K and the label text is a copy error. Recorded, not relied on.
+- **Local time** (SIS RDR field 30 `cloctime`): "Local time at FOV Center (hours past midnight)", 0–24, spherical Moon. 24 local-time hours make one lunar day, so a one-hour window spans 15° of the Sun's hour angle.
+
+### 6.3 Samples fetched (26 Nov, 08:45–08:53 UTC)
+
+| Sample | URL (under `…/urn-nasa-pds-lro_diviner_derived1/`) | Request | Bytes | Pane time | SHA-256 |
+|---|---|---|---|---|---|
+| GCP 0–10N, 0.25–4.75°E (near side) | `data_derived_gcp/global_cumul_avg_cyl_00n10n_002.tab` | `bytes=78105713-80275312` → 206 | 2,169,600 | 765 ms | `c6389c55…bb54f` |
+| GCP 30–40S, same longitudes | `…/global_cumul_avg_cyl_40s30s_002.tab` | same range → 206 | 2,169,600 | 1,702 ms | `c3311ad6…91ee` |
+| GCP 80–90S, same longitudes (south polar) | `…/global_cumul_avg_cyl_90s80s_002.tab` | same range → 206 | 2,169,600 | 1,173 ms | `2f99420f…f809` |
+| GCP 60–70S, same longitudes | `…/global_cumul_avg_cyl_70s60s_002.tab` | same range → 206 | 2,169,600 | not measured¹ | `4a10075e…dd15` |
+| GCP 70–80N, same longitudes | `…/global_cumul_avg_cyl_70n80n_002.tab` | same range → 206 | 2,169,600 | not measured¹ | `c3e13259…b26c` |
+| L3 TBOL, cycle from 2016-01-11 (day), 4 ppd | `data_derived_gdr_l3/2016/cylindrical/img/dgdr_tbol_avg_cyl_20160111d_004_img.img` | whole → 200 | 2,073,600 | 708 ms | `86679c0c…83b2` |
+| L2 LTIM, same cycle | `data_derived_gdr_l2/2016/cylindrical/img/dgdr_ltim_avg_cyl_20160111d_004_img.img` | whole → 200 | 2,073,600 | 1,365 ms | `b267a8b7…e49d` |
+| L3 TBOL, cycle from 2016-01-25 (night), 4 ppd | `…/dgdr_tbol_avg_cyl_20160125n_004_img.img` | whole → 200 | 2,073,600 | 1,653 ms | `5a769d45…fd00` |
+| L2 LTIM, same cycle | `…/dgdr_ltim_avg_cyl_20160125n_004_img.img` | whole → 200 | 2,073,600 | 1,084 ms | `81d47f9d…5a69` |
+| GHRM `tbol` midnight, 1° × 1° at 0°N 0°E | `data_derived_ghrm/img/dghrm_tbol_m_70s70n_img.img` | 128 ranges in one request → 206 multipart | 65,536 payload | 2,204 ms | `e3478099…9549` |
+| same, 1° × 1° at 0°N 180°E | same file | 128 ranges → 206 | 65,536 | 1,723 ms | `e1f909ab…2fbc` |
+| same, 1° × 1° at 45°S 300°E | same file | 128 ranges → 206 | 65,536 | 3,790 ms | `2d9216d6…387d` |
+
+The earlier two GCP samples (SAMPLES §3, far side 179.75°W–175.25°W) were staged from the Mac and re-hashed: both matched.
+
+¹ The first request for the last two GCP patches was still running when the 45 s tool limit ended. A second request a few seconds later returned in about 50 ms, from the browser's cache. The true transfer time is **unknown**; the bytes and hashes are verified.
+
+### 6.4 Multi-range retrieval test (capped)
+
+Five requests to the GHRM file had 8, 32, 128, 128 and 128 ranges; one request to the GCP file had 80 ranges. Each multi-range request was answered with HTTP 206 `multipart/byteranges`. **Every returned part had exactly the requested start, end and length**, in order. The first part of each GHRM request was byte-identical to the same range fetched on its own. Each of the 80 GCP parts was byte-identical to the same bytes in the contiguous patch fetched earlier.
+
+| Request | Ranges | Payload | Body | Overhead | Time |
+|---|---|---|---|---|---|
+| GHRM, 8 rows × 512 B | 8 | 4,096 | 5,288 | 1,192 B | 2,579 ms |
+| GHRM, 32 rows × 512 B | 32 | 16,384 | 21,008 | 4,624 B | 2,848 ms |
+| GHRM, 128 rows × 512 B (three sites) | 128 | 65,536 | 83,888 | 18,352 B | 2,204 / 1,723 / 3,790 ms |
+| GCP, noon window (4 lines × 20 latitudes × 4 longitudes) | 80 | 36,160 | 46,128 | 9,968 B | 329 ms |
+
+Overhead is about 143 B per part (multipart headers). More than 128 ranges per request was **not tried**.
+
+**Archive checksums for the whole GCP files.** The bundle's MD5 list `urn-nasa-pds-lro_diviner_derived1.md5` (45,050,842 B, Last-Modified 21 Sep 2026) was searched with small byte ranges (8 binary-search steps of 4 KB, then 64 KB reads). It lists one MD5 per file. A whole-file fetch can therefore be checked against the archive's own checksum; a ranged fetch cannot. The 18 GCP entries (each file 156,211,313 B):
+
+| File | MD5 (archive list) |
+|---|---|
+| `global_cumul_avg_cyl_00n10n_002.tab` | `0044e6df5344775442241afb8e1a6e66` |
+| `global_cumul_avg_cyl_10n20n_002.tab` | `66dcd592b7bb614ffa72eb110d0c506a` |
+| `global_cumul_avg_cyl_10s00s_002.tab` | `c1fc628ba4fbedf0de620573d215686c` |
+| `global_cumul_avg_cyl_20n30n_002.tab` | `dedfe3f2ccc0ee71e993d9b5bcfc69f3` |
+| `global_cumul_avg_cyl_20s10s_002.tab` | `0b13cb5d7f244e3bb5dc8545a7d08eac` |
+| `global_cumul_avg_cyl_30n40n_002.tab` | `5dfe356183b56e4e1df3de54ecc10278` |
+| `global_cumul_avg_cyl_30s20s_002.tab` | `24916e51c8fb8befc14ad83f761d7de8` |
+| `global_cumul_avg_cyl_40n50n_002.tab` | `837dc75075c1b342dd30427fb4d468eb` |
+| `global_cumul_avg_cyl_40s30s_002.tab` | `3d7f97803c6a9082e9a6274892a4bcbd` |
+| `global_cumul_avg_cyl_50n60n_002.tab` | `93c039247e7f7ad5e54d0358243c5488` |
+| `global_cumul_avg_cyl_50s40s_002.tab` | `26727cfa54c758dfd8e0274c52d24e0e` |
+| `global_cumul_avg_cyl_60n70n_002.tab` | `71e6784dd51cc2833d907da337546663` |
+| `global_cumul_avg_cyl_60s50s_002.tab` | `62c5b3f9764e0626697398776a019005` |
+| `global_cumul_avg_cyl_70n80n_002.tab` | `c132354928ad9b09a3da974b6af9f215` |
+| `global_cumul_avg_cyl_70s60s_002.tab` | `b3c131b9c243168fe7b0060d4dc418f8` |
+| `global_cumul_avg_cyl_80n90n_002.tab` | `396e9215ab3925b3b1facf6d487050c4` |
+| `global_cumul_avg_cyl_80s70s_002.tab` | `d26aa3c85b82105dcb15825de076a4ce` |
+| `global_cumul_avg_cyl_90s80s_002.tab` | `3200dd1267b676cad89300d344a88010` |
+
+### 6.5 Findings from the samples
+
+**GCP coverage and local-time bins** (G1–G4 in the output):
+
+- Empty `tbol` bins: 39–41% at 0–10° and 30–40°S, 30% at 60–70°S, 17% at 70–80°N, 7.5–12% in the polar caps. There is no `-9998` and no negative `tbol` in any patch. Negative values appear only in single channels t3–t9 (below each channel's sensitivity, as the label says). They are never displayed.
+- **A single 15-minute bin is not usable as a map.** At low and mid latitudes, 15–18 of the 96 bins have **no value in any cell** of a patch.
+- **One-hour window around noon (11:30–12:30) and around midnight (23:30–00:30)**, unweighted mean of the available bins, with a count of contributing bins (0–4) per cell:
+
+  | Patch | Noon: cells with no bin / spread inside the window (mean, max) | Midnight: cells with no bin / spread (mean, max) |
+  |---|---|---|
+  | 0–10N far side | 0 / 3.29, 7.72 K | 0 / 0.85, 6.75 K |
+  | 0–10N near side | **7 of 200 (3.5%)** / 1.49, 4.75 K | 0 / 1.59, 7.47 K |
+  | 30–40S | 0 / 2.43, 12.55 K | 0 / 1.14, 8.18 K |
+  | 60–70S | 1 of 200 / 7.17, 54.72 K | 0 / 2.84, 14.34 K |
+  | 70–80N | 1 of 200 / 14.52, 73.30 K | 0 / 4.31, 11.58 K |
+  | 80–90N | 0 / 26.61, 138.15 K | 0 / 11.79, 48.61 K |
+  | 80–90S | 0 / 30.15, 116.55 K | 0 / 14.37, 141.08 K |
+
+  A **two-hour** window fills every cell sampled but doubles the spread at noon (for example 4.41 K mean, 20.20 K max at 0–10N near side).
+- **Dawn and dusk windows are not usable:** the spread inside one hour is 18–85 K on average, up to 203 K at the terminator. Only noon and midnight are proposed.
+- **By latitude (G4):** midnight spread stays at 2–6 K per row up to 80° in both hemispheres. Noon spread is 4–20 K per row at 60–70°S, rises to 10–20 K at 70–80°N, and reaches tens of K, with rows of only one bin, beyond 80°.
+
+**Cross-checks between products at the same places (X1, X2):**
+
+- **GHRM midnight against the GCP midnight window**, as 0.5° block means at four cells (0°N 0.25°E and 0.75°E; 0°N 180.25°E and 180.75°E): GHRM 102.28, 101.86, 101.98, 101.88 K against GCP 102.78, 102.15, 102.18, 102.15 K. The differences are 0.20–0.50 K, with GCP slightly warmer at all four. These are two products made differently (an empirical fit to midnight on 2009–2022 data at 128 ppd, against a bin mean of 2009–2015 data). **This supports the registration (longitude conventions −180…180 against 0…360) and the interpretation of both.** Four cells are not a global validation.
+- **2016 cycle maps against the GCP at the cell's own local time:** night cycle, 1,752 matched cells, median difference −0.02 K, mean |difference| 4.25 K. Day cycle, 1,322 cells, median +0.14 K, but mean |difference| 23.3 K and 90th percentile 71 K. The day-cycle matches sit mostly at high latitudes, where daytime gradients over 15 minutes and seasons are large. Not interpreted further.
+
+**Mapping-cycle maps (the dated-interval option):**
+
+- One cycle at 4 ppd is **sparse**. In the day cycle from 11 Jan 2016, 19.5% of cells have a value: 44–53% poleward of 60°, but only **4–6% between 60°S and 60°N**. In the night cycle from 25 Jan 2016, 36.8% of cells have a value (20–36% at low and mid latitudes).
+- **Local time differs across one map.** In the day cycle the equatorial values sit near 12:00 (12.09–12.17 h medians where present). In the night cycle the median local time drifts from 23:09 to 00:10 across longitude. As the label itself says, the orbit's drift produces "a drift in local time across each map".
+- LTIM decodes as DN × 0.0833333333 + 2730.00273000273 (the label's offset). This gives 6.086–18.003 h (label: 6.0102–17.9918) in 5-minute steps, a difference of up to 0.08 h from the label's derived limits. Every TBOL cell has an LTIM value (9,109 and 23,356 LTIM cells have no TBOL).
+- Measured page-file size for one cycle at 4 ppd (gzip −9): 394,752 B (day) and 656,026 B (night) as published int16. Re-quantised to 0.1 K uint16: 343,035 B and 524,377 B. These are sparse maps, so a full map will compress less.
+
+### 6.6 What was not fetched
+
+No whole GCP band file, no whole GHRM mosaic, no RDR records, no PCP, no ODE job, no account, no email. Paige et al. (2010), Williams et al. (2017) and Powell et al. (2023) were not read in full text (Science and Icarus are not open access; Powell 2023 was not sought). The GHRM midnight fitting method is described here only as the SIS states it. No hub, R2 or collector request.

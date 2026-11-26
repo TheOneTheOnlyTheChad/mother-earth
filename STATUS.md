@@ -4,6 +4,23 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 26 Nov 2026
 
+## 26 Nov 09:00 UTC (clock reading) — **Diviner assessed; proposal rev 1 for GPT's review. Docs only: nothing built, no bulk fetch, no page or hub change** (Moon/LRO science, Diviner thread)
+- **Chad's go (26 Nov):** a docs-only Diviner assessment: recheck products first, bounded small samples, define `tbol` from the documentation, a capped multi-range test, no global acquisition, measured sample costs kept apart from estimates. Moon stays active; Sun waits.
+- **Proposal:** `docs/concepts/MOON-DIVINER-PROPOSAL.md` rev 1. Recommended: the GCP `tbol` (2009–2015) as two Moon-tab maps, "around local noon" and "around local midnight", each a one-hour window, unweighted mean of the available 15-minute bins, with count and spread in the readout. Noon withheld beyond 70°, midnight beyond 80°. Evenly lit, mutually exclusive with height. Route A: stream the 18 band files in the pane with archive-MD5 checks, after a one-file stop point. Page file estimated at 0.7–1.1 MB. Decisions D1–D7 for Chad after GPT's review.
+- **Evidence:** `docs/research/moon-lro-science/SAMPLES.md` §6, `assess_diviner.py`, `assess_diviner_output-2026-11-26.txt`. Twelve new samples were fetched in the browser pane 08:45–08:53 UTC and hashed there; the copies matched. They are not committed; the Mac copy is in `_source-data/moon-lro-science-2026-11-26/diviner/`. The two earlier GCP samples were re-staged from the Mac and their hashes matched.
+- **Findings:**
+  - **Products:** GCP, GHRM (added Feb 2024; midnight only, 70°S–70°N), per-cycle GDR maps, PCP, PRP, RCP and bundle 2 (EPF) checked. No newer GCP.
+  - **`tbol`:** defined from the label, `gcpds.cat` and SIS v1.21 §8.1 (from the mean radiances of channels 3–9 per bin). The Paige 2010 sentence was read only in a third-party copy and is labelled as secondary.
+  - **Windows:** a one-hour window fills all sampled cells at midnight and all but 9 of 1,400 at noon. Spread is 1–3 K (noon) and 1–2 K (midnight) at low and mid latitudes. Dawn and dusk are unusable.
+  - **Cross-check:** GHRM midnight agrees with the GCP midnight window within 0.20–0.50 K at four cells.
+  - **Cycle maps:** sparse (4–6% of low-latitude cells by day).
+  - **Multi-range:** 8–128 ranges per request, every part exact, about 143 B overhead per part.
+  - **Archive MD5s** for all 18 GCP files recorded.
+  - **Label errors** recorded: the GCP DOI typo; the L3 TBOL unit and description text.
+- **Measured:** contiguous fetches of about 2.1 MB at 1.25–2.93 MB/s; 128-range requests 1.7–3.8 s; one request with two ranges did not finish within 45 s (time unknown; bytes verified on a repeat from the cache).
+- **Checklist:** `docs/concepts/MOON-LRO-SCIENCE-CHECKLIST.md` rev 2, §3 updated.
+- **Not done:** no hub, R2, D1, collector, page or served-file change. Main's page files are unchanged; `served_manifest.mjs --check` still passes. Next: GPT's review of the proposal, then Chad's D1–D7, then a build only on his go.
+
 ## 26 Nov 08:32 UTC (clock reading) — **Moon spec stays open: checklist created against GPT's original brief; next thread starts with Diviner (assessment and proposal, not a build). Docs only; no page or hub change** (Moon/LRO science thread)
 - **Chad's correction (26 Nov):** the close-out covers the **height release**, not the whole Moon/LRO spec. The Sun and Parker work waits until every Moon item has a recorded outcome and Chad accepts the Moon close-out.
 - **Checklist:** `docs/concepts/MOON-LRO-SCIENCE-CHECKLIST.md` rev 1, reconciled against `docs/concepts/MOON-LRO-SCIENCE-BRIEF-GPT-2026-11-25.md`. Each item records its status, evidence, next bounded assessment, blockers and the decision needed.

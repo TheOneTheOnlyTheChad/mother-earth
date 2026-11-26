@@ -1,0 +1,156 @@
+== D0 hashes
+  gcp_00n10n_rows0-19199.tab: OK
+  gcp_80n90n_rows0-19199.tab: OK
+  gcp_00n10n_lon000-009.tab: OK
+  gcp_40s30s_lon000-009.tab: OK
+  gcp_90s80s_lon000-009.tab: OK
+  gcp_70s60s_lon000-009.tab: OK
+  gcp_70n80n_lon000-009.tab: OK
+  dgdr_tbol_avg_cyl_20160111d_004_img.img: OK
+  dgdr_ltim_avg_cyl_20160111d_004_img.img: OK
+  dgdr_tbol_avg_cyl_20160125n_004_img.img: OK
+  dgdr_ltim_avg_cyl_20160125n_004_img.img: OK
+  ghrm_n128_eq_0E.f32: OK
+  ghrm_n128_eq_180E.f32: OK
+  ghrm_n128_45S_300E.f32: OK
+
+== G1 GCP patches: layout, missing share, values
+  0-10N, 179.75W-175.25W (far side): lon -179.75..-175.25, lat 0.25..9.75, local-time centres match 0.125+0.25k: True
+    tbol bins 19200: empty (-9999) 39.8%, invalid (-9998) 0, range 92.5..396.6 K, negative tbol 0
+    channel t3-t9 values below 0 K: 10028 of 80721
+    bins with tbol but no channel value: 0; channel values but no tbol: 80
+  80-90N, 179.75W-175.25W (far side, north polar): lon -179.75..-175.25, lat 80.25..89.75, local-time centres match 0.125+0.25k: True
+    tbol bins 19200: empty (-9999) 7.5%, invalid (-9998) 0, range 32.3..291.0 K, negative tbol 0
+    channel t3-t9 values below 0 K: 17402 of 124217
+    bins with tbol but no channel value: 0; channel values but no tbol: 18
+  0-10N, 0.25E-4.75E (near side): lon 0.25..4.75, lat 0.25..9.75, local-time centres match 0.125+0.25k: True
+    tbol bins 19200: empty (-9999) 41.2%, invalid (-9998) 0, range 89.2..394.3 K, negative tbol 0
+    channel t3-t9 values below 0 K: 9055 of 78892
+    bins with tbol but no channel value: 0; channel values but no tbol: 58
+  30-40S, 0.25E-4.75E (near side, mid-latitude): lon 0.25..4.75, lat -39.75..-30.25, local-time centres match 0.125+0.25k: True
+    tbol bins 19200: empty (-9999) 39.0%, invalid (-9998) 0, range 87.1..377.4 K, negative tbol 0
+    channel t3-t9 values below 0 K: 11534 of 81761
+    bins with tbol but no channel value: 0; channel values but no tbol: 50
+  80-90S, 0.25E-4.75E (near side, south polar): lon 0.25..4.75, lat -89.75..-80.25, local-time centres match 0.125+0.25k: True
+    tbol bins 19200: empty (-9999) 12.0%, invalid (-9998) 0, range 28.3..299.5 K, negative tbol 0
+    channel t3-t9 values below 0 K: 21876 of 118077
+    bins with tbol but no channel value: 0; channel values but no tbol: 10
+  60-70S, 0.25E-4.75E (near side): lon 0.25..4.75, lat -69.75..-60.25, local-time centres match 0.125+0.25k: True
+    tbol bins 19200: empty (-9999) 29.9%, invalid (-9998) 0, range 61.9..353.3 K, negative tbol 0
+    channel t3-t9 values below 0 K: 14959 of 93952
+    bins with tbol but no channel value: 0; channel values but no tbol: 71
+  70-80N, 0.25E-4.75E (near side): lon 0.25..4.75, lat 70.25..79.75, local-time centres match 0.125+0.25k: True
+    tbol bins 19200: empty (-9999) 17.3%, invalid (-9998) 0, range 54.8..315.0 K, negative tbol 0
+    channel t3-t9 values below 0 K: 14846 of 110975
+    bins with tbol but no channel value: 0; channel values but no tbol: 85
+
+== G2 single 15-minute bins: cells with a value, per bin (min / median / max over the 96 bins)
+  0-10N, 179.75W-175.25W (far side): 0% / 72% / 100%; bins with no value in any cell: 16 of 96
+  80-90N, 179.75W-175.25W (far side, north polar): 50% / 100% / 100%; bins with no value in any cell: 0 of 96
+  0-10N, 0.25E-4.75E (near side): 0% / 69% / 100%; bins with no value in any cell: 18 of 96
+  30-40S, 0.25E-4.75E (near side, mid-latitude): 0% / 67% / 100%; bins with no value in any cell: 15 of 96
+  80-90S, 0.25E-4.75E (near side, south polar): 50% / 97% / 100%; bins with no value in any cell: 0 of 96
+  60-70S, 0.25E-4.75E (near side): 0% / 82% / 100%; bins with no value in any cell: 4 of 96
+  70-80N, 0.25E-4.75E (near side): 2% / 94% / 100%; bins with no value in any cell: 0 of 96
+
+== G3 windows: per-cell count of contributing bins, cells with none, unweighted mean, within-window spread
+  0-10N, 179.75W-175.25W (far side):
+    noon 11:30-12:30: cells 200, none 0 (0.0%), bins per cell histogram [0, 9, 61, 60, 70], mean of cell means 387.2 K, spread mean 3.29 K, max 7.72 K
+    midnight 23:30-00:30: cells 200, none 0 (0.0%), bins per cell histogram [0, 23, 177, 0, 0], mean of cell means 101.3 K, spread mean 0.85 K, max 6.75 K
+    dawn 05:30-06:30: cells 200, none 0 (0.0%), bins per cell histogram [0, 18, 80, 80, 22], mean of cell means 144.6 K, spread mean 85.38 K, max 184.76 K
+    dusk 17:30-18:30: cells 200, none 2 (1.0%), bins per cell histogram [2, 13, 139, 46, 0], mean of cell means 171.2 K, spread mean 54.28 K, max 123.07 K
+    noon 2 h 11:00-13:00: cells 200, none 0 (0.0%), bins per cell histogram [0, 0, 0, 18, 36, 102, 44, 0, 0], mean of cell means 386.0 K, spread mean 6.14 K, max 21.22 K
+    midnight 2 h 23:00-01:00: cells 200, none 0 (0.0%), bins per cell histogram [0, 0, 0, 0, 15, 38, 147, 0, 0], mean of cell means 101.7 K, spread mean 3.36 K, max 8.56 K
+  80-90N, 179.75W-175.25W (far side, north polar):
+    noon 11:30-12:30: cells 200, none 0 (0.0%), bins per cell histogram [0, 51, 26, 22, 101], mean of cell means 170.1 K, spread mean 26.61 K, max 138.15 K
+    midnight 23:30-00:30: cells 200, none 0 (0.0%), bins per cell histogram [0, 0, 0, 0, 200], mean of cell means 66.0 K, spread mean 11.79 K, max 48.61 K
+    dawn 05:30-06:30: cells 200, none 0 (0.0%), bins per cell histogram [0, 0, 0, 60, 140], mean of cell means 97.5 K, spread mean 25.70 K, max 121.24 K
+    dusk 17:30-18:30: cells 200, none 0 (0.0%), bins per cell histogram [0, 0, 0, 44, 156], mean of cell means 106.3 K, spread mean 28.87 K, max 154.77 K
+    noon 2 h 11:00-13:00: cells 200, none 0 (0.0%), bins per cell histogram [0, 0, 0, 0, 0, 51, 26, 22, 101], mean of cell means 171.3 K, spread mean 49.65 K, max 151.92 K
+    midnight 2 h 23:00-01:00: cells 200, none 0 (0.0%), bins per cell histogram [0, 0, 0, 0, 0, 15, 53, 11, 121], mean of cell means 66.3 K, spread mean 17.32 K, max 99.91 K
+  0-10N, 0.25E-4.75E (near side):
+    noon 11:30-12:30: cells 200, none 7 (3.5%), bins per cell histogram [7, 39, 154, 0, 0], mean of cell means 391.3 K, spread mean 1.49 K, max 4.75 K
+    midnight 23:30-00:30: cells 200, none 0 (0.0%), bins per cell histogram [0, 0, 68, 51, 81], mean of cell means 101.8 K, spread mean 1.59 K, max 7.47 K
+    dawn 05:30-06:30: cells 200, none 0 (0.0%), bins per cell histogram [0, 29, 75, 96, 0], mean of cell means 118.1 K, spread mean 67.83 K, max 200.81 K
+    dusk 17:30-18:30: cells 200, none 0 (0.0%), bins per cell histogram [0, 19, 79, 83, 19], mean of cell means 146.6 K, spread mean 40.64 K, max 139.35 K
+    noon 2 h 11:00-13:00: cells 200, none 0 (0.0%), bins per cell histogram [0, 0, 0, 1, 20, 99, 80, 0, 0], mean of cell means 389.7 K, spread mean 4.41 K, max 20.20 K
+    midnight 2 h 23:00-01:00: cells 200, none 0 (0.0%), bins per cell histogram [0, 0, 0, 5, 41, 111, 43, 0, 0], mean of cell means 101.8 K, spread mean 2.89 K, max 10.16 K
+  30-40S, 0.25E-4.75E (near side, mid-latitude):
+    noon 11:30-12:30: cells 200, none 0 (0.0%), bins per cell histogram [0, 2, 139, 59, 0], mean of cell means 362.8 K, spread mean 2.43 K, max 12.55 K
+    midnight 23:30-00:30: cells 200, none 0 (0.0%), bins per cell histogram [0, 5, 71, 124, 0], mean of cell means 98.3 K, spread mean 1.14 K, max 8.18 K
+    dawn 05:30-06:30: cells 200, none 2 (1.0%), bins per cell histogram [2, 18, 102, 78, 0], mean of cell means 118.1 K, spread mean 64.83 K, max 173.73 K
+    dusk 17:30-18:30: cells 200, none 0 (0.0%), bins per cell histogram [0, 26, 104, 55, 15], mean of cell means 135.1 K, spread mean 32.35 K, max 161.88 K
+    noon 2 h 11:00-13:00: cells 200, none 0 (0.0%), bins per cell histogram [0, 0, 0, 1, 11, 78, 99, 11, 0], mean of cell means 361.7 K, spread mean 6.31 K, max 28.93 K
+    midnight 2 h 23:00-01:00: cells 200, none 0 (0.0%), bins per cell histogram [0, 0, 5, 51, 106, 38, 0, 0, 0], mean of cell means 98.2 K, spread mean 2.04 K, max 8.18 K
+  80-90S, 0.25E-4.75E (near side, south polar):
+    noon 11:30-12:30: cells 200, none 0 (0.0%), bins per cell histogram [0, 0, 0, 3, 197], mean of cell means 160.4 K, spread mean 30.15 K, max 116.55 K
+    midnight 23:30-00:30: cells 200, none 0 (0.0%), bins per cell histogram [0, 88, 2, 10, 100], mean of cell means 70.5 K, spread mean 14.37 K, max 141.08 K
+    dawn 05:30-06:30: cells 200, none 0 (0.0%), bins per cell histogram [0, 0, 8, 82, 110], mean of cell means 68.2 K, spread mean 24.92 K, max 148.94 K
+    dusk 17:30-18:30: cells 200, none 0 (0.0%), bins per cell histogram [0, 0, 8, 53, 139], mean of cell means 120.3 K, spread mean 35.79 K, max 129.09 K
+    noon 2 h 11:00-13:00: cells 200, none 0 (0.0%), bins per cell histogram [0, 0, 0, 0, 1, 31, 47, 11, 110], mean of cell means 162.6 K, spread mean 45.29 K, max 165.26 K
+    midnight 2 h 23:00-01:00: cells 200, none 0 (0.0%), bins per cell histogram [0, 0, 0, 0, 19, 71, 0, 10, 100], mean of cell means 71.2 K, spread mean 22.11 K, max 172.63 K
+  60-70S, 0.25E-4.75E (near side):
+    noon 11:30-12:30: cells 200, none 1 (0.5%), bins per cell histogram [1, 5, 30, 156, 8], mean of cell means 301.4 K, spread mean 7.17 K, max 54.72 K
+    midnight 23:30-00:30: cells 200, none 0 (0.0%), bins per cell histogram [0, 0, 0, 47, 153], mean of cell means 86.0 K, spread mean 2.84 K, max 14.34 K
+    dawn 05:30-06:30: cells 200, none 2 (1.0%), bins per cell histogram [2, 28, 80, 73, 17], mean of cell means 110.3 K, spread mean 59.81 K, max 202.80 K
+    dusk 17:30-18:30: cells 200, none 0 (0.0%), bins per cell histogram [0, 4, 40, 78, 78], mean of cell means 128.9 K, spread mean 52.62 K, max 142.18 K
+    noon 2 h 11:00-13:00: cells 200, none 0 (0.0%), bins per cell histogram [0, 0, 0, 0, 9, 37, 90, 61, 3], mean of cell means 301.2 K, spread mean 13.74 K, max 57.57 K
+    midnight 2 h 23:00-01:00: cells 200, none 0 (0.0%), bins per cell histogram [0, 0, 0, 0, 4, 80, 116, 0, 0], mean of cell means 86.1 K, spread mean 3.41 K, max 14.34 K
+  70-80N, 0.25E-4.75E (near side):
+    noon 11:30-12:30: cells 200, none 1 (0.5%), bins per cell histogram [1, 3, 9, 64, 123], mean of cell means 261.5 K, spread mean 14.52 K, max 73.30 K
+    midnight 23:30-00:30: cells 200, none 0 (0.0%), bins per cell histogram [0, 0, 31, 138, 31], mean of cell means 77.6 K, spread mean 4.31 K, max 11.58 K
+    dawn 05:30-06:30: cells 200, none 0 (0.0%), bins per cell histogram [0, 0, 0, 164, 36], mean of cell means 88.4 K, spread mean 18.11 K, max 134.90 K
+    dusk 17:30-18:30: cells 200, none 0 (0.0%), bins per cell histogram [0, 1, 54, 145, 0], mean of cell means 126.4 K, spread mean 45.87 K, max 127.39 K
+    noon 2 h 11:00-13:00: cells 200, none 0 (0.0%), bins per cell histogram [0, 0, 0, 0, 1, 3, 23, 65, 108], mean of cell means 260.0 K, spread mean 19.20 K, max 74.22 K
+    midnight 2 h 23:00-01:00: cells 200, none 0 (0.0%), bins per cell histogram [0, 0, 0, 0, 1, 13, 65, 107, 14], mean of cell means 78.0 K, spread mean 5.67 K, max 14.37 K
+
+== G4 high-latitude patches: within-window spread by latitude row (mean over the 10 longitudes) / mean bins per cell
+  window noon 11:30-12:30
+    gcp_70s60s_lon000-009.tab: -69.75:9.4K/3.2, -69.25:4.2K/3.2, -68.75:6.0K/3.1, -68.25:5.2K/3.1, -67.75:4.8K/3.1, -67.25:6.2K/3.0, -66.75:8.5K/2.9, -66.25:12.8K/2.9, -65.75:20.4K/3.0, -65.25:6.4K/3.0, -64.75:7.3K/2.9, -64.25:6.4K/2.9, -63.75:6.5K/2.9, -63.25:7.4K/2.7, -62.75:5.3K/2.7, -62.25:5.4K/2.7, -61.75:4.0K/2.3, -61.25:4.3K/2.0, -60.75:6.2K/2.3, -60.25:6.5K/2.6
+    gcp_70n80n_lon000-009.tab: +70.25:12.7K/2.3, +70.75:11.6K/2.5, +71.25:16.4K/2.7, +71.75:16.1K/3.0, +72.25:15.8K/3.2, +72.75:11.8K/3.9, +73.25:13.3K/3.8, +73.75:10.4K/3.9, +74.25:13.1K/3.9, +74.75:14.3K/3.9, +75.25:12.0K/3.8, +75.75:13.1K/3.5, +76.25:16.1K/3.5, +76.75:20.3K/3.6, +77.25:13.7K/3.8, +77.75:16.7K/4.0, +78.25:13.8K/3.7, +78.75:15.3K/3.7, +79.25:16.3K/3.9, +79.75:17.3K/3.9
+    gcp_80n90n_rows0-19199.tab: +80.25:32.9K/2.9, +80.75:20.4K/2.3, +81.25:30.9K/1.6, +81.75:3.0K/1.3, +82.25:0.0K/1.0, +82.75:0.0K/1.0, +83.25:0.0K/1.0, +83.75:0.0K/1.0, +84.25:27.6K/2.1, +84.75:128.2K/3.1, +85.25:96.1K/4.0, +85.75:13.2K/4.0, +86.25:12.2K/4.0, +86.75:6.8K/4.0, +87.25:7.7K/4.0, +87.75:16.3K/4.0, +88.25:51.7K/4.0, +88.75:36.3K/4.0, +89.25:30.0K/4.0, +89.75:19.1K/4.0
+    gcp_90s80s_lon000-009.tab: -89.75:28.2K/4.0, -89.25:23.8K/4.0, -88.75:69.2K/4.0, -88.25:34.9K/4.0, -87.75:5.8K/4.0, -87.25:9.8K/4.0, -86.75:16.7K/4.0, -86.25:37.5K/4.0, -85.75:12.7K/4.0, -85.25:23.3K/4.0, -84.75:85.9K/4.0, -84.25:26.9K/4.0, -83.75:18.3K/4.0, -83.25:30.2K/4.0, -82.75:50.7K/4.0, -82.25:27.0K/4.0, -81.75:29.5K/4.0, -81.25:30.0K/4.0, -80.75:29.1K/3.9, -80.25:13.6K/3.8
+  window midnight 23:30-00:30
+    gcp_70s60s_lon000-009.tab: -69.75:3.3K/3.2, -69.25:2.8K/3.3, -68.75:2.9K/3.4, -68.25:3.4K/3.8, -67.75:3.0K/3.8, -67.25:3.1K/4.0, -66.75:3.5K/3.9, -66.25:3.2K/3.9, -65.75:3.5K/4.0, -65.25:2.1K/4.0, -64.75:2.8K/3.9, -64.25:2.0K/3.9, -63.75:2.4K/3.7, -63.25:3.3K/3.8, -62.75:2.6K/3.7, -62.25:3.6K/3.8, -61.75:2.4K/3.9, -61.25:2.7K/3.9, -60.75:2.3K/3.8, -60.25:2.0K/3.6
+    gcp_70n80n_lon000-009.tab: +70.25:2.5K/2.6, +70.75:3.2K/2.8, +71.25:2.0K/2.9, +71.75:3.0K/3.2, +72.25:3.9K/3.4, +72.75:3.8K/3.2, +73.25:3.8K/3.2, +73.75:4.0K/3.2, +74.25:3.6K/3.3, +74.75:5.9K/3.7, +75.25:5.2K/3.5, +75.75:4.6K/3.3, +76.25:4.8K/3.1, +76.75:6.1K/3.0, +77.25:5.6K/2.8, +77.75:4.6K/2.8, +78.25:4.8K/2.8, +78.75:5.4K/2.5, +79.25:5.0K/2.5, +79.75:4.5K/2.2
+    gcp_80n90n_rows0-19199.tab: +80.25:8.2K/4.0, +80.75:10.2K/4.0, +81.25:6.7K/4.0, +81.75:4.2K/4.0, +82.25:5.2K/4.0, +82.75:3.6K/4.0, +83.25:3.1K/4.0, +83.75:4.9K/4.0, +84.25:8.5K/4.0, +84.75:11.0K/4.0, +85.25:11.7K/4.0, +85.75:8.9K/4.0, +86.25:6.9K/4.0, +86.75:3.6K/4.0, +87.25:3.1K/4.0, +87.75:20.9K/4.0, +88.25:29.1K/4.0, +88.75:42.9K/4.0, +89.25:5.1K/4.0, +89.75:38.1K/4.0
+    gcp_90s80s_lon000-009.tab: -89.75:13.5K/4.0, -89.25:9.1K/4.0, -88.75:7.2K/4.0, -88.25:22.2K/4.0, -87.75:5.9K/4.0, -87.25:8.2K/4.0, -86.75:87.3K/4.0, -86.25:97.9K/4.0, -85.75:10.6K/4.0, -85.25:10.9K/4.0, -84.75:14.4K/3.0, -84.25:0.0K/1.0, -83.75:0.0K/1.0, -83.25:0.0K/1.0, -82.75:0.0K/1.0, -82.25:0.0K/1.0, -81.75:0.0K/1.0, -81.25:0.0K/1.0, -80.75:0.0K/1.0, -80.25:0.2K/1.2
+
+== C1 one mapping cycle at 4 ppd (Level 3 TBOL + Level 2 LTIM)
+  20160111d: tbol cells 202048 of 1036800 (19.5%), range 25.16..397.86 K; ltim cells 211157, range 6.086..18.003 h; tbol without ltim 0, ltim without tbol 9109
+    coverage by latitude band: 90..60: 53.1%; 60..30: 5.9%; 30..0: 4.8%; 0..-30: 4.4%; -30..-60: 4.8%; -60..-90: 44.0%
+    latitude rows with any value: 702 of 720; longitude columns with any value: 1440 of 1440
+    median local time by 30-degree longitude band (|lat|<30): 0E:nan, 30E:nan, 60E:nan, 90E:nan, 120E:nan, 150E:nan, 180E:12.09, 210E:12.17, 240E:nan, 270E:nan, 300E:nan, 330E:nan
+    local-time span inside a latitude row: median 0.25 h, max 4.67 h
+    ltim steps present (h): [0.083333] ...; tbol step 0.02 K
+  20160125n: tbol cells 381177 of 1036800 (36.8%), range 28.10..280.38 K; ltim cells 404533, range 0.003..24.003 h; tbol without ltim 0, ltim without tbol 23356
+    coverage by latitude band: 90..60: 65.4%; 60..30: 36.3%; 30..0: 24.4%; 0..-30: 20.5%; -30..-60: 22.7%; -60..-90: 51.2%
+    latitude rows with any value: 702 of 720; longitude columns with any value: 1440 of 1440
+    median local time by 30-degree longitude band (|lat|<30): 0E:0.17, 30E:0.17, 60E:nan, 90E:nan, 120E:nan, 150E:nan, 180E:23.09, 210E:23.25, 240E:23.42, 270E:23.59, 300E:23.75, 330E:23.84
+    local-time span inside a latitude row: median 24.00 h, max 24.00 h
+    ltim steps present (h): [0.083333, 12.083333] ...; tbol step 0.02 K
+
+== X1 GCP against the 2016 day cycle at the same place and local time
+  20160111d: matched cells 1949; cycle minus GCP: median +0.74 K, mean |diff| 18.57 K, 90th percentile |diff| 52.51 K
+    e.g. gcp_00n10n_rows0-19199.tab lat +9.875 lon 180.125E lt 12.00 h: cycle 387.86 K, GCP 384.00 K
+    e.g. gcp_00n10n_rows0-19199.tab lat +9.875 lon 180.875E lt 12.00 h: cycle 386.86 K, GCP 384.41 K
+    e.g. gcp_00n10n_rows0-19199.tab lat +9.875 lon 181.125E lt 12.00 h: cycle 387.40 K, GCP 385.56 K
+  20160125n: matched cells 2594; cycle minus GCP: median +0.31 K, mean |diff| 3.61 K, 90th percentile |diff| 8.29 K
+    e.g. gcp_00n10n_rows0-19199.tab lat +9.875 lon 181.125E lt 22.92 h: cycle 103.76 K, GCP 103.87 K
+    e.g. gcp_00n10n_rows0-19199.tab lat +9.875 lon 181.375E lt 23.00 h: cycle 103.38 K, GCP 103.54 K
+    e.g. gcp_00n10n_rows0-19199.tab lat +9.625 lon 181.125E lt 22.92 h: cycle 104.64 K, GCP 103.87 K
+
+== X2 GHRM tbol at midnight (multi-range patches): values and comparison with the GCP midnight window
+  ghrm_n128_eq_0E.f32: lat +0.496..-0.496, lon 0.004..0.996E; NaN 0.0%, range 98.73..129.10 K, mean 101.71 K, sd 2.34 K
+    0.5-deg cell lat +0.25 lon 0.25E: GHRM block mean 102.28 K (n=4096); GCP midnight window unweighted mean 102.78 K from 4 bins
+    0.5-deg cell lat +0.25 lon 0.75E: GHRM block mean 101.86 K (n=4096); GCP midnight window unweighted mean 102.15 K from 2 bins
+  ghrm_n128_eq_180E.f32: lat +0.496..-0.496, lon 180.004..180.996E; NaN 0.0%, range 96.57..122.84 K, mean 102.02 K, sd 1.17 K
+    0.5-deg cell lat +0.25 lon 180.25E: GHRM block mean 101.98 K (n=4096); GCP midnight window unweighted mean 102.18 K from 2 bins
+    0.5-deg cell lat +0.25 lon 180.75E: GHRM block mean 101.88 K (n=4096); GCP midnight window unweighted mean 102.15 K from 2 bins
+  ghrm_n128_45S_300E.f32: lat -44.504..-45.496, lon 300.004..300.996E; NaN 0.0%, range 88.83..139.03 K, mean 95.41 K, sd 3.68 K
+
+== S1 page-file sizes measured on the real 4 ppd cycle maps (int16 LE, gzip -9, zero mtime)
+  20160111d: source int16 2073600 B -> gzip 394752 B; re-quantised 0.1 K uint16 -> gzip 343035 B
+  20160125n: source int16 2073600 B -> gzip 656026 B; re-quantised 0.1 K uint16 -> gzip 524377 B
+
+Done.

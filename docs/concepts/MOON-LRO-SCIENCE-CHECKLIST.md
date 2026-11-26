@@ -1,6 +1,6 @@
 # Moon globe and LRO science — spec checklist
 
-Rev 1 · 26 Nov 2026, 08:31 UTC (clock reading) · written by Claude on Chad's instruction (26 Nov) · **persistent record; update it as each item moves** · docs only.
+Rev 2 · 26 Nov 2026, 08:59 UTC (clock reading; rev 1 08:31 UTC) · written by Claude on Chad's instruction (26 Nov) · **persistent record; update it as each item moves** · docs only.
 
 **What this is.** The record of every item in GPT's original brief, `docs/concepts/MOON-LRO-SCIENCE-BRIEF-GPT-2026-11-25.md`. It also covers the scope Chad added on 26 Nov: every page that shows the Moon. It is **not** the narrowed height proposal (`docs/concepts/MOON-LRO-SCIENCE-PROPOSAL.md` rev 2.1), which covered only the first release.
 
@@ -19,7 +19,7 @@ Rev 1 · 26 Nov 2026, 08:31 UTC (clock reading) · written by Claude on Chad's i
 |---|---|---|
 | 1 | Existing all-round appearance, orientation, polar disclosure, lighting, dated LRO path ("Existing Moon view", "Existing LRO view", requirement 1) | **done: preserved** |
 | 2 | LOLA elevation-first layer ("Recommended first feature", requirements 2–4) | **done: released and closed** |
-| 3 | Diviner temperature ("Recommended first feature", second paragraph) | **next** (partly assessed) |
+| 3 | Diviner temperature ("Recommended first feature", second paragraph) | **assessed; proposal rev 1 with GPT** (`docs/concepts/MOON-DIVINER-PROPOSAL.md`) |
 | 4 | LROC regional detailed imagery | to assess |
 | 5 | CRaTER radiation | to assess |
 | 6 | LEND neutron and hydrogen products | to assess |
@@ -79,53 +79,37 @@ Rev 1 · 26 Nov 2026, 08:31 UTC (clock reading) · written by Claude on Chad's i
 - **Review cadence:** yearly and at each build, check for a newer version against the PDS errata and the LOLA Data Node. Last checked 26 Nov 2026.
 - **Next:** none for this layer. Options in item 12.
 
-## 3. Diviner temperature — next (partly assessed)
+## 3. Diviner temperature — assessed; proposal rev 1 with GPT for review
 
 - **Brief asked:** a bounded Diviner example, either one documented map product or a short dated observation interval.
   - Keep channel brightness temperature apart from derived or bolometric temperature, and record local time, viewing geometry and aggregation.
   - No generic "Moon temperature now", and no apparent thermal response synchronised to the day/night control.
   - Check the `-9999` warning against the exact product. Missing is never 0 K.
-- **Status:** partly assessed before the height release, then parked from that release only (GPT's recommendation, proposal §8, D4). Assessment resumes as the next item.
-- **Real samples kept** (not committed: research stays text only):
-  - on the Mac in `Documents/Mother Earth/_source-data/moon-lro-science-2026-11-26/`: `gcp_00n10n_rows0-19199.tab` (`b1f930da…ba97`) and `gcp_80n90n_rows0-19199.tab` (`9c1de725…6264`), 2,169,600 B each
-  - also in the workspace `/home/claude/samples/` for this session only
-  - URLs and byte ranges in `SAMPLES.md` §3
-- **Product findings so far (SAMPLES §3):**
-  - Product: Diviner Global Cumulative Product (GCP), `LRO-L-DLRE-5-GCP-V1.0`, bundle `urn:nasa:pds:lro_diviner_derived1` v5.0, DOI 10.17189/wj0s-w188 (Paige, Sullivan, Williams 2022). Method paper: Williams et al. 2017, Icarus 283.
-  - Quantities: average calibrated channel brightness temperatures t3–t9 and the bolometric brightness temperature `tbol`, in K. These are brightness temperatures, not modelled physical or subsurface temperatures. Only `tbol` was proposed for display.
-  - Period: all nadir observations, 5 Jul 2009 – 1 Apr 2015 (multi-year).
-  - Binning: 0.5° × 0.5° × 0.25 h local time (96 bins). Longitude runs −179.75 to +179.75, a different convention from LOLA's 0–360. Row order: longitude slowest, local time fastest. 113 B per line (measured).
-  - Size: 18 band files × 156,211,313 B = 2,811,803,634 B ASCII (from the directory listing).
-- **Missing-value rules (recorded):**
-  - The GCP `-9999` means an empty bin; `-9998` means invalid. Both are shown as missing, never as 0 K.
-  - Negative channel values occur below a channel's sensitivity (label). They are not physical temperatures.
-  - The RDR `-9999` warning covers RDR point records from 17 Apr 2019 only (the `tb` column). It cannot affect the 2009–2015 GCP, and it is kept apart from the GCP's own `-9999`.
-- **Sample statistics:**
-  - Equatorial patch: 39.8% of `tbol` bins empty. A single 15-minute bin is patchy: some hours have no values at all.
-  - With a one-hour window (11:30–12:30 or 23:30–00:30), all 200 equatorial cells have values. The within-window spread is 3.29 K at noon and 0.85 K at midnight.
-  - Polar patch (80–90°N): 7.5% empty, but the within-window spread is 26.6 K at noon and 11.8 K at midnight. Local time means little near the pole.
-- **Acquisition estimates** (not measured as downloads):
-  - Whole product: 2.81 GB, offline only.
-  - A ranged fetch of one one-hour window (4 bins per cell) for the whole globe: 720 × 360 cells × 4 bins × 113 B ≈ **117 MB in 259,200 contiguous ranges**. Two windows: ≈ 234 MB.
-  - The server answered single-range and two-range requests with 206 (SAMPLES §3). Behaviour with many ranges per request is untested.
-  - The pane is the only route that reaches PDS (both shells get a 403), so any bulk fetch goes through the pane in pieces, or through another route to be found.
-  - The published layer would be a small derived grid, like LOLA's. Its size is not yet estimated.
-- **Unresolved decisions:**
-  - which local time or times to show
-  - window width
-  - how to average: proposal §8 commits to an unweighted mean of available local-time-bin values, with a per-cell count of contributing bins and the missing share
-  - a polar cut-off latitude or polar caveat
-  - how coverage and gaps are shown
-  - whether a dated RDR interval is preferable to, or additional to, the multi-year map
-- **Next bounded assessment** (docs only):
-  1. Recheck the Diviner archive for newer or better-suited derived products (newer GCP versions, other gridded or polar products) and read their labels.
-  2. Fetch a few more bounded GCP patches: far side, mid-latitude, south polar. This tests coverage beyond the two equatorial and north-polar patches.
-  3. Test a multi-range request to measure the ranged-fetch route.
-  4. Estimate the derived grid size and build cost.
-  5. Draft the display wording (brightness temperature, local-time window, compiled period, calculated sunlight kept separate).
-  6. Return a Diviner proposal for GPT's review.
-- **Blockers:** none known. The bulk-fetch route is a practical constraint, not a block.
-- **Decision needed (Chad, after GPT's review):** the product and display form (map at chosen local times, or a dated interval), the acquisition route, and the accepted download and draw costs.
+- **Status (26 Nov, 08:59 UTC clock reading):** assessed, docs only, on Chad's go of 26 Nov. **Proposal `docs/concepts/MOON-DIVINER-PROPOSAL.md` rev 1** is with GPT for review. Nothing is built, nothing has been fetched in bulk, and nothing is deployed.
+- **Evidence:** `docs/research/moon-lro-science/SAMPLES.md` §6 (product recheck, `tbol` definition, 12 new samples, multi-range test, archive MD5s, findings), `assess_diviner.py` and `assess_diviner_output-2026-11-26.txt`. Earlier reads are in SAMPLES §1 and §3.
+- **Samples kept** (not committed; research stays text only):
+  - on the Mac in `Documents/Mother Earth/_source-data/moon-lro-science-2026-11-26/`, with the new ones in its `diviner/` folder: seven GCP patches, two Level 3 TBOL and two Level 2 LTIM cycle maps at 4 ppd, three GHRM midnight 1° patches, and the SIS v1.21 PDF (read, not committed)
+  - hashes in SAMPLES §3 and §6.3
+- **Products checked:** GCP, GHRM, GDR Level 2/3 per-cycle maps, PCP, PRP, RCP, the derived bundle 2 (EPF) and the RDR. No newer GCP version exists; the derived bundle was last changed 2 Feb 2024.
+- **Proposed (for GPT's review, then Chad's decisions D1–D7):**
+  - GCP `tbol`, 2009–2015, two maps "around local noon" (11:30–12:30) and "around local midnight" (23:30–00:30)
+  - each 0.5° cell = an unweighted mean of the available 15-minute bin values, with the bin count and spread in the readout
+  - noon withheld poleward of 70°, midnight poleward of 80°
+  - evenly lit; mutually exclusive with height; Moon tab only
+  - route A: stream the 18 whole band files in the browser pane with archive-MD5 checks, after a one-file stop point
+- **Key findings:**
+  - `tbol` is the bolometric brightness temperature, computed per bin from the mean radiances of channels 3–9 (SIS v1.21 §8.1). The Paige 2010 definition sentence was read only in a third-party copy, labelled as secondary.
+  - A 15-minute bin alone is patchy (15–18 of 96 bins empty in whole patches). A one-hour window fills all sampled cells at midnight and all but 7 + 1 + 1 of 1,400 at noon.
+  - Within-window spread is 1–3 K at noon and 1–2 K at midnight at low and mid latitudes. It rises at high latitude (noon 10–20 K per row at 70–80°N; tens of K beyond 80°).
+  - Dawn and dusk windows are not usable (spread 18–85 K mean).
+  - The GHRM 2009–2022 midnight mosaic agrees with the GCP midnight window within 0.20–0.50 K at four cells.
+  - Single 2016 cycle maps are sparse (4–6% of low-latitude cells by day, 20–36% by night), and local time drifts across the map.
+  - Multi-range requests (8–128 ranges) returned every part exactly; overhead is about 143 B per part.
+  - Label errors are recorded: the GCP DOI typo; the Level 3 TBOL unit and description text.
+- **Missing-value rules (unchanged):** GCP `-9999` = empty bin and `-9998` = invalid, both shown as no value, never 0 K. The RDR 2019 `-9999` gap cannot affect the 2009–2015 GCP. Negative single-channel values are not displayed.
+- **Not proposed now, with revisit conditions (proposal §10):** single mapping-cycle maps; GHRM high-resolution midnight; polar PCP; an RDR dated interval for 10–11 June 2026; dawn and dusk.
+- **Blockers:** none. PDS is reachable only from the browser pane; that is a practical constraint.
+- **Decision needed (Chad, after GPT's review):** D1 product, D2 window, D3 latitude limits, D4 acquisition route, D5 texture, D6 units, D7 spread in the readout. A build starts only on Chad's go; the release only on his own Approve line.
 
 ## 4. LROC regional detailed imagery — to assess
 
@@ -243,7 +227,7 @@ Each stays `option` until Chad classifies it as "assess" or "not pursued", with 
 
 ## Order of work (Chad, 26 Nov)
 
-1. **Diviner:** assessment and proposal first, not a build.
+1. **Diviner:** assessment and proposal first, not a build. *(Done 26 Nov: proposal rev 1 with GPT.)*
 2. Then the remaining items **one at a time**, in the order Chad chooses.
 
 Suggested order (Claude's suggestion, for Chad to decide): LROC regional example (4), then the Sky Moon decision (10a), then CRaTER (5), LEND (6), LAMP (7) and Mini-RF (8). Pairing (9) and the options (12) are taken up only inside the item they serve or when Chad classifies them.
@@ -251,3 +235,4 @@ Suggested order (Claude's suggestion, for Chad to decide): LROC regional example
 ## Change log
 
 - Rev 1 (26 Nov 2026, 08:31 UTC): created after the height release close-out, reconciled against the original brief.
+- Rev 2 (26 Nov 2026, 08:59 UTC): §3 Diviner assessed and proposal rev 1 written (`docs/concepts/MOON-DIVINER-PROPOSAL.md`; evidence SAMPLES §6). Summary row 3 updated. No other item moved.
