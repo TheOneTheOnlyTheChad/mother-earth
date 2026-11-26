@@ -75,7 +75,7 @@ Rev 7 · 26 Nov 2026, 11:58 UTC (clock reading; rev 6 10:22, rev 5 09:54, rev 4 
   - Idle draws per 5 s in the release-candidate run: height off 239, on 484.
 - **Current served comparison:** `reviews/evidence/2026-11-26-moon-height-manifest.json` (42 files), checked with `node phase1/moonsci/served_manifest.mjs --check` (local tree) and `--pane` (live site). The Tides manifests stay as their release records.
 - **Animals pins:** `MH_MAIN` `83f7c32` / `MH_PARENT` `97815dd` hold `moon.html`, `moonglobe.js` and `sources.html` (checks 13e, 13q–13s in `phase1/animals-tab-ui.test.cjs`).
-- **Tests:** `phase1/moon-height-ui.test.cjs` (110; 12 deliberate breaks); build check `python3 phase1/moonsci/build_lola.py --check`.
+- **Tests:** `phase1/moon-height-ui.test.cjs` (110; 12 deliberate breaks); build check `python3 phase1/moonsci/build_lola.py --check`. *Erratum (26 Nov, 12:31 UTC): at the release code, breaks `late` and `nocache` matched nothing, so 10 of the 12 were established; see the erratum in `reviews/2026-11-26-moon-height-release-rc.md`, corrected on branch `moon-diviner-ui`.*
 - **Review cadence:** yearly and at each build, check for a newer version against the PDS errata and the LOLA Data Node. Last checked 26 Nov 2026.
 - **Next:** none for this layer. Options in item 12.
 
