@@ -176,7 +176,7 @@ Live or current-position anything; LRO prediction; LROC detailed imagery (a late
 ## 10. Notes for the Sun thread (carried over, same principles)
 
 - Keep three kinds of thing apart in words and in the code: **reference composites** (the Moon picture), **dated measurements compiled over a period** (LOLA 2009–2016; Diviner GCP 2009–2015), and **calculated views** ("Lit as now"). The Sun spec's "dated all-longitude reference Sun" vs "recent Earth-facing HMI image" vs "What Parker measured" maps onto the same three.
-- Read the exact label, not the archive page: here the label gave the longitude origin (0° at the left edge vs the picture's centre), pixel registration and a fill row that the archive page does not mention. A cross-correlation against the picture already on the page caught any shift cheaply.
+- Read the exact label, not the archive page: here the label gave the longitude origin (0° at the left edge vs the picture's centre) and the pixel registration; the north fill row is in neither the label nor the archive page and was found only in the data. A cross-correlation against the picture already on the page caught any shift cheaply.
 - Archive warnings are product-specific: the Diviner `-9999` note was about one product family and period. Check each warning against the exact product and say which.
 - Missing stays missing (`-9999` is never zero). An unmarked fill (exact zeros in one row) can only be found by looking at the data.
 - PDS pages need the browser pane (both shells are refused). Multi-range requests work on PDS Geosciences, so large tables can be sampled without bulk downloads.
