@@ -1,6 +1,6 @@
 # Moon globe and LRO science — spec checklist
 
-Rev 2 · 26 Nov 2026, 08:59 UTC (clock reading; rev 1 08:31 UTC) · written by Claude on Chad's instruction (26 Nov) · **persistent record; update it as each item moves** · docs only.
+Rev 3 · 26 Nov 2026, 09:20 UTC (clock reading; rev 2 08:59, rev 1 08:31 UTC) · written by Claude on Chad's instruction (26 Nov) · **persistent record; update it as each item moves** · docs only.
 
 **What this is.** The record of every item in GPT's original brief, `docs/concepts/MOON-LRO-SCIENCE-BRIEF-GPT-2026-11-25.md`. It also covers the scope Chad added on 26 Nov: every page that shows the Moon. It is **not** the narrowed height proposal (`docs/concepts/MOON-LRO-SCIENCE-PROPOSAL.md` rev 2.1), which covered only the first release.
 
@@ -19,7 +19,7 @@ Rev 2 · 26 Nov 2026, 08:59 UTC (clock reading; rev 1 08:31 UTC) · written by C
 |---|---|---|
 | 1 | Existing all-round appearance, orientation, polar disclosure, lighting, dated LRO path ("Existing Moon view", "Existing LRO view", requirement 1) | **done: preserved** |
 | 2 | LOLA elevation-first layer ("Recommended first feature", requirements 2–4) | **done: released and closed** |
-| 3 | Diviner temperature ("Recommended first feature", second paragraph) | **assessed; proposal rev 1 with GPT** (`docs/concepts/MOON-DIVINER-PROPOSAL.md`) |
+| 3 | Diviner temperature ("Recommended first feature", second paragraph) | **assessed; proposal rev 2 with GPT for recheck** (`docs/concepts/MOON-DIVINER-PROPOSAL.md`; rev 1: REVISE FIRST, concept supported) |
 | 4 | LROC regional detailed imagery | to assess |
 | 5 | CRaTER radiation | to assess |
 | 6 | LEND neutron and hydrogen products | to assess |
@@ -79,13 +79,24 @@ Rev 2 · 26 Nov 2026, 08:59 UTC (clock reading; rev 1 08:31 UTC) · written by C
 - **Review cadence:** yearly and at each build, check for a newer version against the PDS errata and the LOLA Data Node. Last checked 26 Nov 2026.
 - **Next:** none for this layer. Options in item 12.
 
-## 3. Diviner temperature — assessed; proposal rev 1 with GPT for review
+## 3. Diviner temperature — assessed; proposal rev 2 with GPT for recheck
 
 - **Brief asked:** a bounded Diviner example, either one documented map product or a short dated observation interval.
   - Keep channel brightness temperature apart from derived or bolometric temperature, and record local time, viewing geometry and aggregation.
   - No generic "Moon temperature now", and no apparent thermal response synchronised to the day/night control.
   - Check the `-9999` warning against the exact product. Missing is never 0 K.
-- **Status (26 Nov, 08:59 UTC clock reading):** assessed, docs only, on Chad's go of 26 Nov. **Proposal `docs/concepts/MOON-DIVINER-PROPOSAL.md` rev 1** is with GPT for review. Nothing is built, nothing has been fetched in bulk, and nothing is deployed.
+- **Status (26 Nov, 09:20 UTC clock reading):** assessed, docs only.
+  - **Rev 1** (`9be23dd`, fixes `caa00ab`) reviewed by GPT: **REVISE FIRST**, with the GCP product and the noon/midnight concept supported. Review filed unchanged as `reviews/2026-11-26-moon-diviner-proposal-rev1-gpt-review.md`.
+  - **Rev 2** answers R1–R5 (proposal §14 maps each point) and is with GPT for recheck.
+  - Nothing is built, nothing has been fetched in bulk, and nothing is deployed.
+- **Rev 2 in short:**
+  - **R1:** our statistic is named precisely: the unweighted mean of the available quarter-hour bin values. Range only for n ≥ 2, and never called uncertainty. "No valid data in this window". Three cell states distinct; the map cell is distinguished from the detector footprint.
+  - **R2:** per-band durable checkpoints; a failed band is refetched whole; a streaming parser with a pinned, vector-tested MD5/SHA-256; memory measured in a first-band trial; no partial publishing. Retention is Chad's decision D8: (a) a lossless all-bin extraction, about 54–77 MB gzip (estimated), or (b) the two-window grid only.
+  - **R3:** one science-mode coordinator. The lighting and Earth-view state is saved once on entry and restored for the current minute only on leaving. The previous map stays until its replacement has passed validation. Stale answers are discarded.
+  - **R4:** strict parsing with our own 1–450 K plausibility bounds; a 64-byte header with offsets, codes and payload hash; whole-file validation in the page; fixed scales from valid displayed cells, with clipping shown; masks stated as display policy, and a global report before freezing.
+  - **R5:** claims narrowed. The GHRM agreement is corroboration only; explicit index, origin and flip tests are planned. Cycle maps, single bins and dawn/dusk are described as unsuited to this display, with revisit conditions.
+  - **Script:** `assess_diviner.py` rev 2 exits 1 on any hash, layout or value failure (eight break tests) and reads the Mac's two-folder layout.
+  - **Sources:** Powell et al. 2023 is the primary source for the general definition. That is GPT's read; Claude reads §2.4–2.5 before any build (the fetch needed an approval that went unanswered on 26 Nov).
 - **Evidence:** `docs/research/moon-lro-science/SAMPLES.md` §6 (product recheck, `tbol` definition, 12 new samples, multi-range test, archive MD5s, findings), `assess_diviner.py` and `assess_diviner_output-2026-11-26.txt`. Earlier reads are in SAMPLES §1 and §3.
 - **Samples kept** (not committed; research stays text only):
   - on the Mac in `Documents/Mother Earth/_source-data/moon-lro-science-2026-11-26/`, with the new ones in its `diviner/` folder: seven GCP patches, two Level 3 TBOL and two Level 2 LTIM cycle maps at 4 ppd, three GHRM midnight 1° patches, and the SIS v1.21 PDF (read, not committed)
@@ -109,7 +120,7 @@ Rev 2 · 26 Nov 2026, 08:59 UTC (clock reading; rev 1 08:31 UTC) · written by C
 - **Missing-value rules (unchanged):** GCP `-9999` = empty bin and `-9998` = invalid, both shown as no value, never 0 K. The RDR 2019 `-9999` gap cannot affect the 2009–2015 GCP. Negative single-channel values are not displayed.
 - **Not proposed now, with revisit conditions (proposal §10):** single mapping-cycle maps; GHRM high-resolution midnight; polar PCP; an RDR dated interval for 10–11 June 2026; dawn and dusk.
 - **Blockers:** none. PDS is reachable only from the browser pane; that is a practical constraint.
-- **Decision needed (Chad, after GPT's review):** D1 product, D2 window, D3 latitude limits, D4 acquisition route, D5 texture, D6 units, D7 spread in the readout. A build starts only on Chad's go; the release only on his own Approve line.
+- **Decision needed (Chad, after GPT's recheck):** D1 product, D2 window, D3 masks, D4a go for the first-band trial and D4b go for the remaining 17 bands after its report, D5 texture, D6 units, D7 readout, D8 retention. A build starts only on Chad's go; the release only on his own Approve line.
 
 ## 4. LROC regional detailed imagery — to assess
 
@@ -227,7 +238,7 @@ Each stays `option` until Chad classifies it as "assess" or "not pursued", with 
 
 ## Order of work (Chad, 26 Nov)
 
-1. **Diviner:** assessment and proposal first, not a build. *(Done 26 Nov: proposal rev 1 with GPT.)*
+1. **Diviner:** assessment and proposal first, not a build. *(26 Nov: rev 1 reviewed, REVISE FIRST; rev 2 with GPT for recheck.)*
 2. Then the remaining items **one at a time**, in the order Chad chooses.
 
 Suggested order (Claude's suggestion, for Chad to decide): LROC regional example (4), then the Sky Moon decision (10a), then CRaTER (5), LEND (6), LAMP (7) and Mini-RF (8). Pairing (9) and the options (12) are taken up only inside the item they serve or when Chad classifies them.
@@ -236,3 +247,4 @@ Suggested order (Claude's suggestion, for Chad to decide): LROC regional example
 
 - Rev 1 (26 Nov 2026, 08:31 UTC): created after the height release close-out, reconciled against the original brief.
 - Rev 2 (26 Nov 2026, 08:59 UTC): §3 Diviner assessed and proposal rev 1 written (`docs/concepts/MOON-DIVINER-PROPOSAL.md`; evidence SAMPLES §6). Summary row 3 updated. No other item moved.
+- Rev 3 (26 Nov 2026, 09:20 UTC): §3 updated for GPT's rev 1 review (REVISE FIRST) and proposal rev 2. No other item moved.

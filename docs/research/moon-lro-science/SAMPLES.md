@@ -217,7 +217,7 @@ Overhead is about 143 B per part (multipart headers). More than 128 ranges per r
 **GCP coverage and local-time bins** (G1–G4 in the output):
 
 - Empty `tbol` bins: 39–41% at 0–10° and 30–40°S, 30% at 60–70°S, 17% at 70–80°N, 7.5–12% in the polar caps. There is no `-9998` and no negative `tbol` in any patch. Negative values appear only in single channels t3–t9 (below each channel's sensitivity, as the label says). They are never displayed.
-- **A single 15-minute bin is not usable as a map.** At low and mid latitudes, 15–18 of the 96 bins have **no value in any cell** of a patch.
+- **A single 15-minute bin is too sparse for the proposed near-complete map** (scope choice; rev 2 wording). At low and mid latitudes, 15–18 of the 96 bins have **no value in any cell** of a patch. Single bins can still serve a dated-pass or diurnal feature.
 - **One-hour window around noon (11:30–12:30) and around midnight (23:30–00:30)**, unweighted mean of the available bins, with a count of contributing bins (0–4) per cell:
 
   | Patch | Noon: cells with no bin / spread inside the window (mean, max) | Midnight: cells with no bin / spread (mean, max) |
@@ -231,12 +231,12 @@ Overhead is about 143 B per part (multipart headers). More than 128 ranges per r
   | 80–90S | 0 / 30.15, 116.55 K | 0 / 14.37, 141.08 K |
 
   A **two-hour** window fills every cell sampled but doubles the spread at noon (for example 4.41 K mean, 20.20 K max at 0–10N near side).
-- **Dawn and dusk windows are not usable:** the spread inside one hour is 18–85 K on average, up to 203 K at the terminator. Only noon and midnight are proposed.
+- **Dawn and dusk windows are unsuitable for a one-hour representative map** (scope choice; rev 2 wording): the spread inside one hour is 18–85 K on average, up to 203 K near the terminator. That spread is real change, which a diurnal feature could show. Only noon and midnight are proposed.
 - **By latitude (G4):** midnight spread stays at 2–6 K per row up to 80° in both hemispheres. Noon spread is 4–20 K per row at 60–70°S, rises to 10–20 K at 70–80°N, and reaches tens of K, with rows of only one bin, beyond 80°.
 
 **Cross-checks between products at the same places (X1, X2):**
 
-- **GHRM midnight against the GCP midnight window**, as 0.5° block means at four cells (0°N 0.25°E and 0.75°E; 0°N 180.25°E and 180.75°E): GHRM 102.28, 101.86, 101.98, 101.88 K against GCP 102.78, 102.15, 102.18, 102.15 K. The differences are 0.20–0.50 K, with GCP slightly warmer at all four. These are two products made differently (an empirical fit to midnight on 2009–2022 data at 128 ppd, against a bin mean of 2009–2015 data). **This supports the registration (longitude conventions −180…180 against 0…360) and the interpretation of both.** Four cells are not a global validation.
+- **GHRM midnight against the GCP midnight window**, as 0.5° block means at four cells (0°N 0.25°E and 0.75°E; 0°N 180.25°E and 180.75°E): GHRM 102.28, 101.86, 101.98, 101.88 K against GCP 102.78, 102.15, 102.18, 102.15 K. The differences are 0.20–0.50 K, with GCP slightly warmer at all four. The two products are made differently (an empirical fit to midnight on 2009–2022 data at 128 ppd, against a bin mean of 2009–2015 data), but they share the instrument's lineage. **This is corroboration only** (rev 2 wording, after GPT's review). It is not independent absolute accuracy and not proof of registration: smooth ~100 K equatorial night backgrounds could agree even with an indexing error. Registration is to be tested with explicit coordinate and grid tests and deliberate origin and flip controls (proposal rev 2 §7).
 - **2016 cycle maps against the GCP at the cell's own local time:** night cycle, 1,752 matched cells, median difference −0.02 K, mean |difference| 4.25 K. Day cycle, 1,322 cells, median +0.14 K, but mean |difference| 23.3 K and 90th percentile 71 K. The day-cycle matches sit mostly at high latitudes, where daytime gradients over 15 minutes and seasons are large. Not interpreted further.
 
 **Mapping-cycle maps (the dated-interval option):**
@@ -249,3 +249,17 @@ Overhead is about 143 B per part (multipart headers). More than 128 ranges per r
 ### 6.6 What was not fetched
 
 No whole GCP band file, no whole GHRM mosaic, no RDR records, no PCP, no ODE job, no account, no email. Paige et al. (2010), Williams et al. (2017) and Powell et al. (2023) were not read in full text (Science and Icarus are not open access; Powell 2023 was not sought). The GHRM midnight fitting method is described here only as the SIS states it. No hub, R2 or collector request.
+
+### 6.7 Rev 2 changes (26 Nov, after GPT's review of proposal rev 1)
+
+- **GPT's review** is filed unchanged as `reviews/2026-11-26-moon-diviner-proposal-rev1-gpt-review.md` (sha256 `6457efb2…a4b9e`). GPT checked the 13 hashes in `SHA256SUMS.txt`. **GPT's own work, labelled as GPT's:** it recomputed the bin-count distributions and within-window spreads of all seven GCP patches with a separate standard-library parser, and they agree. It did **not** rerun `assess_diviner.py`, because numpy was unavailable to it.
+- **Primary source for the general `tbol` meaning:** GPT reports that Powell et al. 2023, JGR Planets 128, e2022JE007532 (https://agupubs.onlinelibrary.wiley.com/doi/full/10.1029/2022JE007532) is openly accessible. GPT says §2.5 explains the equivalent-blackbody interpretation and §2.4 the fitted night-time temperatures. **That is GPT's read.** Claude's own fetch of the page on 26 Nov needed an approval that was not answered, so Claude has **not** read it yet. Claude reads §2.4–2.5 in full text before any build. The GCP's own processing stays sourced to the SIS §8.1 and `gcpds.cat`. The third-party copy of Paige et al. 2010 stays labelled as secondary.
+- **`assess_diviner.py` (rev 2):**
+  - It now exits with status 1 and prints `STOP: …` when a file is missing, a hash does not match or a structural check fails. Before, it printed `MISMATCH` and carried on.
+  - New L1 checks for each GCP sample: whole 113-byte records ending CRLF, 11 numeric fields, the exact coordinate sequence (longitude, then latitude ascending, then 96 local-time bins), sentinels exactly `-9999`/`-9998`, and every other `tbol` finite and inside our plausibility bounds of 1–450 K (the floor keeps valid values clear of the page file's reserved codes 0 and 1). The label documents no bounds, so these are ours; a value outside them stops the script and is never encoded. The binaries are checked for exact size.
+  - It looks for each file in `<samples-dir>` and then in `<samples-dir>/diviner/`, which matches the Mac layout (the two older GCP patches in the parent folder, the newer files in `diviner/`).
+  - Tested by Claude on 26 Nov:
+    - The full run passes (exit 0), and its statistics are identical to the rev 1 output.
+    - A copy laid out like the Mac folders gives byte-identical output.
+    - One altered byte gives exit 1 (hash). A missing file gives exit 1.
+    - `--structure-only` (a test aid that runs L1 on one file without hashes or statistics) catches eight deliberate breaks, each with exit 1: a letter in a field, `tbol` 500 K, `tbol` 0.5 K, sentinel `-9997`, `nan`, a missing CRLF, a wrong longitude and a truncated file.

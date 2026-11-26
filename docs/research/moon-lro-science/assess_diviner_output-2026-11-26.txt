@@ -14,6 +14,22 @@
   ghrm_n128_eq_180E.f32: OK
   ghrm_n128_45S_300E.f32: OK
 
+== L1 strict structure checks (GCP records; fixed-size binaries)
+  L1 gcp_00n10n_rows0-19199.tab: records 19200, sentinels -9999 7643, -9998 0: OK
+  L1 gcp_80n90n_rows0-19199.tab: records 19200, sentinels -9999 1447, -9998 0: OK
+  L1 gcp_00n10n_lon000-009.tab: records 19200, sentinels -9999 7902, -9998 0: OK
+  L1 gcp_40s30s_lon000-009.tab: records 19200, sentinels -9999 7481, -9998 0: OK
+  L1 gcp_90s80s_lon000-009.tab: records 19200, sentinels -9999 2311, -9998 0: OK
+  L1 gcp_70s60s_lon000-009.tab: records 19200, sentinels -9999 5748, -9998 0: OK
+  L1 gcp_70n80n_lon000-009.tab: records 19200, sentinels -9999 3313, -9998 0: OK
+  L1 dgdr_tbol_avg_cyl_20160111d_004_img.img: 2073600 B: OK
+  L1 dgdr_ltim_avg_cyl_20160111d_004_img.img: 2073600 B: OK
+  L1 dgdr_tbol_avg_cyl_20160125n_004_img.img: 2073600 B: OK
+  L1 dgdr_ltim_avg_cyl_20160125n_004_img.img: 2073600 B: OK
+  L1 ghrm_n128_eq_0E.f32: 65536 B: OK
+  L1 ghrm_n128_eq_180E.f32: 65536 B: OK
+  L1 ghrm_n128_45S_300E.f32: 65536 B: OK
+
 == G1 GCP patches: layout, missing share, values
   0-10N, 179.75W-175.25W (far side): lon -179.75..-175.25, lat 0.25..9.75, local-time centres match 0.125+0.25k: True
     tbol bins 19200: empty (-9999) 39.8%, invalid (-9998) 0, range 92.5..396.6 K, negative tbol 0

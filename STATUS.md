@@ -4,6 +4,23 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 26 Nov 2026
 
+## 26 Nov 09:20 UTC (clock reading) — **Diviner proposal rev 2 for GPT's recheck, after GPT's rev 1 review (REVISE FIRST; concept supported). Docs only** (Moon/LRO science, Diviner thread)
+- **GPT's review** is filed unchanged as `reviews/2026-11-26-moon-diviner-proposal-rev1-gpt-review.md` (sha256 `6457efb2…a4b9e`).
+- **Proposal** `docs/concepts/MOON-DIVINER-PROPOSAL.md` rev 2; §14 maps R1–R5:
+  - **R1:** the statistic is named as our unweighted mean of available bin values; range for n ≥ 2 only; "no valid data in this window"; three distinct cell states.
+  - **R2:** per-band checkpoints, whole-band refetch on failure, a streaming parser with vector-tested hashing, memory measured in the first-band trial, no partial publishing. Retention is decision D8.
+  - **R3:** one science-mode coordinator. Lighting state saved once on entry and restored for the current minute on exit; atomic swap after validation; stale answers discarded.
+  - **R4:** strict parsing with 1–450 K plausibility bounds (ours); a 64-byte header and exact plane offsets (2,073,664 B raw); whole-file validation; fixed scales from valid displayed cells; masks as display policy; a global report before freezing.
+  - **R5:** claims narrowed; explicit index, origin and flip tests.
+- **Evidence changes:**
+  - `assess_diviner.py` rev 2 exits 1 on any failure: tested with one altered byte, one missing file and eight crafted record breaks. Its statistics are identical to rev 1, and it reads the Mac's two-folder layout.
+  - SAMPLES §6.5 reworded, and §6.7 added.
+  - Measured locally on the existing samples (no new fetch): a lossless int32 × 10000 extraction is exact, with gzip ratios of 0.54–0.78.
+- **Not done:**
+  - Claude has not read Powell et al. 2023 (GPT's read is cited as GPT's); the fetch needed an approval that went unanswered.
+  - No new PDS fetch, no build, no page or hub change.
+- **Checklist** rev 3, §3. Next: GPT's recheck, then Chad's D1–D8 (D4a first-band trial go).
+
 ## 26 Nov 09:00 UTC (clock reading) — **Diviner assessed; proposal rev 1 for GPT's review. Docs only: nothing built, no bulk fetch, no page or hub change** (Moon/LRO science, Diviner thread)
 - **Chad's go (26 Nov):** a docs-only Diviner assessment: recheck products first, bounded small samples, define `tbol` from the documentation, a capped multi-range test, no global acquisition, measured sample costs kept apart from estimates. Moon stays active; Sun waits.
 - **Proposal:** `docs/concepts/MOON-DIVINER-PROPOSAL.md` rev 1. Recommended: the GCP `tbol` (2009–2015) as two Moon-tab maps, "around local noon" and "around local midnight", each a one-hour window, unweighted mean of the available 15-minute bins, with count and spread in the readout. Noon withheld beyond 70°, midnight beyond 80°. Evenly lit, mutually exclusive with height. Route A: stream the 18 band files in the pane with archive-MD5 checks, after a one-file stop point. Page file estimated at 0.7–1.1 MB. Decisions D1–D7 for Chad after GPT's review.

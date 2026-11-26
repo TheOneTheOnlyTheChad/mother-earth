@@ -3,9 +3,18 @@
 
 Usage: python3 -I assess_diviner.py <samples-dir>
 
-Reads the bounded Diviner samples listed in SAMPLES.md §6 (not committed:
-research stays text only) and prints every sample-derived number used in
-docs/concepts/MOON-DIVINER-PROPOSAL.md. Needs numpy only.
+<samples-dir> is the Mac folder _source-data/moon-lro-science-2026-11-26/
+(or a copy of it): the two older GCP patches sit in it, the newer files in
+its diviner/ subfolder; each file is looked up in <samples-dir> first, then
+in <samples-dir>/diviner/. Reads the bounded Diviner samples listed in
+SAMPLES.md §6 (not committed: research stays text only) and prints every
+sample-derived number used in docs/concepts/MOON-DIVINER-PROPOSAL.md.
+Needs numpy only.
+
+Exit status (rev 2, after GPT's rev 1 review): 0 only if every file is present
+with its recorded SHA-256 and every structural check passes (D0, L1);
+otherwise the failures are printed and the script stops with status 1 before
+any statistic is printed.
 
 Products:
   GCP   LRO-L-DLRE-5-GCP-V1.0, global_cumul_avg_cyl_<band>_002.tab
@@ -31,8 +40,16 @@ import numpy as np
 
 warnings.simplefilter('ignore', RuntimeWarning)
 
-D = sys.argv[1] if len(sys.argv) > 1 else '/home/claude/samples'
-P = lambda f: os.path.join(D, f)
+STRUCTURE_ONLY = len(sys.argv) > 2 and sys.argv[1] == '--structure-only'   # test aid: L1 on one GCP file, no hashes, no statistics
+D = os.path.dirname(os.path.abspath(sys.argv[2])) if STRUCTURE_ONLY else (sys.argv[1] if len(sys.argv) > 1 else '/home/claude/samples')
+
+
+def P(f):
+    for d in (D, os.path.join(D, 'diviner')):
+        q = os.path.join(d, f)
+        if os.path.isfile(q):
+            return q
+    return None
 
 EXPECTED = {
     'gcp_00n10n_rows0-19199.tab': 'b1f930da3d4a8de1e136ac71c90947e1d7dc3e82d54114f6b722eaa68802ba97',
@@ -56,19 +73,70 @@ def sha(f):
     return hashlib.sha256(open(P(f), 'rb').read()).hexdigest()
 
 
-print('== D0 hashes')
-for f, h in EXPECTED.items():
+FAIL = []
+if not STRUCTURE_ONLY:
+    print('== D0 hashes')
+for f, h in (EXPECTED.items() if not STRUCTURE_ONLY else []):
+    if P(f) is None:
+        print(f'  {f}: MISSING'); FAIL.append(f + ' missing'); continue
     got = sha(f)
-    print(f'  {f}: {"OK" if got == h else "MISMATCH " + got}')
+    ok = got == h
+    print(f'  {f}: {"OK" if ok else "MISMATCH " + got}')
+    if not ok:
+        FAIL.append(f + ' hash mismatch')
+if FAIL:
+    print('STOP: ' + '; '.join(FAIL)); sys.exit(1)
 
 
 # ---------------------------------------------------------------- GCP
+import re
+NUM = re.compile(rb'^ *-?[0-9]+(\.[0-9]+)?$')
+TBOL_MIN, TBOL_MAX = 1.0, 450.0   # our plausibility bounds (the label documents no bounds); outside = stop, never encoded
+
+
 def gcp(f):
-    a = np.loadtxt(P(f), delimiter=',')
-    assert a.shape[1] == 11
-    n = a.shape[0] // 1920
-    a = a.reshape(n, 20, 96, 11)       # lon, lat, local time, field
-    return a
+    """Strict parse of a GCP sample: whole 113-byte CRLF records, 11 numeric fields, the exact coordinate sequence
+    (longitude slowest, then latitude ascending, then 96 local-time bins), sentinels exactly -9999 or -9998, every
+    other tbol finite and inside (TBOL_MIN, TBOL_MAX). Any failure is recorded in FAIL."""
+    raw = open(P(f), 'rb').read()
+    bad = []
+    if len(raw) % 113:
+        bad.append('length not a multiple of 113')
+    n = len(raw) // 113
+    if n % 1920:
+        bad.append('record count not a multiple of 1920 (20 latitudes x 96 bins)')
+    out = np.empty((n, 11))
+    sentinels = {b'-9999': 0, b'-9998': 0}
+    for i in range(n):
+        rec = raw[i * 113:(i + 1) * 113]
+        if rec[-2:] != b'\r\n':
+            bad.append(f'record {i}: no CRLF'); break
+        fs = rec[:-2].split(b',')
+        if len(fs) != 11 or not all(NUM.match(x) for x in fs):
+            bad.append(f'record {i}: not 11 numeric fields'); break
+        v = [float(x) for x in fs]
+        if not all(np.isfinite(v)):
+            bad.append(f'record {i}: non-finite'); break
+        t = fs[10].strip()
+        if t in sentinels:
+            sentinels[t] += 1
+        elif not (TBOL_MIN < v[10] < TBOL_MAX):
+            bad.append(f'record {i}: tbol {v[10]} outside plausibility bounds'); break
+        out[i] = v
+    if not bad:
+        a = out.reshape(n // 1920, 20, 96, 11)
+        lon, lat, lt = a[:, 0, 0, 0], a[0, :, 0, 1], a[0, 0, :, 2]
+        if not np.allclose(np.diff(lon), 0.5) or not np.allclose(a[..., 0], lon[:, None, None]):
+            bad.append('longitude sequence')
+        if not np.allclose(np.diff(lat), 0.5) or not np.allclose(a[..., 1], lat[None, :, None]):
+            bad.append('latitude sequence')
+        if not np.allclose(lt, (np.arange(96) + 0.5) * 0.25, atol=0.006) or not np.allclose(a[..., 2], lt[None, None, :]):
+            bad.append('local-time sequence')
+    print(f'  L1 {f}: records {n}, sentinels -9999 {sentinels[b"-9999"]}, -9998 {sentinels[b"-9998"]}: {"OK" if not bad else "FAIL " + "; ".join(bad)}')
+    if bad:
+        FAIL.append(f + ': ' + '; '.join(bad))
+        return None
+    return out.reshape(n // 1920, 20, 96, 11)
 
 
 LT = (np.arange(96) + 0.5) * 0.25      # bin centres
@@ -91,11 +159,25 @@ PATCHES = [
     ('gcp_70n80n_lon000-009.tab', '70-80N, 0.25E-4.75E (near side)'),
 ]
 
+if STRUCTURE_ONLY:
+    r = gcp(os.path.basename(sys.argv[2]))
+    sys.exit(0 if r is not None else 1)
+
+print('\n== L1 strict structure checks (GCP records; fixed-size binaries)')
+G = {f: gcp(f) for f, _ in PATCHES}
+for f, size in [('dgdr_tbol_avg_cyl_20160111d_004_img.img', 2073600), ('dgdr_ltim_avg_cyl_20160111d_004_img.img', 2073600),
+                ('dgdr_tbol_avg_cyl_20160125n_004_img.img', 2073600), ('dgdr_ltim_avg_cyl_20160125n_004_img.img', 2073600),
+                ('ghrm_n128_eq_0E.f32', 65536), ('ghrm_n128_eq_180E.f32', 65536), ('ghrm_n128_45S_300E.f32', 65536)]:
+    got = os.path.getsize(P(f))
+    print(f'  L1 {f}: {got} B: {"OK" if got == size else "FAIL"}')
+    if got != size:
+        FAIL.append(f + ' size')
+if FAIL:
+    print('STOP: ' + '; '.join(FAIL)); sys.exit(1)
+
 print('\n== G1 GCP patches: layout, missing share, values')
-G = {}
 for f, desc in PATCHES:
-    a = gcp(f)
-    G[f] = a
+    a = G[f]
     lon = a[:, 0, 0, 0]
     lat = a[0, :, 0, 1]
     lt = a[0, 0, :, 2]
