@@ -170,7 +170,6 @@ Both are caught (§7). The same helper is used in `moon-diviner-ui`.
 | `test_mehash` / `test_gcp_stream` / `test_pane_job` (acquisition tooling, carried) | 466 / 165 / 56 passed, 0 failed | final |
 | `build_diviner.py --planes … --check` | committed files equal a fresh build | final |
 | `ghrm_compare.py` | PASS (registration controls) | final |
-
 | `skycraft-ui` | 77 passed, 0 failed | final |
 | `smoke-fixes` | 11 failed, **the same 11 on main** (`f63b4fe`, run side by side on another port): Earth now's fire-cell record checks, which read live hub data. Pre-existing; not from this branch | final |
 
