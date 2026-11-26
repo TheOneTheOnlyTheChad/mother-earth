@@ -14,7 +14,11 @@
  *  H. startup readiness (GPT preview review R1): opened before the globe is ready (delayed library), off before ready, on/off/on before
  *     ready, library failure, and a deadline passed before a late start: one turn exactly when ready, none after off or the deadline,
  *     no endless polling, the picture panel working throughout
- * BREAK=turn|late|offlate|pe|novis|earthloc|stale|fp|ptr|bar|nd|retry|offcam|eager|size|noready|nodeadline|latestart|offwait must each fail. */
+ * BREAK=turn|late|offlate|pe|novis|earthloc|stale|fp|ptr|bar|nd|retry|offcam|eager|size|noready|nodeadline|latestart|offwait|inctl must each fail.
+ *  J. control availability (GPT's rev 3 recheck): the toggle sits outside the globe controls (#mg-ctl), so it stays usable when the globe fails
+ *     before or after opening; closing clears the locator and the wait and returns focus to the toggle. Break inctl serves moon.html with the
+ *     toggle put back inside #mg-ctl (the pre-RC layout). Focus: the toggle is the only off control, and activating it focuses it, so
+ *     removing setOn's btn.focus() changes no user path (tried as a break and not counted); J1d and J2d check where focus is after closing. */
 const { chromium } = require('playwright'); const fs = require('fs'); const path = require('path'); const crypto = require('crypto');
 const BASE = process.argv[2] || 'http://127.0.0.1:8899'; const BREAK = process.env.BREAK || '';
 const ROOT = path.join(__dirname, '..');
@@ -72,6 +76,12 @@ let br = null;
       if (opt.timeout) s = s.replace('const TIMEOUT_MS = 20000;', `const TIMEOUT_MS = ${opt.timeout};`);
       if (opt.globeWait) { if (!s.includes('const GLOBE_WAIT_MS = 20000;')) throw new Error('GLOBE_WAIT_MS pattern missing'); s = s.replace('const GLOBE_WAIT_MS = 20000;', `const GLOBE_WAIT_MS = ${opt.globeWait};`); }
       r.fulfill({ status: 200, contentType: 'application/javascript', body: s }); });
+    if (BREAK === 'inctl') await ctx.route(/\/moon\.html(\?.*)?$/, r => { let h = fs.readFileSync(path.join(ROOT, 'moon.html'), 'utf8');
+      const blk = '    <div id="mg-lroc-ctl" class="mgctl">\n      <button type="button" id="mg-lroc" aria-pressed="false">Show a detailed site: Apollo 11 (LROC)</button>\n    </div>\n';
+      const end = '      </fieldset>\n    </div>\n    <p id="mg-lit-read"';
+      if (!h.includes(blk) || !h.includes(end)) throw new Error('break pattern missing: inctl'); brkSeen = true;
+      h = h.replace(blk, '').replace(end, '      </fieldset>\n      <button type="button" id="mg-lroc" aria-pressed="false">Show a detailed site: Apollo 11 (LROC)</button>\n    </div>\n    <p id="mg-lit-read"');
+      r.fulfill({ status: 200, contentType: 'text/html', body: h }); });
     await ctx.route('**/moonlroc.css*', r => r.fulfill({ status: 200, contentType: 'text/css', body: patchCss(fs.readFileSync(path.join(ROOT, 'moonlroc.css'), 'utf8')) }));
     const asset = (key, file) => ctx.route(`**/assets/moon/lroc/${file}*`, async r => { hits[key]++;
       const o = (opt.assets || {})[key] || {};
@@ -102,6 +112,11 @@ let br = null;
     ok('A2 panel and locator line hidden', await T.p.evaluate(() => document.getElementById('mg-lroc-panel').hidden && document.getElementById('mg-lroc-loc').hidden));
     ok('A3 no LROC request while off', T.hits.area + T.hits.mask + T.hits.site === 0, T.hits);
     ok('A4 nothing in the globe HTML layer', await T.p.evaluate(() => !document.querySelector('.mgl-ring')));
+    // J3: where the toggle sits (normal page)
+    { const where = await T.p.evaluate(() => { const b = document.getElementById('mg-lroc'), w = document.getElementById('mg-lroc-ctl');
+      const prev = w && w.previousElementSibling, next = w && w.nextElementSibling;
+      return { inCtl: !!b.closest('#mg-ctl'), inWrap: b.parentElement === w, prev: prev && prev.id, next: next && next.id, vis: !!(w && w.offsetParent) }; });
+      ok('J3 the detail toggle is outside the globe controls, in its own control row after the LRO readout and before the locator line', !where.inCtl && where.inWrap && where.prev === 'mg-lro-read' && where.next === 'mg-lroc-loc' && where.vis, where); }
     // ---------- B
     await T.p.click('#mg-lroc'); await waitState(T.p, 'shown'); await T.p.waitForTimeout(300);
     const v = await T.p.evaluate(() => MoonGlobe.view());
@@ -206,8 +221,43 @@ let br = null;
     await T.p.waitForFunction(() => document.getElementById('mg-globe').hidden, null, { timeout: 10000 }).catch(() => {});
     await T.p.waitForTimeout(500);
     const a = await st(T.p);
-    ok('H7a the library fails before the detail is asked for: the page hides its controls as before, the detail stays off, nothing polls',
+    ok('H7a the library fails before the detail is asked for: the page hides its globe controls as before, the detail stays off, nothing polls',
       await T.p.evaluate(() => document.getElementById('mg-ctl').hidden && document.getElementById('mg-lroc-panel').hidden) && !a.on && !a.waiting && a.turns === 0 && T.errs.length === 0, { a, errs: T.errs });
+    // J1: the toggle stays visible and keyboard-operable; open, use, close, all without a reload
+    const vis = await T.p.isVisible('#mg-lroc');
+    let tabs = 0; await T.p.evaluate(() => { document.activeElement && document.activeElement.blur(); window.scrollTo(0, 0); });
+    while (tabs < 60 && !(await T.p.evaluate(() => document.activeElement && document.activeElement.id === 'mg-lroc'))) { await T.p.keyboard.press('Tab'); tabs++; }
+    const reached = await T.p.evaluate(() => document.activeElement && document.activeElement.id === 'mg-lroc');
+    ok('J1a globe failed before opening: the detail toggle is still visible and reachable by Tab', vis && reached, { vis, tabs });
+    if (reached) { await T.p.keyboard.press('Enter'); await T.p.waitForTimeout(250);
+      const b = await st(T.p), line = await T.p.textContent('#mg-lroc-loc');
+      ok('J1b Enter opens the detail at once with the locator unavailable (no wait, no turn), said so under the globe', b.on && b.loc === 'unavailable' && !b.waiting && b.turns === 0 && /Locator unavailable/.test(line)
+        && !(await T.p.evaluate(() => document.getElementById('mg-lroc-panel').hidden)), { b, line });
+      await waitState(T.p, 'shown').catch(() => {});
+      await T.p.check('input[name="mg-lroc-view"][value="site"]'); await waitState(T.p, 'shown').catch(() => {}); await T.p.waitForTimeout(200);
+      const c = await st(T.p);
+      ok('J1c the pictures work with the globe failed: area shown, then the site view', c.state === 'shown' && c.view === 'site' && /a11-site-0p5m/.test(c.shown), c);
+      await T.p.focus('#mg-lroc'); await T.p.keyboard.press('Enter'); await T.p.waitForTimeout(250);
+      const d = await st(T.p), f = await T.p.evaluate(() => ({ panel: document.getElementById('mg-lroc-panel').hidden, loc: document.getElementById('mg-lroc-loc').hidden, focus: document.activeElement && document.activeElement.id, pressed: document.getElementById('mg-lroc').getAttribute('aria-pressed') }));
+      ok('J1d Enter on the same toggle closes it without a reload: panel and locator line gone, focus stays on the toggle', !d.on && d.loc === 'off' && !d.waiting && f.panel && f.loc && f.focus === 'mg-lroc' && f.pressed === 'false' && !(await ringBox(T.p)), { d, f });
+    } else { ok('J1b Enter opens the detail at once with the locator unavailable', false, 'toggle not reachable'); ok('J1c the pictures work with the globe failed', false, 'toggle not reachable'); ok('J1d the toggle closes it without a reload', false, 'toggle not reachable'); }
+    ok('J1e no page errors', T.errs.length === 0, T.errs);
+    await T.close(); }
+  { const O = { noReady: true, lib: { delay: 1500, fail: true }, assets: { area: { status: 500 } } }, T = await mk(O);
+    await T.p.click('#mg-lroc');
+    await T.p.waitForFunction(() => MoonLroc.state().loc === 'unavailable' && MoonLroc.state().state === 'failed', null, { timeout: 8000 }).catch(() => {});
+    const a = await st(T.p), ctl = await T.p.evaluate(() => document.getElementById('mg-ctl').hidden);
+    const retryVis = await T.p.isVisible('#mg-lroc-retry'), togVis = await T.p.isVisible('#mg-lroc');
+    ok('J2a globe failed after opening, picture failed too: the globe controls hide, the detail toggle and Retry stay visible', ctl && a.loc === 'unavailable' && a.state === 'failed' && retryVis && togVis, { a, ctl, retryVis, togVis });
+    delete O.assets.area.status;
+    if (retryVis) await T.p.click('#mg-lroc-retry'); await waitState(T.p, 'shown').catch(() => {});
+    ok('J2b Retry works with the globe failed', (await st(T.p)).state === 'shown');
+    await T.p.check('input[name="mg-lroc-view"][value="site"]'); await waitState(T.p, 'shown').catch(() => {}); await T.p.waitForTimeout(200);
+    ok('J2c the view radios work with the globe failed', (await st(T.p)).view === 'site' && (await st(T.p)).state === 'shown');
+    if (togVis) await T.p.click('#mg-lroc'); await T.p.waitForTimeout(250);
+    const d = await st(T.p), f = await T.p.evaluate(() => ({ panel: document.getElementById('mg-lroc-panel').hidden, focus: document.activeElement && document.activeElement.id, src: document.getElementById('mg-lroc-img').getAttribute('src') }));
+    ok('J2d the visible toggle closes the panel: locator and wait cleared, picture released, focus on the toggle', !d.on && d.loc === 'off' && !d.waiting && f.panel && f.focus === 'mg-lroc' && f.src === null && !(await ringBox(T.p)), { d, f });
+    ok('J2e no page errors', T.errs.length === 0, T.errs);
     await T.close(); }
   { const T = await mk({ noReady: true, lib: { delay: 1500, fail: true } });
     await T.p.click('#mg-lroc');

@@ -423,9 +423,12 @@ const setCell = (b, m, i, v, n, r) => { b.writeUInt16LE(v, OFF.value[m] + 2 * i)
     await ctx.close(); }
 
   // ---- H (release candidate): sources.html#moontemp, read from the file (no browser)
-  { const t = fs.readFileSync(path.join(ROOT, 'sources.html'), 'utf8'), sec = (/  <h2 id="moontemp">[\s\S]*?\n\n(?=  <h2 id="sunglobe">)/.exec(t) || [''])[0];
-    ok('H sources.html: one Moon temperature section, after Moon height and before the Sun globe; one shortcut, between Moon height and Tides', (t.match(/<h2 id="moontemp">/g) || []).length === 1 && sec.length > 2000
-      && t.indexOf('id="moonheight"') < t.indexOf('id="moontemp"') && t.split(' · <a href="#moonheight">Moon height</a> · <a href="#moontemp">Moon temperature</a> · <a href="#tides">Tides</a>').length === 2);
+  // 26 Nov 2026 (Moon LROC release candidate): the Moon detailed-site section now follows this one, and its shortcut follows this shortcut;
+  // the section ends at the next section (detailed site, or the Sun globe), so the checks below read this section only
+  { const t = fs.readFileSync(path.join(ROOT, 'sources.html'), 'utf8'), sec = (/  <h2 id="moontemp">[\s\S]*?\n\n(?=  <h2 id="(?:moonlroc|sunglobe)">)/.exec(t) || [''])[0];
+    ok('H sources.html: one Moon temperature section, after Moon height and before the Moon detailed site and the Sun globe; one shortcut, after Moon height\'s and before the Moon detailed site\'s and Tides\'', (t.match(/<h2 id="moontemp">/g) || []).length === 1 && sec.length > 2000 && !sec.includes('id="moonlroc"')
+      && t.indexOf('id="moonheight"') < t.indexOf('id="moontemp"') && t.indexOf('id="moontemp"') < t.indexOf('id="moonlroc"') && t.indexOf('id="moonlroc"') < t.indexOf('id="sunglobe"')
+      && t.split(' · <a href="#moonheight">Moon height</a> · <a href="#moontemp">Moon temperature</a> · <a href="#moonlroc">Moon detailed site</a> · <a href="#tides">Tides</a>').length === 2);
     ok('H section: our statistic, the masks as display policy, both scales (rounded outward), the same-colour warning, grid-cell shares, the GHRM caveat, DOI and public domain',
       /our<\/b> unweighted mean of the available quarter-hour bin values/.test(sec) && /<b>our display policy<\/b>, not the edge of Diviner’s coverage/.test(sec) && /noon 281–395 K and midnight 70–105 K/.test(sec)
       && /rounded outward to whole kelvin/.test(sec) && /The same colour does not mean the same temperature on the two maps/.test(sec) && /not of surface area/.test(sec)
