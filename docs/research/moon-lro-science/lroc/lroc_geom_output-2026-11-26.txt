@@ -1,0 +1,33 @@
+  50CM k=0.0: worst edge error 1.000 px  (N edge line -0.500, W edge sample -0.031, S edge line 55907.500, E edge sample 8439.969)
+  50CM k=0.5: worst edge error 0.500 px  (N edge line 0.000, W edge sample 0.469, S edge line 55908.000, E edge sample 8440.469)
+  50CM k=1.0: worst edge error 0.469 px  (N edge line 0.500, W edge sample 0.969, S edge line 55908.500, E edge sample 8440.969)
+PASS 50CM: label bounds within 0.75 px of the array edges for the best convention  best k=1.0, worst 0.469 px
+  50CM: separation from the next-best convention 0.031 px
+  2M k=0.0: worst edge error 1.500 px  (N edge line 0.000, W edge sample 0.117, S edge line 13977.000, E edge sample 2110.117)
+  2M k=0.5: worst edge error 1.000 px  (N edge line 0.500, W edge sample 0.617, S edge line 13977.500, E edge sample 2110.617)
+  2M k=1.0: worst edge error 0.617 px  (N edge line 1.000, W edge sample 1.117, S edge line 13978.000, E edge sample 2111.117)
+PASS 2M: label bounds within 0.75 px of the array edges for the best convention  best k=1.0, worst 0.617 px
+  2M: separation from the next-best convention 0.383 px
+PASS both products are best fitted by the same convention, k = 1 (DSMAP.CAT "+1" form)  {1.0}
+PASS at least one product separates k = 1 from its neighbours by >= 0.25 px  50CM 0.031 px, 2M 0.383 px  (the 0.5 m bounds alone do not separate k = 1 from k = 0.5: half a pixel, 0.25 m)
+  0.5 m upper-left edge from PDS3: x -4748753.000 m, y 37495.000 m (PDS4 label: x +4748752.75, y 37494.75)
+  centre of pixel (1,1) from PDS3: x -4748752.750 m, y 37494.750 m
+PASS PDS4 upperleft_corner_y equals the centre of pixel (1,1) (to 1 mm)
+PASS PDS4 upperleft_corner_x has the magnitude of that centre but the opposite sign
+PASS 50CM LM: forward/inverse round trip < 1e-9 deg  line 34104.920 sample 6114.652
+PASS 50CM PSE: forward/inverse round trip < 1e-9 deg  line 34161.928 sample 6115.258
+PASS 50CM NW: forward/inverse round trip < 1e-9 deg  line 0.500 sample 0.969
+PASS 2M LM: forward/inverse round trip < 1e-9 deg  line 8527.105 sample 1529.538
+PASS 2M PSE: forward/inverse round trip < 1e-9 deg  line 8541.357 sample 1529.690
+PASS 2M NW: forward/inverse round trip < 1e-9 deg  line 1.000 sample 1.117
+PASS LM ground position identical through both grids
+PASS negative control "x sign flipped" is worse than the adopted convention by >= 0.5 px in both products  50CM 18995011.53 px, 2M 4748753.38 px
+PASS negative control "axes swapped" is worse than the adopted convention by >= 0.5 px in both products  50CM 9572496.00 px, 2M 2393124.50 px
+PASS negative control "one-line shift" is worse than the adopted convention by >= 0.5 px in both products  50CM 1.00 px, 2M 1.50 px
+  site crop lines (33593, 34616), samples (5603, 6626); LM is -0.040 m (south +) and -0.174 m (east +) from its pixel centre at crop (512,512) 0-based
+PASS site crop rows lie inside the checkpoint 1 range (full-width lines 33593-34616)
+  area source lines (7527, 9526), samples (1, 2110) (sample 2111 dropped) -> 1055 x 1000 output at 4 m
+  area ground bounds: N 0.74015568, W 23.37227576, S 0.60824413, E 23.51146363; width 4220.0 m, height 4000.0 m
+PASS area width is 4,220 m and height 4,000 m
+  site footprint in the area output (4 m px, 0-based, x right, y down): x 700.500..828.500, y 436.250..564.250
+RESULT PASS 0 failures
