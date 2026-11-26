@@ -4,7 +4,7 @@
 
 All reads below are **Claude's own reads**, made in the browser pane between 03:56 and 04:05 UTC on 26 Nov 2026 (clock readings: the first data file's HTTP `Date` header said 03:58:37 GMT; `date -u` in the workspace said 04:05:54 UTC after the last fetch). Neither the workspace shell nor the Mac shell can reach `pds-geosciences.wustl.edu` (the proxy refuses the connection, HTTP 403), so every file was fetched in the pane, hashed there, and copied to the workspace in base64 pieces. Each copy's SHA-256 matched the hash taken in the pane. GPT's 25 Nov reads are in the brief (`docs/concepts/MOON-LRO-SCIENCE-BRIEF-GPT-2026-11-25.md`) and are labelled as GPT's wherever they are used.
 
-The sample files are **not committed** (research stays text only). Anyone can fetch them again from the URLs and check them against the hashes. `assess_samples.py` (beside this note) reproduces the sample-derived numbers (hashes, LOLA checks, the float/int16 comparison, candidate sizes, Diviner statistics): `python3 -I assess_samples.py <samples-dir> <repo-root>`; its output is in `assess_output-2026-11-26.txt` (rev 2 run). Archive-page facts are reads, quoted with their pages. Browser decoding and rendering are measured by `measure_browser.cjs` (§5).
+The sample files are **not committed** (research stays text only). Since rev 2 a copy sits on Chad's Mac outside the repo, in `Documents/Mother Earth/_source-data/moon-lro-science-2026-11-26/` (the eight sample files plus the candidate grid as `ldem4-m-candidate.i16.gz`), so a reviewer can rerun the scripts. Anyone can fetch them again from the URLs and check them against the hashes. `assess_samples.py` (beside this note) reproduces the sample-derived numbers (hashes, LOLA checks, the float/int16 comparison, candidate sizes, Diviner statistics): `python3 -I assess_samples.py <samples-dir> <repo-root>`; its output is in `assess_output-2026-11-26.txt` (rev 2 run). Archive-page facts are reads, quoted with their pages. Browser decoding and rendering are measured by `measure_browser.cjs` (§5).
 
 ## 1. Archive rechecks (GPT's 25 Nov facts, read again)
 
@@ -40,7 +40,7 @@ These are archive coverage statements, not an instrument health check. Neither p
 |---|---|---|---|---|
 | ldem_4_float.img | https://pds-geosciences.wustl.edu/lro/lro-l-lola-3-rdr-v1/lrolol_1xxx/data/lola_gdr/cylindrical/float_img/ldem_4_float.img | 4,147,200 | Wed, 06 Sep 2017 16:12:35 GMT | `6eaee9376442dc851b8f8e94790499ec339d923367d7b8608a4316088b85bd45` |
 | ldec_4.img | …/cylindrical/img/ldec_4.img | 2,073,600 | Mon, 04 Dec 2017 18:00:22 GMT | `10ccc1253a7adab1ecb651d26b00ef6cbfa41107fd40f8998b5ab9fa5f9ee943` |
-| ldem_4.img (int16, read in the pane only, for comparison) | …/cylindrical/img/ldem_4.img | 2,073,600 | Wed, 06 Sep 2017 15:43:35 GMT | `c04632eba6449af49e3108ed7c25b3b1c450600abd3690df4fc815853a1af476` |
+| ldem_4.img (int16; rev 1 read it in the pane only, rev 2 copied it, see §5) | …/cylindrical/img/ldem_4.img | 2,073,600 | Wed, 06 Sep 2017 15:43:35 GMT | `c04632eba6449af49e3108ed7c25b3b1c450600abd3690df4fc815853a1af476` |
 
 The first fetch of `ldem_4_float.img` took 3,052 ms in the pane (one measurement, Chad's home connection to St. Louis; not a page-load figure).
 
