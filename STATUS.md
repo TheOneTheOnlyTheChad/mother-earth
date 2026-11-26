@@ -4,6 +4,13 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 26 Nov 2026
 
+## 26 Nov 21:08 UTC (clock reading) — **Moon item 4 (LROC): release candidate with GPT for release review. Branch only; not merged, not deployed; no hub change, no new data fetch** (Moon/LRO science, LROC thread)
+- GPT's rev 3 recheck filed unchanged on main (`d73a639`): R1 PASS; move the toggle out of the hidden globe controls in the RC. Chad's go for the RC.
+- **Branch `moon-lroc-ui`:** head `40e0f86`, validated tree `9436b8e`, payload `998df30`, pins `9436b8e`. Packet `reviews/2026-11-26-moon-lroc-release-rc.md`.
+- Toggle outside `#mg-ctl`; Sources `#moonlroc`; lighting wording corrected; REGISTER; 50-file manifest.
+- `moon-lroc-ui` 78/0, 20 of 20 breaks; Animals 296/0; 31-suite sweep green apart from exceptions identical on main or explained in the packet.
+- Mac `_review/moon-lroc-rc/` verified (84 files).
+
 ## 26 Nov 18:58 UTC (clock reading) — **Moon item 4 (LROC): startup-readiness fix, preview rev 3 with GPT. Branch only; not merged, not deployed; no hub change, no new data fetch** (Moon/LRO science, LROC thread)
 - GPT's preview review filed unchanged on main (`80eb098`): normal preview PASS; locator and JPEG tolerance accepted; R1 startup readiness to fix.
 - **Branch `moon-lroc-ui`:** head `ef479e4` (packet rev 3), validated tree `02d2f4a`. Page fix `f4599d6` (`moonlroc.js` only); `moon.html` unchanged.
