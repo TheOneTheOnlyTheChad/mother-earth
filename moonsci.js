@@ -12,7 +12,8 @@
  * State contract (rev 2.1 §4.3): nothing in the view changes until both files are ready; on failure nothing changes; on success
  * the Earth view is left, "Lit as now" is set off and both lighting buttons are disabled; switching height off brings the
  * picture back and restores "Lit as now" (for the current minute) if it was on; the Earth view is not reopened. A late response
- * after the user has switched height off is ignored (token) and the fetch is aborted. The LRO overlay is never touched. */
+ * after the user has switched height off is ignored (token) and the fetch is aborted. The first failing file aborts the other; a texture
+ * URL made by a cancelled or failed attempt is revoked, and only the committed one is kept. The LRO overlay is never touched. */
 (() => {
   'use strict';
   const $ = id => document.getElementById(id);
@@ -25,7 +26,7 @@
   };
   const ROWS = 720, COLS = 1440, WITHHELD = -32768, TIMEOUT_MS = 15000;
   const WITHHELD_TEXT = 'Values north of 89.5°N are withheld because inconsistencies were found in the source products.';
-  const st = { on: false, phase: 'off', token: 0, ctl: null, grid: null, texUrl: null, prev: null, why: '' };
+  const st = { on: false, phase: 'off', token: 0, ctl: null, grid: null, texUrl: null, prev: null, why: '', revoked: 0 };
 
   const hex = async buf => [...new Uint8Array(await crypto.subtle.digest('SHA-256', buf))].map(b => b.toString(16).padStart(2, '0')).join('');
   class Why extends Error {}
@@ -87,19 +88,23 @@
     if (!h || !h.ready()) { say('Height map unavailable: the globe is not running.'); return; }
     st.on = true; st.phase = 'loading'; const tok = ++st.token; say(''); paint();
     const ctl = new AbortController(); st.ctl = ctl; const tm = setTimeout(() => ctl.abort(), TIMEOUT_MS);
-    try {
-      const [grid, texUrl] = await Promise.all([st.grid || loadGrid(ctl.signal), st.texUrl || loadTex(ctl.signal)]);
-      if (tok !== st.token || !st.on) return;   // switched off (or pressed again) while loading: a late answer changes nothing
-      st.grid = grid; st.texUrl = texUrl;      // kept: later toggles make no requests
-      // one step: remember, leave the Earth view, sunlight off and locked, then the texture
-      st.prev = h.lit(); h.litOff(); h.lock(true); h.texture(texUrl); h.cap(true);
-      st.phase = 'on'; paint();
-      say('Sunlight is not drawn on the height map, so “Lit as now” is off while height is shown. Click the globe, or use “Read height at centre”, to read a value.');
-    } catch (e) {
-      if (tok !== st.token) return;
-      st.on = false; st.phase = 'off'; paint();   // nothing in the view has changed
-      say('Height map could not be loaded: ' + (e instanceof Why ? e.message : 'an unexpected error') + '. The globe is unchanged.');
-    } finally { clearTimeout(tm); if (st.ctl === ctl) st.ctl = null; }
+    // Each file loads on its own; the first failure aborts the other (no sibling left running). Every outcome is waited for, so a
+    // texture URL made by this attempt is either committed (kept as the cache) or revoked: a cancelled or failed attempt keeps nothing.
+    let firstErr = null; const first = p => p.catch(e => { if (!firstErr) firstErr = e; ctl.abort(); throw e; });   // the reason shown is the first failure's
+    const [g, t] = await Promise.allSettled([st.grid ? Promise.resolve(st.grid) : first(loadGrid(ctl.signal)), st.texUrl ? Promise.resolve(st.texUrl) : first(loadTex(ctl.signal))]);
+    clearTimeout(tm); if (st.ctl === ctl) st.ctl = null;
+    const madeTex = t.status === 'fulfilled' && t.value !== st.texUrl ? t.value : null;   // made by this attempt, not yet owned by the cache
+    const drop = () => { if (madeTex) { URL.revokeObjectURL(madeTex); st.revoked++; } };
+    if (tok !== st.token || !st.on) { drop(); return; }   // switched off (or pressed again) while loading: a late answer changes nothing
+    if (g.status === 'rejected' || t.status === 'rejected') {
+      drop(); st.on = false; st.phase = 'off'; paint();   // nothing in the view has changed
+      const e = firstErr || (g.status === 'rejected' ? g.reason : t.reason);
+      say('Height map could not be loaded: ' + (e instanceof Why ? e.message : 'an unexpected error') + '. The globe is unchanged.'); return; }
+    st.grid = g.value; st.texUrl = t.value;      // kept: later toggles make no requests
+    // one step: remember, leave the Earth view, sunlight off and locked, then the texture
+    st.prev = h.lit(); h.litOff(); h.lock(true); h.texture(st.texUrl); h.cap(true);
+    st.phase = 'on'; paint();
+    say('Sunlight is not drawn on the height map, so “Lit as now” is off while height is shown. Click the globe, or use “Read height at centre”, to read a value.');
   }
   function turnOff() {
     const h = MG();
@@ -114,6 +119,6 @@
   if (cbtn) cbtn.addEventListener('click', () => { const h = MG(), v = h && h.centre(); if (v) readAt(v.lat, v.lng, 'centre of view'); });
   const hookUp = setInterval(() => { const h = MG(); if (h) { clearInterval(hookUp); h.onClick((lat, lng) => readAt(lat, lng, 'clicked')); } }, 200);
   paint();
-  window.MoonHeight = { state: () => ({ on: st.on, phase: st.phase, token: st.token, cached: { grid: !!st.grid, tex: !!st.texUrl }, prev: st.prev }),   // test aids
+  window.MoonHeight = { state: () => ({ on: st.on, phase: st.phase, token: st.token, cached: { grid: !!st.grid, tex: !!st.texUrl }, prev: st.prev, revoked: st.revoked }),   // test aids
     value: (lat, lng) => st.grid ? st.grid[cellIndex(lat, lng)] : null, index: cellIndex, grid: () => st.grid };
 })();

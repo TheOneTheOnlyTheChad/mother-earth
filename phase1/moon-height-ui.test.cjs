@@ -6,7 +6,7 @@
  *  D. network and rendering: no requests while off, one per file on first use, none later; idle draw calls height off/on
  *  E. keyboard, narrow layout, behaviour with height never used
  * Run: LOLA_SRC=<dir with ldem_4_float.img> node phase1/moon-height-ui.test.cjs [base-url]   (static server on the repo, default 127.0.0.1:8899)
- * BREAK=be|late|nolock|norestore|early|nocache|row|col|noraw|nopin must each fail. */
+ * BREAK=be|late|nolock|norestore|early|nocache|row|col|noraw|nopin|nofirst|norevoke must each fail. */
 const { chromium } = require('playwright'); const fs = require('fs'); const path = require('path'); const zlib = require('zlib');
 const { PNG } = require('/home/claude/spike/node_modules/pngjs');
 const BASE = process.argv[2] || 'http://127.0.0.1:8899'; const BREAK = process.env.BREAK || '';
@@ -41,6 +41,8 @@ const near = (a, b, tol = 30) => a.every((v, k) => Math.abs(v - b[k]) <= tol);
       if (BREAK === 'row') s = s.replace('Math.floor((90 - lat) * 4)', 'Math.round((90 - lat) * 4)');
       if (BREAK === 'col') s = s.replace("Math.floor((((lng % 360) + 360) % 360) * 4) % COLS", "Math.floor((((lng + 180) % 360 + 360) % 360) * 4) % COLS");
       if (BREAK === 'noraw') s = s.replace('} else raw = buf;', '} else throw new Why(\'not gzip\');');
+      if (BREAK === 'nofirst') s = s.replace("if (!firstErr) firstErr = e; ctl.abort(); throw e;", "if (!firstErr) firstErr = e; throw e;");
+      if (BREAK === 'norevoke') s = s.replace("if (madeTex) { URL.revokeObjectURL(madeTex); st.revoked++; }", "");
       if (BREAK === 'nopin') s = s.replace("if (raw.byteLength !== F.grid.rawBytes || await hex(raw) !== F.grid.rawSha) throw", "if (false) throw");
       r.fulfill({ status: 200, contentType: 'application/javascript', body: s }); });
     await ctx.route('**/assets/moon/lola/ldem4-m-R1.i16.gz*', async r => { hits.grid++;
@@ -49,7 +51,17 @@ const near = (a, b, tol = 30) => a.every((v, k) => Math.abs(v - b[k]) <= tol);
       if (opt.grid404) return r.fulfill({ status: 404, body: '' });
       let body = GZ; if (opt.gridRaw) body = RAW; if (opt.gridBad) { body = Buffer.from(opt.gridRaw ? RAW : GZ); body[body.length >> 1] ^= 1; } if (opt.gridShort) body = GZ.subarray(0, GZ.length - 10);
       r.fulfill({ status: 200, contentType: 'application/octet-stream', body }); });
-    await ctx.route('**/assets/moon/lola/ldem4-colour-R1.png*', r => { hits.tex++; r.continue(); });
+    const PNGB = fs.readFileSync(path.join(ROOT, 'assets/moon/lola/ldem4-colour-R1.png'));
+    await ctx.route('**/assets/moon/lola/ldem4-colour-R1.png*', async r => { hits.tex++;
+      if (opt.texDelay) await new Promise(res => setTimeout(res, opt.texDelay));
+      if (opt.texHang) return;
+      if (opt.tex404) return r.fulfill({ status: 404, body: '' }).catch(() => {});
+      let body = PNGB; if (opt.texBad) { body = Buffer.from(PNGB); body[body.length >> 1] ^= 1; }
+      r.fulfill({ status: 200, contentType: 'image/png', body }).catch(() => {}); });
+    // object-URL accounting: every URL made and revoked on the page
+    await ctx.addInitScript(() => { window.__u = { made: [], revoked: [] }; const mk = URL.createObjectURL.bind(URL), rv = URL.revokeObjectURL.bind(URL);
+      URL.createObjectURL = b => { const u = mk(b); window.__u.made.push(u); return u; }; URL.revokeObjectURL = u => { window.__u.revoked.push(u); rv(u); }; });
+    if (opt.noDecode) await ctx.addInitScript(() => { HTMLImageElement.prototype.decode = function () { return Promise.reject(new Error('decode')); }; });
     if (opt.noDS) await ctx.addInitScript(() => { delete window.DecompressionStream; });
     if (opt.noAbort) await ctx.addInitScript(() => { AbortController.prototype.abort = function () {}; });   // a response that arrives anyway
     if (opt.count) await ctx.addInitScript(() => { window.__c = { draw: 0 }; for (const C of [window.WebGLRenderingContext, window.WebGL2RenderingContext]) { if (!C) continue;
@@ -63,6 +75,7 @@ const near = (a, b, tol = 30) => a.every((v, k) => Math.abs(v - b[k]) <= tol);
   const hidden = (p, sel) => p.evaluate(sel => { const e = document.querySelector(sel); return !e || e.hidden || getComputedStyle(e).display === 'none'; }, sel);
   const press = (p, sel) => p.evaluate(sel => document.querySelector(sel).click(), sel);
   const toGlobe = p => p.evaluate(() => document.getElementById('mg-globe').scrollIntoView({ block: 'center' }));
+  const live = p => p.evaluate(() => window.__u.made.filter(u => !window.__u.revoked.includes(u)).length);
   const texUrl = p => p.evaluate(() => MoonGlobe.globe().globeImageUrl());
   const hstate = p => p.evaluate(() => MoonHeight.state());
   const waitPhase = (p, ph, t = 20000) => p.waitForFunction(ph => MoonHeight.state().phase === ph, ph, { timeout: t }).then(() => true, () => false);
@@ -113,7 +126,7 @@ const near = (a, b, tol = 30) => a.every((v, k) => Math.abs(v - b[k]) <= tol);
       const dAng = Math.hypot(cl - la, ((((cg - lo) % 360) + 540) % 360 - 180) * Math.cos(la * Math.PI / 180));
       ok(`B click registers at once (no stale position): ${name}`, v !== null && cl + ',' + cg !== before && dAng <= 0.25, { cl, cg, la, lo, dAng });
       ok(`B readout = value of the cell containing the clicked point: ${name}`, v !== null && +v === EXP[idx(cl, cg)], { v, want: EXP[idx(cl, cg)] });
-      const rgb = await centreRGB(p, sc.x, sc.y); ok(`B colour under the click matches the texture: ${name}`, near(rgb, texAt(cl, cg), 36), { rgb, tex: texAt(cl, cg) }); }
+      const rgb = await centreRGB(p, sc.x, sc.y); ok(`B screen colour at the click is within 36 per channel of the saved texture's colour at the clicked point (visual registration at this scope, not proof of unfiltered per-cell rendering): ${name}`, near(rgb, texAt(cl, cg), 36), { rgb, tex: texAt(cl, cg) }); }
     // cell boundaries without the screen: the page's own lookup on both sides of 10N/20E, 0/360 and 180 against the build file
     for (const [la, lo] of [[10.0001, 20.0001], [9.9999, 19.9999], [10.0, 20.0], [0.1, 359.9999], [0.1, 0.0001], [0.1, 179.9999], [0.1, 180.0001], [0.1, -0.0001], [89.5001, 5], [89.4999, 5], [-89.9999, 5]]) {
       const got = await p.evaluate(([a, o]) => MoonHeight.value(a, o), [la, lo]); ok(`B lookup at ${la}, ${lo} = build cell`, got === EXP[idx(la, lo)], { got, want: EXP[idx(la, lo)] }); }
@@ -157,7 +170,9 @@ const near = (a, b, tol = 30) => a.every((v, k) => Math.abs(v - b[k]) <= tol);
     ok(`C rapid toggle${noAbort ? ' (answer arrives despite the abort)' : ''}: a late answer does not switch height on`, s.phase === 'off' && !s.on && /lroc_color_2k/.test(await texUrl(p)) && !(await p.evaluate(() => document.getElementById('mg-lit').disabled)), s);
     await ctx.close(); }
   for (const [name, opt, re] of [['404', { grid404: true }, /HTTP 404/], ['bad hash (compressed)', { gridBad: true }, /integrity/], ['short file', { gridShort: true }, /integrity/],
-    ['bad hash (already decompressed)', { gridRaw: true, gridBad: true }, /integrity/], ['no DecompressionStream', { noDS: true }, /newer browser/], ['timeout', { gridHang: true }, /too long/]]) {
+    ['bad hash (already decompressed)', { gridRaw: true, gridBad: true }, /integrity/], ['no DecompressionStream', { noDS: true }, /newer browser/], ['timeout', { gridHang: true }, /too long/],
+    ['texture 404', { tex404: true }, /HTTP 404/], ['texture bad hash', { texBad: true }, /picture failed its integrity/], ['texture timeout', { texHang: true }, /too long/],
+    ['texture decode failure', { noDecode: true }, /could not be decoded/], ['texture ok, grid 404 (texture made then dropped)', { grid404: true, texDelay: 0 }, /HTTP 404/]]) {
     const { ctx, p } = await mk(opt);
     await press(p, '#mg-lit'); await p.waitForFunction(() => MoonGlobe.light().state === 'on', null, { timeout: 15000 }).catch(() => {});
     const b4 = await p.evaluate(() => MoonGlobe.light());
@@ -165,6 +180,26 @@ const near = (a, b, tol = 30) => a.every((v, k) => Math.abs(v - b[k]) <= tol);
     const af = await p.evaluate(() => MoonGlobe.light()), t = await text(p, '#mg-height-read');
     ok(`C failure (${name}): nothing changes, reason given`, af.on === b4.on && af.uniform.on === b4.uniform.on && /lroc_color_2k/.test(await texUrl(p)) && !(await p.evaluate(() => document.getElementById('mg-lit').disabled))
       && re.test(t) && /could not be loaded/.test(t) && (await attr(p, '#mg-height', 'aria-pressed')) === 'false', { t, af: af.on });
+    if (opt.grid404) await p.waitForTimeout(1500);   // let the texture finish, then it must have been dropped
+    ok(`C failure (${name}): no object URL left behind`, (await live(p)) === 0, await p.evaluate(() => window.__u));
+    await ctx.close(); }
+  { // cancelled while the grid is still loading but after the texture arrived: the texture URL made by that attempt is revoked
+    const { ctx, p } = await mk({ gridDelay: 3000 });
+    await press(p, '#mg-height'); await p.waitForTimeout(1200); await press(p, '#mg-height'); await p.waitForTimeout(3000);
+    const u = await p.evaluate(() => window.__u);
+    ok('C cleanup: a cancelled attempt leaves no object URL (texture made, then revoked)', u.made.length >= 1 && (await live(p)) === 0 && (await hstate(p)).phase === 'off', u);
+    await press(p, '#mg-height'); ok('C cleanup: a later attempt still succeeds', await waitPhase(p, 'on'));
+    ok('C cleanup: success keeps exactly one object URL (the cached texture)', (await live(p)) === 1);
+    await press(p, '#mg-height'); await waitPhase(p, 'off'); await press(p, '#mg-height'); await waitPhase(p, 'on');
+    ok('C cleanup: later toggles make no new object URL', (await live(p)) === 1 && (await p.evaluate(() => window.__u.made.length)) === u.made.length + 1);
+    await ctx.close(); }
+  { // the grid fails at once while the texture is still on its way: the texture request is aborted, not left running
+    const { ctx, p } = await mk({ grid404: true, texDelay: 4000 }); const failed = [];
+    p.on('requestfailed', rq => { if (/ldem4-colour-R1\.png/.test(rq.url())) failed.push(rq.failure() && rq.failure().errorText); });
+    await press(p, '#mg-height'); await waitPhase(p, 'off', 8000); await p.waitForTimeout(800);
+    const t = await text(p, '#mg-height-read');
+    ok('C first failure aborts the sibling: texture request cancelled, the grid\'s reason shown, nothing changed', failed.some(e => /ABORTED/i.test(e || '')) && /HTTP 404/.test(t) && /lroc_color_2k/.test(await texUrl(p)), { failed, t });
+    await p.waitForTimeout(3800); ok('C first failure: no object URL afterwards', (await live(p)) === 0);
     await ctx.close(); }
   { const { ctx, p } = await mk({ gridRaw: true });   // a server that already removed the gzip layer
     await press(p, '#mg-height'); ok('C already-decompressed answer accepted on its own pin', await waitPhase(p, 'on'));
