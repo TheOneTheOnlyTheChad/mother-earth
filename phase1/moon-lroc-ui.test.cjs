@@ -45,8 +45,9 @@ function patchCss(s) {
   return s;
 }
 
+let br = null;
 (async () => {
-  const br = await chromium.launch({ args: ['--use-gl=swiftshader', '--enable-unsafe-swiftshader', '--ignore-gpu-blocklist'] });
+  br = await chromium.launch({ args: ['--use-gl=swiftshader', '--enable-unsafe-swiftshader', '--ignore-gpu-blocklist'] });
   const mk = async (opt = {}) => {
     const ctx = await br.newContext({ viewport: { width: opt.w || 1000, height: opt.h || 900 }, reducedMotion: 'reduce' });
     const hits = { area: 0, mask: 0, site: 0 };
@@ -160,7 +161,7 @@ function patchCss(s) {
     ok('D3 failure: plain message, Retry shown, figure hidden, locator kept', /Detailed image unavailable/.test(txt) && await T.p.isVisible('#mg-lroc-retry') && await T.p.evaluate(() => document.getElementById('mg-lroc-fig').hidden) && rb && rb.disp !== 'none', { txt, rb });
     await T.ctx.unroute('**/assets/moon/lroc/a11-area-4m.jpg*');
     await T.ctx.route('**/assets/moon/lroc/a11-area-4m.jpg*', r => r.fulfill({ status: 200, contentType: 'image/jpeg', body: fs.readFileSync(path.join(ROOT, 'assets/moon/lroc/a11-area-4m.jpg')) }));
-    await T.p.focus('#mg-lroc-retry'); await T.p.keyboard.press('Enter'); await waitState(T.p, 'shown');
+    if (await T.p.isVisible('#mg-lroc-retry')) { await T.p.focus('#mg-lroc-retry'); await T.p.keyboard.press('Enter'); await waitState(T.p, 'shown').catch(() => {}); }
     ok('D4 Retry (keyboard) loads the picture', (await st(T.p)).state === 'shown' && !(await T.p.isVisible('#mg-lroc-retry')));
     await T.close(); }
   { const T = await mk({ timeout: 1200, assets: { area: { hang: true } } });
@@ -247,4 +248,4 @@ function patchCss(s) {
   console.log(`moon-lroc-ui: ${pass} passed, ${fail} failed`);
   await br.close();
   if (fail) process.exitCode = 1;
-})().catch(e => { console.log('SETUP FAIL', e && e.message); process.exitCode = 2; });
+})().catch(async e => { console.log('SETUP FAIL', e && e.message); console.log(`moon-lroc-ui (stopped early): ${pass} passed, ${fail} failed`); process.exitCode = 2; try { if (br) await br.close(); } catch (_) { } });
