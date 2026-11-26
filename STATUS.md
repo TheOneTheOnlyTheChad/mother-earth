@@ -4,6 +4,14 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 26 Nov 2026
 
+## 26 Nov 07:55 UTC (clock reading) — **Moon height: release candidate on `moon-height-rc` for GPT's review. Not merged, nothing deployed, no hub change** (page: none live; Moon/LRO science thread)
+- **GPT's preview review filed unchanged** (`reviews/2026-11-26-moon-height-rc-gpt-review.md`, from the Mac's `ChatGPT/Mother Earth/MOON-HEIGHT-RC-REVIEW-2026-11-26.md`): PASS for the branch preview; resource-cleanup fix and accurate test claims asked for.
+- **Chad's own line (26 Nov):** accepts the preview, the 2,578,646-byte optional download and the extra polar-cap draw; release candidate with GPT's cleanup fix and focused tests, Sources and REGISTER records, narrow Animals pins and a refreshed served manifest; no merge or deployment yet.
+- **Release payload `83f7c32`:** texture object URLs revoked on cancelled or failed attempts, first failure aborts the sibling load; focused tests; `sources.html#moonheight` and shortcut; REGISTER entry for LOLA `LDEM_4_FLOAT` V3.0 and the derived files; served manifest `reviews/evidence/2026-11-26-moon-height-manifest.json` (42 files; Tides manifests kept). Animals pins `bb001b9` + `b468034`.
+- **Tests on the final tree:** moon-height-ui 110/0 (12 breaks caught), animals-tab-ui 292/0 (2 new breaks caught), moon-globe 67, moon-lit 138, moon-lro-path 68, moon-light 27, skycraft-ui 77, smoke-fixes 113, desktop-overflow 286, tides-nav 2,882, build and manifest checks OK.
+- **Records:** packet `reviews/2026-11-26-moon-height-release-rc.md`.
+- **Next:** GPT reviews the release candidate. Then Chad's own Approve line naming the final commit; merge (page only); 42-file served check; release records; close-out.
+
 ## 26 Nov 06:02 UTC (clock reading) — **Moon height layer: branch preview `moon-height-rc` for GPT's review. Not merged, nothing deployed, no hub change** (page: none live; Moon/LRO science thread)
 - **GPT's rev 2 recheck filed** (`reviews/2026-11-26-moon-lro-proposal-rev2-gpt-recheck.md`, relayed by Chad): PASS as a build proposal, with implementation notes. Proposal rev 2.1 narrows §11 and records the notes.
 - **Chad's own line (26 Nov):** "I accept D1–D4. Go ahead with the `moon-height-rc` branch preview under rev 2.1, incorporating GPT’s notes. Page only; return the candidate for GPT review. No merge or deployment."
