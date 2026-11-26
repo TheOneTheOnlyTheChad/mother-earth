@@ -169,8 +169,8 @@ let br = null;
     ok('D5 timeout ends in a failure with Retry', /took too long/.test(await T.p.textContent('#mg-lroc-state')) && await T.p.isVisible('#mg-lroc-retry'));
     await T.close(); }
   { const T = await mk({ assets: { area: { swap: 'a11-site-0p5m.jpg' } } });
-    await T.p.click('#mg-lroc'); await waitState(T.p, 'failed');
-    ok('D6 a picture of the wrong size is refused', /not the expected size/.test(await T.p.textContent('#mg-lroc-state')));
+    await T.p.click('#mg-lroc'); await T.p.waitForFunction(() => MoonLroc.state().state !== 'loading', null, { timeout: 20000 }).catch(() => {});
+    ok('D6 a picture of the wrong size is refused', (await st(T.p)).state === 'failed' && /not the expected size/.test(await T.p.textContent('#mg-lroc-state')), await st(T.p));
     await T.close(); }
 
   // ---------- F: occlusion, Earth view, Lit, height, click-through, LRO path
