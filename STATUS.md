@@ -4,6 +4,19 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 26 Nov 2026
 
+## 26 Nov 08:16 UTC (clock reading) — **Moon height closed out. Live: Moon height `d6a26b6`; main `96a931d` before this commit. Nothing pending in this thread** (Moon/LRO science thread)
+- **Close-out checklist (START-HERE §9):**
+  - Mac `_review/` is empty. The branch tree is in `_to_delete/20261126-moon-height-close-out/_review-moon-height-rc`.
+  - Branch `moon-height-rc` deleted on the GitHub branches page; local branch deleted too.
+  - The Mac copy is synced to `96a931d` preserve-first: 24 files, each checked against its commit hash. Every preserved copy matched its earlier commit (no local edits). Preserved copies are in `_to_delete/20261126-moon-height-close-out/preserved-97815dd` and `preserved-55bb143`. The Mac copy passes the 42-file manifest `--check`.
+  - The container worktree is clean on `main`.
+- **Concurrent commit:** `96a931d` (Animals thread, docs only: ENQUIRIES-ANIMALS rev 4 and STATUS) landed on top of `55bb143` at 08:14 UTC. No served file changed, and the 42-file manifest still matches.
+- **Current served comparison:** `reviews/evidence/2026-11-26-moon-height-manifest.json` (42 files; verified 42 of 42 at 08:10:44 UTC).
+- **Animals suite pins:** `MH_MAIN` `83f7c32` (13e `moon.html` and `sources.html`, 13q–13s). Any later change to `moon.html`, `moonglobe.js` or `sources.html` must move those pins.
+- **Not in this release (Moon/LRO brief):** Diviner (parked); the Sky zoom-out Moon (parked for its own round); the Tides Moon is unchanged by decision; LRO prediction and current position are out of scope.
+- **Not verified:** real phone, Safari, screen reader, hardware renderer.
+- **Next:** Chad names the next thread. The Sun and Parker spec is the separate feature waiting. Handover block: HANDOVER "MOON HEIGHT, CLOSED OUT".
+
 ## 26 Nov 08:14 UTC (clock reading) — **Animals: first substantive ATAP reply (Dr Taryn Murray, SAIAB) filed. Offers SAIAB-owned datasets for discussion, duckbill rays (published, Critically Endangered) suggested first; leervis being written up; diamond rays a sub-sample; the eagle ray NOT available. No data, terms or permission yet.** (page: none; Animals thread)
 - **Record:** `docs/research/animals-source-audit/ENQUIRIES-ANIMALS.md` rev 4, factual summary; the full email kept privately on the Mac.
 - **Next:** GPT's review (Chad sent it); answering her is Chad's. Any dataset is a new study with its own source audit.
