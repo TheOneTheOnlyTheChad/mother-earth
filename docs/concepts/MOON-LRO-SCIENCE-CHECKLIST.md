@@ -91,7 +91,7 @@ Rev 7 · 26 Nov 2026, 11:58 UTC (clock reading; rev 6 10:22, rev 5 09:54, rev 4 
     - froze the masks at 70° (noon) / 80° (midnight) and the scales at 281–395 K / 70–105 K
     - go for the page-only preview after Claude's Powell read
   - **Claude read Powell et al. 2023 §2.4–2.5** in full (SAMPLES §6.8); the explainer now rests on that read.
-  - **Branch `moon-diviner-ui`:** payload `947dd14`, Animals pins `29bb0ee`, packet `reviews/2026-11-26-moon-diviner-ui-rc.md` (head `5faf2db`).
+  - **Branch `moon-diviner-ui`:** payload `947dd14`, Animals pins `29bb0ee`, packet `reviews/2026-11-26-moon-diviner-ui-rc.md` (head `cdc9aed`).
     - page file 720,037 B gzip, built from the 18 retained extractions and byte-checked against the pane planes
     - one coordinator for height and temperature
     - `moon-diviner-ui` 157/0 with 17 of 17 breaks caught; `moon-height-ui` 110/0 with 12 of 12; Animals 294/0
@@ -283,4 +283,4 @@ Suggested order (Claude's suggestion, for Chad to decide): LROC regional example
 - Rev 4 (26 Nov 2026, 09:42 UTC): §3: GPT's rev 2 recheck (PASS), Chad's decisions, the first-band trial PASS (branch `moon-diviner-trial` `3380aaf`). No other item moved.
 - Rev 5 (26 Nov 2026, 09:54 UTC): §3: GPT's first-band review (data PASS; tooling HOLD) and tooling v2 (`83dc53a`). No other item moved.
 - Rev 6 (26 Nov 2026, 10:22 UTC): §3: GPT's v2 recheck (PASS), D4b done (17 bands, all PASS), §6.4 global report (branch `moon-diviner-trial` `b918187`). No other item moved.
-- Rev 7 (26 Nov 2026, 11:58 UTC): §3: Chad's freeze and acceptance, Claude's Powell read, the `moon-diviner-ui` preview (head `5faf2db`). No other item moved.
+- Rev 7 (26 Nov 2026, 11:58 UTC): §3: Chad's freeze and acceptance, Claude's Powell read, the `moon-diviner-ui` preview (head `cdc9aed`). No other item moved.

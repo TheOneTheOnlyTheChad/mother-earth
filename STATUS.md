@@ -15,7 +15,7 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
   - `47dc4f1` page file, builder and GHRM comparison
   - `947dd14` payload
   - `29bb0ee` Animals pins
-  - `5faf2db` packet `reviews/2026-11-26-moon-diviner-ui-rc.md`
+  - `5faf2db` packet `reviews/2026-11-26-moon-diviner-ui-rc.md` (table fix `cdc9aed`)
 - **Page file** `assets/moon/diviner/gcp-tbol-nm-R1.bin.gz`, 720,037 B: built from the 18 retained extractions; equal to the pane planes and the global-report digest; `--check` byte-identical.
 - **Tests:**
   - `moon-diviner-ui` 157/0, with 17 of 17 breaks caught
