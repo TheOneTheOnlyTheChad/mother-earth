@@ -4,6 +4,30 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 26 Nov 2026
 
+## 26 Nov 18:58 UTC (clock reading) — **Moon item 4 (LROC): startup-readiness fix, preview rev 3 with GPT. Branch only; not merged, not deployed; no hub change, no new data fetch** (Moon/LRO science, LROC thread)
+- GPT's preview review filed unchanged on main (`80eb098`): normal preview PASS; locator and JPEG tolerance accepted; R1 startup readiness to fix.
+- **Branch `moon-lroc-ui`:** head `ef479e4` (packet rev 3), validated tree `02d2f4a`. Page fix `f4599d6` (`moonlroc.js` only); `moon.html` unchanged.
+- `moon-lroc-ui` 67/0; 19 of 19 breaks caught; Animals 296/0. Other Moon suites not rerun (detail-off paths unchanged).
+- Open for GPT: the button hidden after a globe failure (existing `moonglobe.js` behaviour).
+- Mac `_review/moon-lroc-ui/` refreshed and hash-checked.
+
+## 26 Nov 17:49 UTC (clock reading) — **Moon item 4 (LROC): page preview `moon-lroc-ui` built, with GPT for review. Branch only; not merged, not deployed; no hub change** (Moon/LRO science, LROC thread)
+- **GPT:** rev 2 recheck (PASS, two prerequisites) and closure/rev 2.1 recheck (PASS) filed unchanged (`reviews/2026-11-26-moon-lroc-proposal-rev2-gpt-recheck.md`, `reviews/2026-11-26-moon-lroc-retention-frame-rev21-gpt-recheck.md`). Chad's go for the page-only preview.
+- **Branch `moon-lroc-ui`:** head `a35a25b`, validated tree `1dc62c1`.
+  - Builder and assets: `ffa593b`.
+  - Payload: `c99da22` (`moonlroc.js`, `moonlroc.css`, five `moon.html` additions, suite), plus the page fix `3ed8f82`.
+  - Animals pins: `ba9785c` (`LR_MAIN` `c99da22`; 13v, 13w).
+  - Test fixes forced by the breaks: `d669eb6`, `b87db76`, `c94b43a`, `1dc62c1`.
+- **Build:** retained inputs only; layout from the PDS3 headers (2 m offset 8,444 B); the PDS4 conflicts recorded. Site 223,227 B, area 359,687 B, mask 6,002 B. `--check` byte-identical. Area JPEG tolerance set at 6 grey levels from measurement (5.46), for GPT.
+- **Validation:**
+  - `moon-lroc-ui` 56/0; 15 of 15 breaks caught, pattern found
+  - diviner 178, height 110 (with `LOLA_SRC`), globe 67, LRO path 68, light 27, lit 138, Animals 296, all green
+  - WebGL draw calls per frame 1 on and 1 off
+- **Found and fixed:** the locator could stay hidden after switching on (with reduced motion and no pause), because the globe library's behind-the-globe answer was stale. Fixed with a live-camera test (`3ed8f82`); tests B7 and B8, break `stale`.
+- **Found:** the file route to the Mac (`device_commit_files`) re-encodes images. The binaries were re-sent in a tar, and all 16 review files are hash-verified on the Mac. This also explains the rev 1 evidence-image hash mismatch.
+- **Not verified:** real phone, Safari, screen reader, hardware renderer.
+- **Next:** GPT's review of the preview; then the release candidate on Chad's go. A release needs his own Approve line.
+
 ## 26 Nov 16:07 UTC (clock reading) — **Moon item 4 (LROC): sources retained, frame closed, proposal rev 2.1 and closure report for GPT. Docs only; no page build, merge or deployment** (Moon/LRO science, LROC thread)
 - **Chad:** Downloads access granted for this work; D6 accepted (at least 2 of 4 valid pixels, hatched no-data).
 - **Retained** on the Mac (`_source-data/moon-lro-science-lroc/`), one file at a time, each re-hashed and checkpointed before the next (retention lines 1–8):
