@@ -4,6 +4,9 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 26 Nov 2026
 
+## 26 Nov 08:26 UTC (clock reading) — **Animals: scopes separated (Chad). The IWC-only whale summary is CLEARED and no longer depends on Cape Vidal; it waits only on Chad's implementation go and its place in the queue (Moon first). Cape Vidal becomes a later, separate addition with its own permission and review.** (page: none; Animals thread)
+- **Records:** `docs/research/animals-source-audit/WHALE-RECOVERY.md` §5 (commit `7691916`) and `ENQUIRIES-EXPANSION.md` rev 1.14. HANDOVER: this thread's own line added.
+
 ## 26 Nov 08:20 UTC (clock reading) — **Animals: IWC scope confirmed in writing: the 2015 estimate 18,111, its 5th–95th percentile range 15,580–20,700, Relative Abundance "Very Good" and 1995–2015 change "Strongly Increased" may be shown with the status sentence, credited to the International Whaling Commission with a link. No further IWC clarification needed. Not a build or release go.** (page: none; Animals thread)
 - **Record:** `docs/research/animals-source-audit/ENQUIRIES-EXPANSION.md` rev 1.12, provenance corrected in rev 1.13 (08:22 UTC): her direct written reply, "Please feel free to use the additional information as described below" (10:03 SAST as relayed), kept privately. This IWC reply and the ATAP reply are the two emails of 26 Nov; none outstanding.
 - **Whale example:** IWC side complete; parked on Cape Vidal and Chad's go.

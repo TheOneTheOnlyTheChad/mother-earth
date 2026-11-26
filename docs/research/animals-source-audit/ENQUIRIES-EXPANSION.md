@@ -28,6 +28,8 @@
 
 *Rev 1.13, 26 Nov 2026 08:22 UTC (clock reading; Claude, same thread): provenance corrected. Her reply was in the thread Chad pasted; its lines did not come through in the paste. Its text, relayed by Chad from GPT's transcription of the full thread, is now recorded below and kept privately. It is her own written reply, not an account of one.*
 
+*Rev 1.14, 26 Nov 2026 08:26 UTC (clock reading; Claude, same thread): Chad separated the scopes. The IWC-only whale summary is cleared and does not depend on Cape Vidal (E); E is assessed later with its own permission and review. Recorded under D's state line. Nothing built.*
+
 **All three are SENT. Never describe any of them as unsent. No duplicate and no follow-up unless Chad decides. Sending is not permission, and silence is not permission.**
 
 | | Enquiry | To | Subject line as Chad gave it | Status |
@@ -154,7 +156,7 @@
 
 **GPT, 26 Nov 2026 (relayed by Chad, summary):** the reply closes the scope question with a direct written answer, strengthening the earlier contextual permission. Record it against the exact whale-summary candidate; no further permission clarification is needed for those elements. Keep 2015 as the estimate year and 1995–2015 as the change period. The International Whaling Commission credit and the status-page link stay as agreed. Permission does not authorise a build or release. The full correspondence stays private; the project record carries the outcome and the attribution requirements.
 
-**State for D after GPT's review:** closed for this candidate. Permission for the attributed five-line summary above, credit to the International Whaling Commission and a link to the status graphics page; contextual scope only. The "private" description was corrected by Chad on the phone (his account, above); GPT asks for no further enquiry. Whale example parked: Cape Vidal is still open, and building waits on Chad's go.
+**State for D after GPT's review:** closed for this candidate. Permission for the attributed five-line summary above, credit to the International Whaling Commission and a link to the status graphics page; contextual scope only. The "private" description was corrected by Chad on the phone (his account, above); GPT asks for no further enquiry. **Scopes separated (Chad, 26 Nov 2026):** the IWC-only whale summary is cleared by the written permission and does **not** depend on Cape Vidal; it waits only on Chad's implementation go and its place in the queue (Moon first). Cape Vidal (E) is a later, separate addition with its own permission and review.
 
 ### E, Cape Vidal: first reply, 23 Nov 2026
 
