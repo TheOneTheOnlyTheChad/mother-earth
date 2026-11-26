@@ -1,6 +1,6 @@
 # Moon globe and LRO science — data assessment and implementation proposal
 
-Rev 2 · 26 Nov 2026 · written by Claude for GPT's recheck · **docs only: nothing built, nothing deployed, no hub change**
+Rev 2.1 · 26 Nov 2026 · written by Claude · rev 2 passed by GPT's recheck (`reviews/2026-11-26-moon-lro-proposal-rev2-gpt-recheck.md`); 2.1 narrows §11 only · **docs only: nothing built, nothing deployed, no hub change**
 
 Answers GPT's brief "Mother Earth — Moon globe and LRO science" (25 Nov; filed unchanged as `docs/concepts/MOON-LRO-SCIENCE-BRIEF-GPT-2026-11-25.md`). Rev 1 (`efdbf74`) was reviewed by GPT on 26 Nov (relayed by Chad; filed unchanged as `reviews/2026-11-26-moon-lro-proposal-rev1-gpt-review.md`): the elevation-first scope was supported, with changes asked for before any build. §12 lists each change and where it is answered. Evidence: `docs/research/moon-lro-science/SAMPLES.md` (rev 2 additions in its §5), `assess_samples.py` and `measure_browser.cjs`, with their outputs beside them.
 
@@ -175,9 +175,9 @@ Live or current-position anything; LRO prediction; LROC detailed imagery; CRaTER
 
 - Keep three kinds of thing apart in words and code: reference composites, dated measurements compiled over a period, calculated views.
 - Read the exact label, and compare sibling products: here a second published version of the same grid exposed the polar inconsistency. Its cause stays unstated until known; the wording says "inconsistencies were found", not a guessed explanation.
-- Numbers in images: an image or canvas route in the browser is 8 bits per channel. For values, use a typed array (here int16 + gzip + `DecompressionStream`) and test the decode end to end in a real browser.
+- Numbers in images: ordinary canvas readback (`getImageData`) gives 8-bit components by default; other formats exist but were not used here. For values, a typed array (here int16 little-endian + gzip + `DecompressionStream`, read with an explicit little-endian decode) avoids the question; test the decode end to end in a real browser, with assertions that fail.
 - A whole-map correlation shows orientation, not local registration; test clicks at landmarks, seams, cell boundaries and poles.
-- Measure rendering before describing it: the Moon globe redraws continuously while idle (so does any globe.gl page, as far as this measurement shows; the Sun globe was not measured).
+- Measure rendering before describing it: the Moon globe redraws continuously while idle. Only the Moon globe was measured; that result does not establish how any other globe page behaves (the Sun globe should be measured on its own).
 - `craft.js` untouched; no pairing of timed measurements with a trajectory without a verified epoch, timescale and frame.
 
 ## 12. GPT's rev 1 review: where each point is answered
@@ -190,3 +190,12 @@ Live or current-position anything; LRO prediction; LROC detailed imagery; CRaTER
 | 4 Lighting/camera on enable, disable and failure; don't switch the view before assets are ready; measure rendering | §4.3, §5 |
 | Smaller: complete affected-file list; direct PDS data-use guidance | §4.4; §3 Rights (PDS Geosciences FAQ) |
 | Recommendations: Moon-tab elevation only; whole-metre lossless; evenly lit with restoration; Sky later; Diviner parked | §0, §7, §8, §10 |
+
+## 13. GPT's rev 2 recheck: implementation notes carried into the build
+
+GPT passed rev 2 as a build proposal (26 Nov; filed unchanged). Notes to carry into the build and tests, without another proposal round:
+- Decode the grid as **explicit little-endian** (`DataView.getInt16(i, true)`), or check host byte order before using `Int16Array`.
+- **Cancellation and rapid toggles:** each load carries a token; a late response must not turn on a layer the user has since switched off (and aborts the fetch).
+- **Assertions, not prints:** the evidence comparisons (every decoded value, named cells, withheld marker, rounding bound) become failing checks in `phase1/moon-height-ui.test.cjs` and the build's `--check`.
+- **Two integrity pins, checked independently:** one for the compressed file, one for the decompressed bytes; whichever path the response takes, its own pin must match.
+- §11 narrowed (rev 2.1, above).
