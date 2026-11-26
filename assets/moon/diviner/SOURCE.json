@@ -87,9 +87,14 @@
   "rule": "one fixed sequential ramp; per mode the ends are the 1st and 99th percentiles of valid displayed cells, rounded outward to whole K; computed once, never per view; clipped cells keep their exact value in the readout",
   "frozen": "Chad, 26 Nov 2026"
  },
+ "review": {
+  "cadence": "every six months and on any Diviner derived release; earlier versions kept if a newer one is reviewed",
+  "last_checked": "26 Nov 2026: GCP files dated 15 Mar 2017; derived bundle last changed 2 Feb 2024; no newer GCP version",
+  "records": "REGISTER.md (LRO Diviner GCP entry); sources.html#moontemp"
+ },
  "build": {
   "script": "phase1/moonsci/build_diviner.py",
-  "script_sha256": "1f8ab2fb842beda5ad0a5f8cdb9bea622d7bf42f473530bde2a25195c418eabd",
+  "script_sha256": "bbaf43f750279c9dfd52ac312a4499c617eadbe4729d9c152bff21225b820d5b",
   "check": "python3 -I phase1/moonsci/build_diviner.py --ext <retained extractions> --check",
   "grid_digest": "1cd629dd3be74f752452ea55366efd9ebff6d279bfedab30a7f1d9d4ebcc9f7b"
  },

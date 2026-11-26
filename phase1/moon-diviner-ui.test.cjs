@@ -422,6 +422,18 @@ const setCell = (b, m, i, v, n, r) => { b.writeUInt16LE(v, OFF.value[m] + 2 * i)
     if (w === 360) await p.locator('#moon-globe').screenshot({ path: process.env.SHOT_DIR ? path.join(process.env.SHOT_DIR, 'temp-360.png') : '/tmp/temp-360.png' });
     await ctx.close(); }
 
+  // ---- H (release candidate): sources.html#moontemp, read from the file (no browser)
+  { const t = fs.readFileSync(path.join(ROOT, 'sources.html'), 'utf8'), sec = (/  <h2 id="moontemp">[\s\S]*?\n\n(?=  <h2 id="sunglobe">)/.exec(t) || [''])[0];
+    ok('H sources.html: one Moon temperature section, after Moon height and before the Sun globe; one shortcut, between Moon height and Tides', (t.match(/<h2 id="moontemp">/g) || []).length === 1 && sec.length > 2000
+      && t.indexOf('id="moonheight"') < t.indexOf('id="moontemp"') && t.split(' · <a href="#moonheight">Moon height</a> · <a href="#moontemp">Moon temperature</a> · <a href="#tides">Tides</a>').length === 2);
+    ok('H section: our statistic, the masks as display policy, both scales (rounded outward), the same-colour warning, grid-cell shares, the GHRM caveat, DOI and public domain',
+      /our<\/b> unweighted mean of the available quarter-hour bin values/.test(sec) && /<b>our display policy<\/b>, not the edge of Diviner’s coverage/.test(sec) && /noon 281–395 K and midnight 70–105 K/.test(sec)
+      && /rounded outward to whole kelvin/.test(sec) && /The same colour does not mean the same temperature on the two maps/.test(sec) && /not of surface area/.test(sec)
+      && /−1\.9 to \+16\.7 K \(median \+8\.7 K\)/.test(sec) && /causes of the differences have not been isolated/.test(sec) && /not an accuracy estimate/.test(sec)
+      && /doi:10\.17189\/wj0s-w188/.test(sec) && /public domain/.test(sec) && /equivalent blackbody temperature/.test(sec) && /not the physical temperature of any one surface/.test(sec) && !/today’s temperature is/i.test(sec));
+    const mh = fs.readFileSync(path.join(ROOT, 'moon.html'), 'utf8');
+    ok('H moon.html Sources line links to sources.html#moontemp', /This comparison is not an accuracy estimate\. <a href="sources\.html#moontemp">Details<\/a>\.<\/li>/.test(mh)); }
+
   await br.close();
   console.log(`moon-diviner-ui: ${pass} passed, ${fail} failed${BREAK ? ' (BREAK=' + BREAK + ')' : ''}`);
   process.exit(fail ? 1 : 0);
