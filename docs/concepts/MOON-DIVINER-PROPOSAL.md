@@ -71,7 +71,7 @@ No newer GCP version exists. The derived bundle was last changed 2 Feb 2024 (GHR
 - **Withheld:** noon poleward of 70°, midnight poleward of 80°. Stored as a separate code (uint16 1), so "withheld" and "no observation" stay distinguishable.
 - **Longitude:** the GCP's −179.75…+179.75 is converted to the page's convention once, in the builder, with a fixed test at 0°, ±180° and the seam. GHRM, LOLA and the GDR use 0–360, starting at 0°E; the GHRM cross-check (§7) tests this.
 - **Files** (new): `assets/moon/diviner/gcp-tbol-nm-R1.bin.gz` (one little-endian file: header, then noon mean, midnight mean, counts packed two per byte, two spread planes; 1,814,400 B raw) and `assets/moon/diviner/SOURCE.json` (product IDs, DOIs, file MD5s, the derivation rule, the colour scales, the withheld latitudes, the build script's hash). The colour texture is drawn in the page from the grid with nearest-cell colours. There is no PNG; that is a decision point (D5).
-- **Builder:** `phase1/moonsci/build_diviner.mjs` (in-pane reduction, the same code run by Node on the samples), with `--check` against a Python reference (`phase1/moonsci/diviner_ref.py`) on the eight sample patches. Both must agree cell for cell.
+- **Builder:** `phase1/moonsci/build_diviner.mjs` (in-pane reduction, the same code run by Node on the samples), with `--check` against a Python reference (`phase1/moonsci/diviner_ref.py`) on the seven GCP sample patches. Both must agree cell for cell.
 
 ## 6. Acquisition route
 
@@ -86,7 +86,7 @@ PDS Geosciences can only be reached from the **browser pane** (both shells get a
 
 ## 7. Verification planned for the build
 
-1. Build `--check`: the in-page reducer and the Python reference agree on all sampled cells (8 patches, 1,600 cells × 2 windows), including counts, spreads, empty and withheld cells.
+1. Build `--check`: the in-page reducer and the Python reference agree on all sampled cells (7 patches, 1,400 cells × 2 windows), including counts, spreads, empty and withheld cells.
 2. Archive integrity: 18 MD5s and sizes match.
 3. **Registration:** (a) GHRM midnight cross-check at about 20 sites spread across longitude and ±60° latitude, fetched by capped multi-range (≤ 128 ranges each, about 84 KB per site), with the agreement statistic recorded (the 4-cell sample gave 0.20–0.50 K); (b) seam test at 0°/360° and ±180°; (c) north–south and east–west mirror tests (correlation against GHRM drops when flipped).
 4. Page tests (a new `moon-diviner-ui` suite with breaks, as `moon-height-ui`): switch on/off, mode switch, mutual exclusion with height, lighting state saved and restored, readout at named cells (one with 1 bin, one with 4, empty, withheld at each boundary, seam), no 0 K anywhere, no fetch until switched on, failure paths (404, bad hash, truncated gzip) leave the globe usable and say so, keyboard path, 360 px layout.
@@ -115,7 +115,7 @@ PDS Geosciences can only be reached from the **browser pane** (both shells get a
 | Route B acquisition | 18–128 min per window, about 154 MB per window | measured per-request times |
 | Page file | **0.7–1.1 MB gzip** (1,814,400 B raw) | full maps compress less than the sparse cycle maps (0.17–0.32 of raw measured); assumed 0.40–0.60 |
 | Page decode | under 50 ms | the height grid's 1.78 MB decoded in 20 ms (SAMPLES §5) |
-| Drawing | one texture swap while on, like height; no polar-cap draw unless D3 asks for one | to be measured as draw counts in the build |
+| Drawing | one texture swap while on, like height; the withheld areas are painted into the same texture, so no extra polar-cap draw | to be measured as draw counts in the build |
 
 ## 9. Records (at release only)
 
@@ -129,7 +129,7 @@ REGISTER entry "LRO Diviner — Global Cumulative Product (tbol)", `sources.html
 - **GHRM high-resolution midnight** (128 ppd, 2009–2022). Revisit after the first release if Chad wants detail at midnight. That would mean a 3.3 GB stream reduced in the pane (estimated 19–44 min) and a choice between `m` and slope-adjusted `sam`. Powell et al. 2023 would need reading first.
 - **Polar temperatures** (PCP, 80–90°). Revisit as its own question with polar stereographic handling. It is the right product for the caps.
 - **RDR dated interval for 10–11 June 2026** (pairing with the LRO example). Not a published `tbol` product, and it needs a verified bolometric computation of our own. Revisit only if Chad asks for pairing, under checklist item 9's conditions (verified time, frame and pointing).
-- **Dawn and dusk maps.** The samples show a 30–85 K spread inside one hour: not meaningful as a map.
+- **Dawn and dusk maps.** The samples show a mean spread of 18–85 K inside one hour: not meaningful as a map.
 
 ## 11. Pages
 
