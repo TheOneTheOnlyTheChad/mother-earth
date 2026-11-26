@@ -1,6 +1,6 @@
 # Moon globe and LRO science — spec checklist
 
-Rev 16 · 26 Nov 2026, 21:08 UTC (clock reading; rev 15 18:58, rev 14 17:49, rev 13 16:07, rev 12 15:54, rev 11 15:34, rev 10 15:07, rev 9 14:42, rev 8 13:07, rev 7 11:58, rev 6 10:22, rev 5 09:54, rev 4 09:42, rev 3 09:20, rev 2 08:59, rev 1 08:31 UTC) · written by Claude on Chad's instruction (26 Nov) · **persistent record; update it as each item moves** · docs only.
+Rev 16 · 26 Nov 2026, 21:05 UTC (clock reading; rev 15 18:58, rev 14 17:49, rev 13 16:07, rev 12 15:54, rev 11 15:34, rev 10 15:07, rev 9 14:42, rev 8 13:07, rev 7 11:58, rev 6 10:22, rev 5 09:54, rev 4 09:42, rev 3 09:20, rev 2 08:59, rev 1 08:31 UTC) · written by Claude on Chad's instruction (26 Nov) · **persistent record; update it as each item moves** · docs only.
 
 **What this is.** The record of every item in GPT's original brief, `docs/concepts/MOON-LRO-SCIENCE-BRIEF-GPT-2026-11-25.md`. It also covers the scope Chad added on 26 Nov: every page that shows the Moon. It is **not** the narrowed height proposal (`docs/concepts/MOON-LRO-SCIENCE-PROPOSAL.md` rev 2.1), which covered only the first release.
 
@@ -263,7 +263,7 @@ Rev 16 · 26 Nov 2026, 21:08 UTC (clock reading; rev 15 18:58, rev 14 17:49, rev
   - Open for GPT: after a globe failure the page's existing behaviour hides the LROC button with the other controls, so an opened panel only closes on reload.
   - Packet rev 3 on the branch; Mac `_review/moon-lroc-ui/` refreshed (SHA256SUMS).
   - **Next:** GPT's recheck; then the release candidate on Chad's go.
-- **Update (21:08 UTC, clock reading): release candidate with GPT. Branch only; not merged, not deployed.**
+- **Update (21:05 UTC, clock reading): release candidate with GPT. Branch only; not merged, not deployed.**
   - GPT's rev 3 recheck filed unchanged (`reviews/2026-11-26-moon-lroc-ui-rev3-gpt-recheck.md`, main `d73a639`): R1 PASS; keep the detail usable after a globe failure by moving the toggle out of the hidden globe controls. Chad's go for the release candidate.
   - **Branch `moon-lroc-ui`:** head `40e0f86` (packet `reviews/2026-11-26-moon-lroc-release-rc.md`), validated tree `9436b8e`; payload `998df30` (`LR_MAIN`), fresh main `d73a639` merged in (`1b1d30d`), Animals pins `9436b8e`.
   - Payload: the toggle in its own row outside `#mg-ctl`; `sources.html#moonlroc` and shortcut; the carried lighting wording fixed in the height and temperature sections; REGISTER entry; Details links; served manifest `reviews/evidence/2026-11-26-moon-lroc-manifest.json` (50 files); `moon-diviner-ui` H narrow maintenance.
@@ -399,4 +399,4 @@ Each stays `option` until Chad classifies it as "assess" or "not pursued", with 
 - Rev 13 (26 Nov 2026, 16:07 UTC): §4: sources retained, frame closed by the volume SIS, 2 m offset error corrected, proposal rev 2.1 and closure report. No other item moved.
 - Rev 14 (26 Nov 2026, 17:49 UTC): §4: GPT's rechecks filed; page preview `moon-lroc-ui` built and with GPT. No other item moved.
 - Rev 15 (26 Nov 2026, 18:58 UTC): §4: GPT's preview review filed; startup fix and preview rev 3 with GPT. No other item moved.
-- Rev 16 (26 Nov 2026, 21:08 UTC): §4: GPT's rev 3 recheck filed; release candidate with GPT. No other item moved.
+- Rev 16 (26 Nov 2026, 21:05 UTC): §4: GPT's rev 3 recheck filed; release candidate with GPT. No other item moved.
