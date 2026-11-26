@@ -17,8 +17,10 @@
   const FP = { x: 0.663981043, y: 0.43625, w: 0.121327014, h: 0.128 };   // site footprint in the area picture (SOURCE.json geometry)
   const PTR = { x: 0.500148448, y: 0.500410309 };                          // descent stage in the site picture (SOURCE.json geometry)
   const TIMEOUT_MS = 20000;
+  const GLOBE_WAIT_MS = 20000;   // longest wait for the globe to start (moonglobe.js gives up on its library after 12 s and hides the globe)
   const CAP = { area: 'averaged to 4 m (2 × 2 blocks of the 2 m orthophoto; blocks with at least 2 of 4 valid pixels)', site: 'shown at its native pixel spacing of 0.5 m' };
-  const S = { on: false, view: 'area', tok: 0, state: 'off', why: '', earth: false, locVisible: false, ring: null, shown: '' };
+  const S = { on: false, view: 'area', tok: 0, state: 'off', why: '', earth: false, locVisible: false, ring: null, shown: '',
+    loc: 'off', entryTok: 0, waitTimer: 0, turns: 0 };   // loc: off | waiting | placed | unavailable
   const radios = [...panel.querySelectorAll('input[name="mg-lroc-view"]')];
   const img = $('mg-lroc-img'), fig = $('mg-lroc-fig'), st = $('mg-lroc-state'), retry = $('mg-lroc-retry'), loc = $('mg-lroc-loc');
   const nd = $('mg-lroc-nd'), fp = $('mg-lroc-fp'), arrow = $('mg-lroc-arrow'), ptrL = $('mg-lroc-ptr-l'), ptr = $('mg-lroc-ptr');
@@ -31,7 +33,9 @@
   function locLine() {
     if (!S.on) { loc.hidden = true; return; }
     loc.hidden = false;
-    const t = S.earth ? 'Locator hidden in the Earth view. Return to the ordinary view (drag, zoom or any view button) to see it.'
+    const t = S.loc === 'waiting' ? 'Waiting for the globe to start; it will turn to the Apollo 11 site and mark it when ready.'
+      : S.loc === 'unavailable' ? 'Locator unavailable: the globe did not start. The detailed picture below does not need it.'
+      : S.earth ? 'Locator hidden in the Earth view. Return to the ordinary view (drag, zoom or any view button) to see it.'
       : 'Ring: locator for the Apollo 11 site (marks the place, not the image’s footprint). The globe’s picture is about 5 km a pixel, so the detail is shown below.';
     if (loc.textContent !== t) loc.textContent = t;
   }
@@ -81,16 +85,34 @@
       overlays(); setState('shown', ''); scaleBar();
     }, why => { if (tok !== S.tok || !S.on) return; fail(typeof why === 'string' ? why : 'the picture did not load'); });
   }
+  // ---------- entry on the globe: the turn to the site and the locator happen together, once, when the globe is ready. Started at switch-on;
+  // if the globe is not running yet it waits (bounded by GLOBE_WAIT_MS, and ended at once if moonglobe.js gives up and hides the globe).
+  // Switching off, or switching on again, ends a pending wait; a wait that belongs to an earlier switch-on never moves the camera.
+  const globeFailed = () => { const e = $('mg-globe'); return !e || e.hidden; };
+  function stopWait() { if (S.waitTimer) { clearInterval(S.waitTimer); S.waitTimer = 0; } }
+  function enter() {
+    stopWait(); const tok = ++S.entryTok, t0 = Date.now();
+    const step = () => {
+      if (tok !== S.entryTok || !S.on) { stopWait(); return true; }
+      if (G()) {
+        stopWait();
+        if (MG() && MG().point) { MG().point(SITE.lat, SITE.lng); S.turns++; }   // like a view button: leaves the Earth view; lighting and science modes kept
+        drawLocator(); S.loc = 'placed'; S.earth = earthView(); locLine(); return true;
+      }
+      if (globeFailed() || Date.now() - t0 > GLOBE_WAIT_MS) { stopWait(); S.loc = 'unavailable'; locLine(); return true; }
+      return false;
+    };
+    if (!step()) { S.loc = 'waiting'; locLine(); S.waitTimer = setInterval(step, 200); }
+  }
   function setOn(on) {
     if (on === S.on) return;
     S.on = on; S.tok++;
     btn.setAttribute('aria-pressed', String(on)); btn.textContent = on ? 'Hide the detailed site' : 'Show a detailed site: Apollo 11 (LROC)';
     panel.hidden = !on;
     if (on) {
-      if (MG() && MG().point) MG().point(SITE.lat, SITE.lng);   // like a view button: leaves the Earth view; lighting and science modes kept
-      if (!drawLocator()) { const t = setInterval(() => { if (!S.on) return clearInterval(t); if (drawLocator()) clearInterval(t); }, 200); }
-      S.earth = earthView(); locLine(); load(S.view);
+      enter(); load(S.view);
     } else {
+      S.entryTok++; stopWait(); S.loc = 'off';
       clearLocator(); locLine(); setState('off', ''); img.removeAttribute('src'); S.shown = ''; btn.focus();   // camera left where it is
     }
   }
@@ -102,5 +124,5 @@
   // re-runs and hides or restores the locator; nothing else is needed here.
 
   window.MoonLroc = { state: () => ({ on: S.on, view: S.view, state: S.state, why: S.why, tok: S.tok, earth: S.earth, locVisible: S.locVisible, shown: S.shown,
-    ring: S.ring ? { visibility: S.ring.style.visibility, inDom: document.body.contains(S.ring) } : null, libVis: S.libVis, front: front() }), SITE, FP, PTR, TIMEOUT_MS };   // test aids
+    ring: S.ring ? { visibility: S.ring.style.visibility, inDom: document.body.contains(S.ring) } : null, libVis: S.libVis, front: front(), loc: S.loc, waiting: !!S.waitTimer, turns: S.turns }), SITE, FP, PTR, TIMEOUT_MS, GLOBE_WAIT_MS };   // test aids
 })();

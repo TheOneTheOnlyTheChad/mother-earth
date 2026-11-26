@@ -11,7 +11,10 @@
  *     leaves it and keeps "Lit as now"; height mode kept; clicks pass through to the height readout; LRO path independent
  *  G. keyboard; narrow 360/390/721 px; served assets equal SOURCE.json; appearance map unchanged; WebGL draw calls per frame unchanged
  * Run: node phase1/moon-lroc-ui.test.cjs [base-url]   (static server on the repo, default 127.0.0.1:8899)
- * BREAK=turn|late|offlate|pe|novis|earthloc|stale|fp|ptr|bar|nd|retry|offcam|eager|size must each fail. */
+ *  H. startup readiness (GPT preview review R1): opened before the globe is ready (delayed library), off before ready, on/off/on before
+ *     ready, library failure, and a deadline passed before a late start: one turn exactly when ready, none after off or the deadline,
+ *     no endless polling, the picture panel working throughout
+ * BREAK=turn|late|offlate|pe|novis|earthloc|stale|fp|ptr|bar|nd|retry|offcam|eager|size|noready|nodeadline|latestart|offguard must each fail. */
 const { chromium } = require('playwright'); const fs = require('fs'); const path = require('path'); const crypto = require('crypto');
 const BASE = process.argv[2] || 'http://127.0.0.1:8899'; const BREAK = process.env.BREAK || '';
 const ROOT = path.join(__dirname, '..');
@@ -25,7 +28,13 @@ const SITE = { lat: 0.67416, lng: 23.47314 };
 let brkSeen = false;
 function patchJs(s) {
   const B = (a, b) => { if (!s.includes(a)) throw new Error('break pattern missing: ' + a); s = s.replace(a, b); brkSeen = true; };
-  if (BREAK === 'turn') B('if (MG() && MG().point) MG().point(SITE.lat, SITE.lng);', '');
+  if (BREAK === 'turn') B('if (MG() && MG().point) { MG().point(SITE.lat, SITE.lng); S.turns++; }', '');
+  // startup readiness (GPT preview review R1)
+  if (BREAK === 'noready') { B('stopWait(); const tok = ++S.entryTok, t0 = Date.now();', 'stopWait(); const tok = ++S.entryTok, t0 = Date.now(); if (MG() && MG().point) MG().point(SITE.lat, SITE.lng);');
+    B('if (MG() && MG().point) { MG().point(SITE.lat, SITE.lng); S.turns++; }', ''); }
+  if (BREAK === 'nodeadline') B('if (globeFailed() || Date.now() - t0 > GLOBE_WAIT_MS)', 'if (false)');
+  if (BREAK === 'latestart') B("if (globeFailed() || Date.now() - t0 > GLOBE_WAIT_MS) { stopWait(); S.loc = 'unavailable'; locLine(); return true; }", "if (globeFailed() || Date.now() - t0 > GLOBE_WAIT_MS) { S.loc = 'unavailable'; locLine(); return false; }");
+  if (BREAK === 'offguard') B('if (tok !== S.entryTok || !S.on) { stopWait(); return true; }', '');
   if (BREAK === 'late') B('if (tok !== S.tok || !S.on || S.view !== view) return;', 'if (!S.on) return;');
   if (BREAK === 'offlate') B('if (tok !== S.tok || !S.on || S.view !== view) return;', 'if (tok !== S.tok && S.view !== view) return;');
   if (BREAK === 'novis') B("el.style.visibility = S.locVisible ? 'visible' : 'hidden';", "el.style.visibility = 'visible';");
@@ -53,9 +62,14 @@ let br = null;
     const ctx = await br.newContext({ viewport: { width: opt.w || 1000, height: opt.h || 900 }, reducedMotion: 'reduce' });
     const hits = { area: 0, mask: 0, site: 0 };
     await ctx.route(/fonts\.googleapis|workers\.dev/, r => r.abort());
-    await ctx.route('**/unpkg.com/globe.gl**', r => r.fulfill({ status: 200, contentType: 'application/javascript', body: GLOBE_JS }));
+    await ctx.route('**/unpkg.com/globe.gl**', async r => { const L = opt.lib || {};
+      if (L.delay) await new Promise(res => setTimeout(res, L.delay));
+      if (L.fail) return r.fulfill({ status: 404, body: '' }).catch(() => {});
+      if (L.hang) return;
+      r.fulfill({ status: 200, contentType: 'application/javascript', body: GLOBE_JS }).catch(() => {}); });
     await ctx.route('**/moonlroc.js*', r => { let s = fs.readFileSync(path.join(ROOT, 'moonlroc.js'), 'utf8'); s = patchJs(s);
       if (opt.timeout) s = s.replace('const TIMEOUT_MS = 20000;', `const TIMEOUT_MS = ${opt.timeout};`);
+      if (opt.globeWait) { if (!s.includes('const GLOBE_WAIT_MS = 20000;')) throw new Error('GLOBE_WAIT_MS pattern missing'); s = s.replace('const GLOBE_WAIT_MS = 20000;', `const GLOBE_WAIT_MS = ${opt.globeWait};`); }
       r.fulfill({ status: 200, contentType: 'application/javascript', body: s }); });
     await ctx.route('**/moonlroc.css*', r => r.fulfill({ status: 200, contentType: 'text/css', body: patchCss(fs.readFileSync(path.join(ROOT, 'moonlroc.css'), 'utf8')) }));
     const asset = (key, file) => ctx.route(`**/assets/moon/lroc/${file}*`, async r => { hits[key]++;
@@ -68,7 +82,9 @@ let br = null;
     await asset('area', 'a11-area-4m.jpg'); await asset('mask', 'a11-area-4m-mask.png'); await asset('site', 'a11-site-0p5m.jpg');
     const p = await ctx.newPage(); const errs = [];
     p.on('pageerror', e => errs.push(String(e)));
-    await p.goto(BASE + '/moon.html'); await p.waitForFunction(() => document.getElementById('mg-globe').dataset.ready === '1', null, { timeout: 30000 });
+    await p.goto(BASE + '/moon.html', opt.noReady ? { waitUntil: 'domcontentloaded' } : undefined);
+    if (opt.noReady) { await p.waitForFunction(() => !!window.MoonLroc); return { ctx, p, hits, errs, close: () => ctx.close() }; }
+    await p.waitForFunction(() => document.getElementById('mg-globe').dataset.ready === '1', null, { timeout: 30000 });
     if (!opt.noPause) await p.waitForTimeout(300);
     return { ctx, p, hits, errs, close: () => ctx.close() };
   };
@@ -155,6 +171,59 @@ let br = null;
     await T.p.evaluate(s => MoonGlobe.point(s.lat, s.lng + 180), SITE); await T.p.waitForTimeout(200);
     const r2 = await T.p.evaluate(() => { const g = MoonGlobe.globe(), fn = g.htmlElementVisibilityModifier(), el = document.querySelector('.mgl-ring'); fn(el, true); return { vis: el.style.visibility, s: MoonLroc.state() }; });
     ok('B8b site on the far side, library says visible: the locator stays hidden', r2.vis === 'hidden' && !r2.s.locVisible && !r2.s.front, r2);
+    await T.close(); }
+
+  // ---------- H: startup readiness (GPT preview review R1)
+  const ready = p => p.waitForFunction(() => document.getElementById('mg-globe').dataset.ready === '1', null, { timeout: 30000 });
+  const atSite = v => v && near(v.lat, SITE.lat, 1e-6) && near(v.lng, SITE.lng, 1e-6);
+  { const T = await mk({ noReady: true, lib: { delay: 3000 } });
+    await T.p.click('#mg-lroc'); await T.p.waitForTimeout(300);
+    const a = await st(T.p), line = await T.p.textContent('#mg-lroc-loc'), v0 = await T.p.evaluate(() => MoonGlobe.view());
+    ok('H1 opened before the globe is ready: waiting, no turn yet, said so under the globe', a.on && a.loc === 'waiting' && a.waiting && a.turns === 0 && v0 === null && /Waiting for the globe/.test(line), { a, line, v0 });
+    await waitState(T.p, 'shown');
+    ok('H2 the picture panel works while the globe is still starting', (await st(T.p)).state === 'shown' && !(await T.p.evaluate(() => document.getElementById('mg-globe').dataset.ready === '1')));
+    await ready(T.p); await T.p.waitForTimeout(700);
+    const b = await st(T.p), v = await T.p.evaluate(() => MoonGlobe.view()), rb = await ringBox(T.p);
+    ok('H3 when the globe is ready: one turn to the site, locator placed and visible, polling stopped', atSite(v) && b.turns === 1 && b.loc === 'placed' && !b.waiting && rb && rb.disp !== 'none' && /Ring: locator/.test(await T.p.textContent('#mg-lroc-loc')), { v, b, rb });
+    ok('H4 no page errors', T.errs.length === 0, T.errs);
+    await T.close(); }
+  { const T = await mk({ noReady: true, lib: { delay: 3000 } });
+    await T.p.click('#mg-lroc'); await T.p.waitForTimeout(300); await T.p.click('#mg-lroc'); await T.p.waitForTimeout(200);
+    const a = await st(T.p);
+    await ready(T.p); await T.p.waitForTimeout(800);
+    const b = await st(T.p), v = await T.p.evaluate(() => MoonGlobe.view());
+    ok('H5 switched off before the globe is ready: no later turn, no locator, panel stays closed, no polling', !a.waiting && !b.on && b.turns === 0 && !b.waiting && b.loc === 'off' && v && near(v.lat, 0, 1e-9) && near(v.lng, 0, 1e-9)
+      && !(await ringBox(T.p)) && await T.p.evaluate(() => document.getElementById('mg-lroc-panel').hidden), { a, b, v });
+    await T.close(); }
+  { const T = await mk({ noReady: true, lib: { delay: 3000 } });
+    await T.p.click('#mg-lroc'); await T.p.waitForTimeout(200); await T.p.click('#mg-lroc'); await T.p.waitForTimeout(200); await T.p.click('#mg-lroc');
+    await ready(T.p); await T.p.waitForTimeout(800);
+    const b = await st(T.p);
+    ok('H6 on, off, on before ready: exactly one turn when ready, locator placed once', b.on && b.turns === 1 && b.loc === 'placed' && !b.waiting && atSite(await T.p.evaluate(() => MoonGlobe.view())) && await T.p.evaluate(() => document.querySelectorAll('.mgl-ring').length === 1), b);
+    await T.close(); }
+  { const T = await mk({ noReady: true, lib: { fail: true } });
+    await T.p.waitForFunction(() => document.getElementById('mg-globe').hidden, null, { timeout: 10000 }).catch(() => {});
+    await T.p.waitForTimeout(500);
+    const a = await st(T.p);
+    ok('H7a the library fails before the detail is asked for: the page hides its controls as before, the detail stays off, nothing polls',
+      await T.p.evaluate(() => document.getElementById('mg-ctl').hidden && document.getElementById('mg-lroc-panel').hidden) && !a.on && !a.waiting && a.turns === 0 && T.errs.length === 0, { a, errs: T.errs });
+    await T.close(); }
+  { const T = await mk({ noReady: true, lib: { delay: 1500, fail: true } });
+    await T.p.click('#mg-lroc');
+    await T.p.waitForFunction(() => MoonLroc.state().loc === 'unavailable', null, { timeout: 5000 }).catch(() => {});
+    await T.p.waitForTimeout(1000);
+    const b = await st(T.p), line = await T.p.textContent('#mg-lroc-loc');
+    ok('H7 the library fails after the detail was asked for: locator unavailable, said so, polling stopped, no turn', b.loc === 'unavailable' && !b.waiting && b.turns === 0 && /Locator unavailable: the globe did not start/.test(line), { b, line });
+    await waitState(T.p, 'shown');
+    ok('H8 with the globe failed, the picture panel still works', (await st(T.p)).state === 'shown');
+    await T.close(); }
+  { const T = await mk({ noReady: true, lib: { delay: 4000 }, globeWait: 1200 });
+    await T.p.click('#mg-lroc'); await T.p.waitForTimeout(1800);
+    const a = await st(T.p);
+    ok('H9 deadline passed before the globe starts: unavailable, polling stopped', a.loc === 'unavailable' && !a.waiting && a.turns === 0, a);
+    await ready(T.p); await T.p.waitForTimeout(800);
+    const b = await st(T.p), v = await T.p.evaluate(() => MoonGlobe.view());
+    ok('H10 a globe that starts after the deadline is not turned and gets no locator', b.turns === 0 && b.loc === 'unavailable' && !(await ringBox(T.p)) && v && near(v.lat, 0, 1e-9) && near(v.lng, 0, 1e-9), { b, v });
     await T.close(); }
 
   // ---------- D: late results, failure, retry, timeout, wrong size
