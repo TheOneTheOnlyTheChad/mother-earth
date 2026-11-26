@@ -1,28 +1,44 @@
 # Moon globe: LROC regional detail — assessment and proposal
 
-Rev 1 · 26 Nov 2026 · written by Claude · **docs only: nothing built, no page or hub change, nothing deployed** · for GPT's review
+Rev 2 · 26 Nov 2026 · written by Claude · **docs only: nothing built, no page or hub change, nothing deployed** · for GPT's recheck
 
-Checklist item §4 of `docs/concepts/MOON-LRO-SCIENCE-CHECKLIST.md`. It answers the LROC part of GPT's brief (`docs/concepts/MOON-LRO-SCIENCE-BRIEF-GPT-2026-11-25.md`, "LROC cameras" row and "Detailed LROC regional imagery can follow as a distinct zoom/region feature"). Chad's go (26 Nov): a docs-only assessment of one bounded, well-documented site, recording the exact product, observation date, resolution, footprint, coordinates and frame, attribution and rights, download size and the proposed interaction, and whether the globe can link honestly to the detail. Bounded downloads, a checkpoint per acquired file, no merge or deployment.
+**Reviews.** Rev 1 (`9397993`) was reviewed by GPT on 26 Nov: concept and Apollo 11 product supported; **revise before build approval** (R1–R4). The review is filed unchanged as `reviews/2026-11-26-moon-lroc-proposal-rev1-gpt-review.md` (`0e76683a…`). §13 maps each point to its answer.
 
-**Evidence:**
-- `docs/research/moon-lro-science/lroc/checkpoints.jsonl`: two acquisitions, each checkpointed and pushed before the next began (`3a89ad5`, `2604505`).
-- Three evidence views (screenshots of pane renderings, not page assets) on the Mac in `_source-data/moon-lro-science-lroc/`:
-  - `view1-site-128m-0.5m-noncentred-screenshot.png` (`ad6c11a6…`)
-  - `view2-site-512m-1m-crosshair-at-published-LM.png` (`73a19c16…`)
-  - `view3-area-4km-4m.png` (`8de71fe3…`)
-- None is committed, under the text-only research rule.
+**Chad (26 Nov):** supports Apollo 11, both views, the optional pointer off by default, and leaving the camera where it is on switch-off. He asked for a docs-only rev 2 addressing R1–R4, with bounded downloads and no build, merge or deployment.
+
+Checklist item §4 of `docs/concepts/MOON-LRO-SCIENCE-CHECKLIST.md`. It answers the LROC part of GPT's brief (`docs/concepts/MOON-LRO-SCIENCE-BRIEF-GPT-2026-11-25.md`).
+
+**Evidence (all on main):**
+- **`docs/research/moon-lro-science/lroc/checkpoints.jsonl`:**
+  - lines 1–2: the two acquisitions
+  - lines 3–4: verification re-reads
+  - line 5: retention state, which is **NOT RETAINED** (§8)
+- **`phase1/moonsci/lroc/lroc_geom.py`** (geometry, independent of the pane code) and its output **`docs/research/moon-lro-science/lroc/lroc_geom_output-2026-11-26.txt`**: PASS, 0 failures.
+- **`phase1/moonsci/lroc/lroc_pixels.js`** (pane source-pixel checks on unstretched DN):
+  - version 1 output: `lroc_pixels_output-2026-11-26.json`, SHA-256 `2ccbe61e…`
+  - version 2 output: `lroc_pixels2_output-2026-11-26.json`, SHA-256 `12ca3c1a…`
+  - each recorded byte-exact: my copy's hash equals the hash computed in the pane
+  - loaded into the pane from main at pinned commits, with the SHA-256 checked before use; the MD5 helper is `mehash.js` (TOOLING v1 hash)
+- **Three evidence views** (pane screenshots, not source or build files) on the Mac in `_source-data/moon-lro-science-lroc/`:
+  - `view1-site-128m-0.5m-noncentred-screenshot.png` `d9456d23…`
+  - `view2-site-512m-1m-crosshair-at-published-LM.png` `75ae93ed…`
+  - `view3-area-4km-4m.png` `658a4638…` (575 × 544, a screenshot, not the 1,055 × 1,000 raster)
+  - **Correction:** the hash prefixes printed in rev 1 do not match these files. The same files hash identically on the Mac and in my workspace now, with the sizes unchanged. I have not established why the rev 1 values differed. These are visual evidence only.
 
 ## 0. Bottom line
 
-- **Site:** the Apollo 11 landing site, Tranquility Base.
-- **Product:** LROC's own orthophoto of one Narrow Angle Camera observation, **M150368601** (left and right cameras together), taken **22 January 2011, 20:48:53–20:49:11 UTC**. PDS RDR collection `lro-l-lroc-5-rdr`, Apollo 11 NAC DTM set. It comes at 0.50 m and 2.00 m a pixel, map-projected (equirectangular), with an exact footprint, public domain as a PDS product, credit NASA/GSFC/Arizona State University.
-- **It registers:**
-  - The Lunar Module's brightest pixel is **0.6 m** from LROC's published LM position (0.67416°N, 23.47314°E) in the 0.5 m product, and **2.0 m** away in the 2 m product.
-  - Its shadow falls 7–9 m to the east, as a low western Sun requires.
-- **The globe cannot show it.** The globe picture is about 5.3 km a pixel. At the closest zoom one screen pixel is about 1.45 km. The whole 4.2 × 28 km orthophoto strip is about 3 screen pixels, and a 512 m site view about a third of one.
-- **So the honest link is a marker, not a drape.** The globe turns to the site and marks *where* it is. The detail opens in its own panel beside the globe, as a dated single observation with scale, north, Sun direction and credit. It never claims the globe has this detail anywhere.
-- **Proposed page cost:** two JPEGs, loaded only when the feature is switched on. Measured in the pane: about 225 KB for the site view (1,024², 0.5 m) and about 360 KB for the area view (1,055 × 1,000, 4 m), both at quality 0.8. Total about 585 KB.
-- **One practical blocker for the build, not for this assessment:** the pane cannot save files to the Mac without Downloads access, which was refused in this session (§7). Decision D5.
+- **Site and product (unchanged):**
+  - the Apollo 11 landing site
+  - LROC's orthophotos of one Narrow Angle Camera observation, M150368601 L/R, 22 January 2011, 20:48:53–20:49:11 UTC, at 0.50 and 2.00 m a pixel
+  - PDS `lro-l-lroc-5-rdr`, Apollo 11 NAC DTM set
+  - public domain as PDS products; credit NASA/GSFC/Arizona State University
+- **Registration claim, narrowed (R1):** the descent stage gives **local agreement at one named landmark, within the image sampling**. LROC's published Lunar Module position is 0.67416°N, 23.47314°E.
+  - **0.5 m product:** the single brightest pixel of the whole 512 m site crop (DN 446, no ties) is 0.6 m from that position (−0.33 m east, +0.46 m north).
+  - **2 m product:** the LM is a local feature only; a bright crater rim 1.6 km west is brighter. Its brightest pixel within 12 m is 2.0 m away (+0.92 m east, −1.79 m north).
+  - **Shadow:** in both products it falls 7 m east.
+  - **Not established here:** absolute positional accuracy, registration elsewhere in the strip, and registration against the globe's picture. LROC states an orbital position uncertainty of ±15 m for the method behind its coordinate list (§4.4).
+- **The globe cannot show the detail (unchanged; numbers corrected):** at the closest zoom one screen pixel is about 1.45 km. The 4.2 × 28 km strip is about **3 × 19 screen pixels**, and the 512 m site view about 0.35 of a pixel. So the globe gets a **locator**, a fixed-size symbol that marks the place and is **not the footprint**. The images go in a separate dated panel (§6).
+- **Processing and retention:** an explicit build contract (§7), and one remaining practical blocker for the build, retention of the source bytes (§8, D5).
 
 ## 1. What stays unchanged
 
@@ -31,206 +47,338 @@ Checklist item §4 of `docs/concepts/MOON-LRO-SCIENCE-CHECKLIST.md`. It answers 
 - Tides (10b, closed decision) and the Sky zoom-out (10a, its own round).
 - Hub, R2, D1 and collectors: no change. The feature is page-only, with static files.
 
-## 2. What LROC offers, and why this product (inventory)
-
-Read from the PDS Imaging Node listing and labels, and from LROC's data portal pages, 26 Nov.
+## 2. What LROC offers, and why this product (inventory; unchanged except one row)
 
 | Product family | What it is | Fit for a first regional view |
 |---|---|---|
-| NAC EDR / CDR single images (e.g. `M150368601LE`/`LC`) | raw and calibrated frames in camera geometry, not map-projected | **No**: needs ISIS projection and pointing; footprint not on a map grid |
-| **NAC DTM set orthophotos** (`…/SDP/NAC_DTM/<site>/…_<image>_50CM.IMG`, `_2M.IMG`) | LROC's orthorectified mosaic of the left and right frames of **one** observation, map-projected, tied to LOLA | **Yes (chosen)**: one date, exact footprint, two scales, labelled projection |
-| NAC ROI controlled mosaics (e.g. `NAC_ROI_APOLLO11HIB_E006N0235`, 0.40 m) | mosaics of several observations | Not first: several observation times in one picture; the 0.4 m Apollo 11 mosaic is 487 MB as TIF |
-| NAC photometry sequences (`NAC_PHO_…`) | repeated images of one site under changing light | Later option: many dates; one could show how lighting changes a site |
-| NAC DTM heights (`NAC_DTM_APOLLO11_E008N0234.IMG`, 2 m posts) | regional terrain model | Out of scope here; relevant to option 12a (finer heights, regionally) |
-| WAC global mosaics (100 m) | global picture | Already covered in spirit by the globe; not a regional detail |
-| LROC website Featured Images and Featured Sites | curated pictures | **Not usable**: LROC's terms say images on its website are copyrighted (§5) |
+| NAC EDR / CDR single images (e.g. `M150368601LE`/`LC`) | raw and calibrated frames in camera geometry | **No**: needs ISIS projection and pointing |
+| **NAC DTM set orthophotos** (`…/SDP/NAC_DTM/APOLLO11/…_M150368601_50CM.IMG`, `_2M.IMG`) | LROC's orthorectified mosaic of the left and right frames of **one** observation, map-projected, tied to LOLA | **Chosen** |
+| NAC ROI controlled mosaics (e.g. `NAC_ROI_APOLLO11HIB_E006N0235`, 0.40 m) | mosaics of several observations | Not first: several observation times in one picture |
+| NAC photometry sequences (`NAC_PHO_…`) | repeated images of one site under changing light | Later option |
+| NAC DTM heights (`NAC_DTM_APOLLO11_E008N0234.IMG`) | regional terrain model | Belongs with option 12a |
+| WAC global mosaics (100 m) | global picture | Not a regional detail |
+| LROC website Featured Images and Featured Sites | curated pictures | **Not selected: different terms.** LROC's terms call website images copyrighted and permit certain educational uses with citation. We use the PDS route instead (§5). |
 
-**Why Apollo 11:** the best-documented site on the Moon, with a published LROC position for the Lunar Module to ±0.3 m (§4.2). That gives a hard registration test that a natural feature cannot. It sits on the near side, close to where the globe opens (0°, 0°). The DTM set publishes an accuracy statement (§3).
-
-**Host note:** `pds.lroc.im-ldi.com/data/…` now redirects to the PDS Imaging Node (`pds.mcp.nasa.gov/data/store/img/lunar_reconnaissance_orbiter/pds4/lroc/lro-l-lroc-5-rdr/…`). The products carry PDS4 labels (label version 2.0, 12 Dec 2025, "Correction to PDS4 labels") with the PDS3 header still attached. Neither shell reaches the host; the browser pane does, with range requests, and with ETags equal to the label MD5s.
+**Host:**
+- `pds.lroc.im-ldi.com/data/…` redirects to the PDS Imaging Node (`pds.mcp.nasa.gov/data/store/img/lunar_reconnaissance_orbiter/pds4/lroc/lro-l-lroc-5-rdr/…`).
+- The products carry PDS4 labels (version 2.0, 12 Dec 2025) with the PDS3 header still attached.
+- Only the browser pane reaches the host; ETags equal the label MD5s.
 
 ## 3. The chosen product: exact facts
 
-**Observation.** NAC M150368601, left and right cameras; 2011-01-22T20:48:53Z to 20:49:11Z (PDS4 label and PDS3 header agree). From LROC's data portal for `M150368601LE`:
-- incidence 63.43°, emission 29.02°, phase 34.41°
-- pixel scale 0.53 (scaled 0.51 × 0.55)
-- centre 0.76°N, 23.36°E; spacecraft altitude 39.03
-- sub-solar azimuth 179.85
-
-The portal does not state units. Degrees, metres and kilometres are the evident reading, but they are not confirmed. The azimuth's convention is not stated, so the page will not use it. The Sun's side is taken from the image itself: shadows point east, so the Sun is low in the west (§4.3).
-
-**Products** (both "Science / Derived", producer Arizona State University, RDR product version 1.9):
+**Observation:** NAC M150368601 L/R, 2011-01-22T20:48:53Z to 20:49:11Z (PDS4 label and PDS3 header agree).
+- From LROC's data portal for `M150368601LE`: incidence 63.43°, emission 29.02°, phase 34.41°; sub-solar azimuth 179.85.
+- The portal states no units or conventions, so the page uses none of these values. The Sun's side is read from the image (§4.3).
 
 | | `NAC_DTM_APOLLO11_M150368601_50CM.IMG` | `NAC_DTM_APOLLO11_M150368601_2M.IMG` |
 |---|---|---|
 | PDS4 LID | `urn:nasa:pds:lro-l-lroc-5-rdr:lrolrc_2001_data:sdp.nac_dtm.apollo11.nac_dtm_apollo11_m150368601_50cm` | `…_2m` |
 | Title | Orthophoto (0.50 m/px): M150368601 | Orthophoto (2.00 m/px): M150368601 |
-| File size; MD5 | 943,743,920 B; `95decbebbf283e46d6146c47fec988ed` | 59,023,560 B; `187f3d1dac32aff7f00c512ec4907cdf` |
-| Header (PDS3, attached) | 16,880 B | 4,222 B |
+| File size; MD5 (label) | 943,743,920 B; `95decbebbf283e46d6146c47fec988ed` | 59,023,560 B; `187f3d1dac32aff7f00c512ec4907cdf` |
+| PDS3 header (attached) | 16,880 B | 4,222 B |
 | Array | 8,440 samples × 55,908 lines, SignedLSB2 | 2,111 × 13,978, SignedLSB2 |
-| Missing value | −32768 (other specials −32767…−32765) | same |
-| Scale | 0.49999999999999 m/px (1.6489e-5°/px) | 2.0000000000006 m/px |
-| Offsets (PDS3) | LINE 74,989.5; SAMPLE 9,497,505.5 | LINE 18,747.5; SAMPLE 2,374,376.5 |
+| Scale (MAP_SCALE) | 0.49999999999999 m/px | 2.0000000000006 m/px |
+| LINE / SAMPLE_PROJECTION_OFFSET | 74,989.5 / 9,497,505.5 | 18,747.5 / 2,374,376.5 |
 
-**Map projection:** equirectangular, centre latitude 1.0°, centre longitude 180.0°. Planetocentric latitude, longitude positive east, sphere of radius 1,737.4 km.
-- **Footprint** (both): 0.31464201–1.23650584°N, 23.37231647–23.51150435°E. That is about 4.2 km east–west by 28.0 km north–south.
-- **Shape:** the strip is not quite rectangular in the map. The edges carry no data: 3.2 % of the 2 m array, and 2.9 % of the proposed area view.
-- **Pixel values** are display brightness (DN). The README says: "These orthophotos do not include scale and offset information". The page must not call them reflectance or radiance.
+**Special values (label Special_Constants; R2):**
 
-**Accuracy statement (README, 2012):**
-- The DTM is tied to LOLA, with RMS 1.81 m against 7.0 LOLA tracks, and SOCET SET precision 0.77 m.
-- Known artifacts are listed: boxes, seams, faceting and noise. They concern the DTM heights, not the use of the orthophoto as a picture.
-- Reference: Henriksen et al. 2017, Icarus 283, 122–137, doi:10.1016/j.icarus.2016.05.012.
+| Code | Meaning (label) | Our handling |
+|---|---|---|
+| −32768 | missing | no data |
+| −32767 | low representation saturation | invalid for averaging |
+| −32766 | low instrument saturation | invalid for averaging |
+| −32765 | high instrument saturation | invalid for averaging |
+| −32764 | high representation saturation | invalid for averaging |
 
-**Label quirks recorded (not errors we rely on):**
-- The PDS4 `upperleft_corner_x` is given as +4,748,752.75 m. The PDS3 offsets and the stated bounds imply −4,748,752.75 m, with x increasing east. I used the PDS3 header, which reproduces the stated corners to half a pixel (§4.1), and the landmark test confirms it (§4.2).
-- The PDS4 `Element_Array` unit says "Elevation" for an orthophoto. That looks like a template leftover; the README and the title say orthophoto.
+- **Measured in every array checked:** only −32768 occurs. The four saturation codes count zero in the 17 MB range, the site crop, the area window and the whole 2 m file (`lroc_pixels` outputs).
+- **The builder must still handle them.** Saturation codes are kept as their own category: invalid for averaging, shown as "saturated (no value)" if they ever appear, never as no coverage. If any appears in a build window, the build stops for review.
+- **One valid-range outlier:** the whole 2 m file's valid maximum is DN 24,407, far above the typical 23–493. It lies outside both proposed windows: the area window's maximum is 427 and the site crop's 446. It is recorded, not interpreted.
 
-**Reference frame (open, does not change the outcome):**
-- The label names the radius and the latitude type, not the frame. LROC's published coordinates are in the Mean Earth/Polar Axis frame (NSSDC's Apollo landing site page, citing Wagner et al. 2017).
-- I have not read the RDR SIS or the projection catalogue (`DSMAP.CAT`) for the orthophoto frame. Their location is in the README; the SIS is a PDF and stays unread for now.
-- At 1.45 km a screen pixel, any difference between the usual lunar frames (well under 1 km) is invisible on the globe. In the panel, the published landmark test is what matters. GPT may ask for the SIS read before the build.
+**Pixel values** are display brightness (DN). The README says: "These orthophotos do not include scale and offset information". They are never called reflectance or radiance.
+
+**Map projection** (PDS3 header, CATALOG/DSMAP.CAT read directly): equirectangular, CENTER_LATITUDE 1.0°, CENTER_LONGITUDE 180.0°.
+- Planetocentric latitude, longitude positive east, sphere of radius 1,737.4 km (labels).
+- DSMAP.CAT's prose says "For the Moon R is assumed to be 1734.4 km". That is a typo against every label; the labels' 1,737.4 km is used.
+
+**Bounds:** the label's bounding coordinates (0.31464201–1.23650584°N, 23.37231647–23.51150435°E) are the **mapped array's bounding box**. They equal the README's "DTM extents" and are identical in both labels. Valid coverage is further limited by the no-data mask: 3.2 % of the 2 m array is −32768.
+
+**Accuracy statement (README):** the DTM is tied to LOLA, with RMS 1.81 m against 7.0 LOLA tracks, and SOCET SET precision 0.77 m. These are **vertical/DTM figures, not the orthophoto's horizontal accuracy**, and are not used as such.
 
 ## 4. Verification done
 
-### 4.1 Projection arithmetic
+### 4.1 Pixel convention and the label conflicts (`lroc_geom.py`, PASS, 0 failures)
 
-Using the PDS3 header:
-- sample = SAMPLE_PROJECTION_OFFSET + 1 + R·cos 1°·(λ − 180°)/scale
-- line = LINE_PROJECTION_OFFSET + 1 − R·φ/scale
+**Formulas:**
+- DSMAP.CAT gives `Sample = x/Scale + S0 + 1` and `x = (Sample − S0 − 1)·Scale`.
+- Its line equations use a sign of L0 that does not fit the labels' positive LINE_PROJECTION_OFFSET.
+- So the script tests three candidate conventions, `line = L0 − y/s + k` and `sample = S0 + x/s + k` with k = 0, 0.5 or 1, against the producer's bounds in **both** products. Integer coordinates are pixel centres; outer array edges are at 0.5 and N + 0.5.
 
-These reproduce the label's corners: the north-west corner at line 0.5, sample 0.97, and the south-east at 55,908.5, 8,440.97. That is, they are the outer pixel edges, to half a pixel.
+**Result:**
+- **k = 1** (DSMAP's "+1" form) fits best in both products.
+- **0.5 m product:** the north and south bounds land exactly on the array edges (line 0.500 and 55,908.500). The longitudes sit 0.47 px (0.23 m) inside.
+- **2 m product:** the bounds sit about half a pixel inside (worst 0.62 px). k = 1 is separated from the next convention by 0.38 px.
+- **Limit, stated plainly:** in the 0.5 m product the bounds alone do **not** separate k = 1 from k = 0.5, which is half a pixel (0.25 m). The latitudes favour one and the longitudes the other. We adopt k = 1 from DSMAP's text and the 2 m product. The residual ambiguity is below the landmark agreement (§4.2) and far below anything the page shows.
 
-### 4.2 Landmark: the Apollo 11 Lunar Module
+**PDS4 upper-left values:**
+- `upperleft_corner_y` 37,494.75 m equals the y of the **centre** of pixel (1,1).
+- `upperleft_corner_x` +4,748,752.75 m has that centre's magnitude with the **opposite sign**.
+- We use the attached PDS3 header with DSMAP's arithmetic. Archive metadata is recorded as found, never altered.
+- Both label identities (PDS4 LID and the PDS3 PRODUCT_ID) stay in the records.
 
-- **Published position:** 0.67416°N, 23.47314°E, ±0.3 m, from LROC's "Coordinates of Lunar Anthropogenic Targets" list (28 July 2016, mean of several images; Wagner et al.). It is also on NSSDC's Apollo landing site page.
-- **Predicted pixel:** line 34,104.92, sample 6,114.65 in the 0.5 m product; line 8,527.11, sample 1,529.54 in the 2 m product.
-- **Found:**
+**Checks:**
+- forward/inverse round trips under 1e-9° (LM, PSE, north-west corner)
+- the LM's ground position is identical through both grids
+- **negative controls** (x sign flipped, axes swapped, one-line shift) are each worse than the adopted convention by at least 0.5 px in both products
+- crop offsets and ground bounds are derived in §7
 
-  | Product | Brightest pixel (east, north of published LM) | Darkest pixel (shadow) |
-  |---|---|---|
-  | 0.5 m | −0.33 m, +0.46 m (0.6 m away) | 7.2 m east |
-  | 2 m | +0.92 m, −1.79 m (2.0 m away) | 8.9 m east |
+**Anchors are independent of the code under test:** the label bounds come from the producer, and the LM and PSE come from LROC's 2016 list. The JS pane checks use separate code.
 
-  Each search ran within 12 m (0.5 m product) and 16 m (2 m product) of the prediction.
-- **Visual check:** a crosshair drawn at the published position sits on the LM's bright body and the start of its eastward shadow. By eye, a small crater lies about 70 m east of the LM and a large bright crater about 500 m east. That fits the site's known layout (Little West crater, then West crater, east of the LM), but it is not a measurement (views 1–3).
+### 4.2 Landmark on unstretched source pixels (`lroc_pixels.js`, versions 1 and 2)
 
-**Between the two products:** the whole-window correlation of the 0.5 m block, averaged to 2 m, against the 2 m product is r 0.94 at its best offset. Its peak lies next to the alignment expected from the two products' own offsets (+0.5 row, +0.75 column of the 2 m grid). The landmark test above is the stronger evidence.
+**0.5 m product, site crop** (lines 33,593–34,616, samples 5,603–6,626; 1,048,576 valid pixels, none special):
+- The crop's single brightest pixel (DN 446, no ties) is −0.33 m east and +0.46 m north of the published LM.
+- The intensity-weighted centroid of the two pixels above the threshold is −0.33 m east, +0.25 m north.
+- The darkest 3 × 3 mean (DN 39.9), within 16 m east, is 7.2 m east.
+- **Control:** the same 12 m search 40 m north-west peaks at DN 277, which is lower.
 
-**What this does not show:** registration across the whole strip, or against the globe's picture at landmark level (the globe is 5 km a pixel). It also does not cover other sites.
+**2 m product, area window** (lines 7,527–9,526, samples 1–2,110):
+- The window maximum (DN 427) is a bright crater rim 1,571 m west, **not** the LM. So "brightest pixel" is not the 2 m test.
+- **Local test:** the brightest pixel within 12 m (DN 268, no ties) is +0.92 m east, −1.79 m north. The shadow 3 × 3 minimum is 6.9 m east.
+- **Control:** 40 m north-west, the same search peaks at DN 261, which is lower but close. **Within ±12 m, the 2 m product supports the LM's position at about the 2 m sample scale; it is not a strong discriminator.**
 
-### 4.3 Lighting and appearance
+**What this shows:** local agreement at one named landmark, within the image sampling. It supports orientation and crop placement.
 
-- The incidence is 63°, so the Sun is low, and shadows fall to the east. The panel will say "Sun low in the west; shadows point east" (from the image) and give the observation's UTC time.
-- This lighting is fixed in the picture. It is unrelated to the globe's even lighting and to "Lit as now".
-- Display stretch, linear and the same for both views: DN 144 → black, DN 239 → white. Those are the 1st and 99th percentiles of the 0.5 m site block. The 2 m product shares the DN scale; its LM peak is lower (268 against 446) because each 2 m pixel averages 16 of the 0.5 m ones.
+**What it does not show:**
+- absolute accuracy
+- registration elsewhere in the strip
+- that a local maximum near a prediction is an independent registration (the search was centred on the prediction)
+
+### 4.3 Lighting
+
+- Incidence is 63°, so shadows are long; they fall east in both products, so the Sun is low in the west.
+- This lighting is fixed in the picture and unrelated to the globe's lighting or to "Lit as now".
+
+### 4.4 Coordinates, uncertainty and frame (R1)
+
+**LROC's coordinate list** ("Coordinates of Lunar Anthropogenic Targets", 28 July 2016) and its explanatory page ("Spacecraft Related Coordinates – 2016 Update", 25 Nov 2016) say:
+- the coordinates are in the mean Earth/polar axis (ME) system
+- they are means from multiple images, computed with ISIS and the GLD100 shape model
+- LRO's positions came from cross-over corrected kernels "with an orbital position uncertainty of ±15 m"
+- the page also puts the current latitude/longitude uncertainty at about ±15 m
+- neither document defines the list's "Uncertainty (m)" column (0.3 m for the LM)
+
+Both were read through the fetch tool's quoting, not as full PDFs.
+
+**So:** the 0.3 m figure is not presented as absolute accuracy. The panel's optional pointer says "position from LROC's 2016 list", with no accuracy claim.
+
+**The orthophoto's frame:**
+- **Read directly:** the PDS4 label and the attached PDS3 header name no frame. DSMAP.CAT names none either.
+- **Secondary reads:** the RDR SIS v1.2 (1 Dec 2008, pds-imaging copy) says "The coordinate system used is the mean Earth/polar axis system" and that DE421 with its Euler angles defines the Moon's ephemeris. That was read only through the fetch tool's quoting, so it is discovery material, not a direct read.
+- **Not read:** the volume's own copy, `DOCUMENT/RDRSIS.PDF` (2,528,722 B, ETag `d52a5420…`). The fetch tool sees only binary data, the pane refused to navigate to it, and loading a PDF reader into the archive page was refused.
+
+**Consistency, not proof:** the orthophoto puts the LM within 0.6 m of LROC's ME-frame coordinate. The ME–principal-axis offset is of order a kilometre, far larger. That is consistent with the orthophoto being in ME, but the two come from the same team's processing, so it is not independent proof.
+
+**Open (R1):** the volume SIS read. It can be closed once the PDF is retained with the sources (§8). At globe scale (1.45 km a screen pixel) the frame question changes nothing visible; in the panel it would change only the stated basis, not the picture.
 
 ## 5. Rights and attribution
 
 **From LROC's "Using LROC Imagery" page (read in full in the pane, 26 Nov):**
-- **Public domain:** data products available through the LROC Data Node of the PDS or through NASA PDS interfaces. The page lists `pds.nasa.gov` and `pds-imaging.jpl.nasa.gov`, among others.
-- **Copyrighted:** images on the LROC website, including Featured Images and Featured Sites. Commercial use of LROC images not downloaded from the PDS archive needs prior permission.
-- **Credit:** "NASA/GSFC/Arizona State University" (short form "NASA/GSFC/ASU").
-- **Research citations** named: Robinson et al. 2010 (instrument overview); Henriksen et al. 2017 for the DTM products.
+- **Public domain:** data products available through the LROC Data Node of the PDS or through NASA PDS interfaces.
+- **Copyrighted:** images on the LROC website. Educational use is permitted with citation; commercial use of LROC images not downloaded from the PDS archive needs prior permission.
+- **Credit:** "NASA/GSFC/Arizona State University".
 
-**What follows for Mother Earth:**
-- Derive both pictures ourselves from the PDS products, never from LROC website images.
-- Credit "NASA/GSFC/Arizona State University" on the panel, and cite Robinson et al. 2010 and Henriksen et al. 2017 in Sources.
-- The serving host, `pds.mcp.nasa.gov`, is the PDS Imaging Node. It is a NASA PDS interface, but it is not one of the hostnames the terms page lists. I read that as covered ("through NASA PDS interfaces"). I record it as my reading, for GPT and Chad.
-- Mother Earth is non-commercial, so the commercial clause does not arise.
+**For Mother Earth:**
+- Both pictures are derived by us from the **PDS products** identified in §3. The basis is the product, its LID and label, and the recorded redirect from the LROC PDS host to the PDS Imaging Node, not the domain name alone.
+- The panel credits "NASA/GSFC/Arizona State University". Sources cites Robinson et al. 2010 and Henriksen et al. 2017.
+- No permission enquiry is needed (GPT concurs). Reuse is not argued from non-commercial status.
 
-## 6. Proposed interaction (Moon tab only)
+## 6. Interaction (Moon tab only) — R3
 
-**Control:** one button, off by default: **"Show a detailed site: Apollo 11 (LROC)"**, `aria-pressed`. Further sites would each be a separate decision (§9).
+**Control:** one button, off by default: **"Show a detailed site: Apollo 11 (LROC)"**, `aria-pressed`.
 
-**When switched on:**
-1. **Globe:** turns at once (like the other buttons) to 0.674°N, 23.473°E at the current zoom. A small fixed-size ring marker (about 14 px) is drawn at the site, labelled "Apollo 11 site". The globe's picture, lighting and science layers are untouched.
-2. **Line under the globe:** "The ring marks where the detailed image below was taken. The globe's picture is about 5 km a pixel, so this detail cannot show on the globe itself."
-3. **Panel below the globe:** loaded only now, with two views as radio buttons:
-   - **Area, about 4 km across (4 m a pixel).** Default. The whole strip width, centred north–south on the site. A rectangle marks the site view's footprint.
-   - **Site, 512 m across (0.5 m a pixel).** Centred on the published LM position.
-4. **Each view carries:**
-   - a scale bar
+**Switching on:**
+1. **Camera:** opening the detail acts like a globe view button, through the existing view call (`set(lat, lng, alt)` in `moonglobe.js`).
+   - If the Earth view is active, the camera leaves it the way every view button already does (`leaveEarth()`).
+   - "Lit as now" stays as chosen, and the height or temperature mode stays active.
+   - The globe turns at once to 0.674°N, 23.473°E at the current zoom. Then the locator is drawn.
+2. **Locator:**
+   - **Shape:** a ring about 14 px across, fixed on screen, drawn in WebGL at the surface. It is depth-tested, so it is hidden whenever the site is on the far side or past the limb. It never floats over unrelated terrain.
+   - **Inert to clicks:** it ignores pointer events and is excluded from picking, so height and temperature readout clicks pass through.
+   - **No floating label.** The line under the globe names it: "Ring: locator for the Apollo 11 site (marks the place, not the image's footprint). The globe's picture is about 5 km a pixel, so the detail is shown below."
+3. **Panel:** below the globe, with two views as radio buttons. Each image is **lazy-loaded when first selected**.
+   - **Area, about 4.2 km across (4 m a pixel).** Default. A rectangle marks the site view's footprint, from §7.
+   - **Site, 512 m across (0.5 m a pixel).**
+4. **Each view shows:**
+   - a ground-distance scale bar that resizes with the displayed image (its length comes from metres per displayed pixel, not a fixed CSS length)
    - "North up, east right"
    - "Sun low in the west, so shadows point east"
-   - no-data edges shown in a distinct colour, with "no image data"
-5. **Caption:** "One observation by LRO's Narrow Angle Camera (M150368601, left and right cameras), 22 January 2011, 20:48:53–20:49:11 UTC. LROC's map-projected orthophoto from the PDS. Brightness stretched for display; not a measured reflectance. Credit: NASA/GSFC/Arizona State University." Plus a "Details" link to `sources.html#moonlroc`.
-6. **Optional pointer (D3):** an arrow to the descent stage, "Apollo 11 Lunar Module descent stage (position: LROC 2016 list)". It would be off by default, behind a checkbox.
-7. **Off:** removes the marker and the panel. The globe view stays where it is, as with the other buttons (D4).
+   - no-data in a distinct hatched style with the words "no image data", kept apart from dark terrain
+   - the caption: "One observation by LRO's Narrow Angle Camera (M150368601, left and right cameras), 22 January 2011, 20:48:53–20:49:11 UTC. LROC's map-projected orthophoto from the PDS, shown at its native pixel spacing of 0.5 m (site) or averaged to 4 m (area); what the eye can resolve depends on your screen. Brightness stretched for display; not a measured reflectance. Credit: NASA/GSFC/Arizona State University." Plus a "Details" link to `sources.html#moonlroc`.
+5. **Optional pointer** (checkbox, off by default, site view only): "Apollo 11 Lunar Module descent stage (position from LROC's 2016 list)". No accuracy claim.
 
-**Never said:** that the globe has this detail, that the picture is current, that it shows the Moon "now", or that the brightness is a physical quantity. The date is always shown.
+**Later Earth view:**
+- If the reader chooses "As seen from Earth now" while the detail is open, the panel stays open, the camera is left alone, and the locator is hidden.
+- The line under the globe then reads "Locator hidden in the Earth view".
+- Returning to the ordinary view brings the locator back, subject to depth hiding.
+
+**Switching off:**
+- removes the panel and the locator, and cancels any pending image load
+- leaves the camera and zoom where they are (Chad, D4) and does not reopen a previous Earth view
+- focus returns to the button
+
+**Loading:**
+- Loading is ordered by a request token, as in the science layers. A load that completes after switch-off, or after the other view was chosen, is discarded and never shown.
+- **Failure:** "Detailed image unavailable", with a Retry button; the locator stays.
+
+**Dated LRO path:** independent. Both can be on; the path and the locator draw separately. Tests cover the combinations (§9).
+
+**Cost:** the locator's draw cost is to be **measured** after implementation, the same way as the height layer's, not assumed.
 
 **Pairing (item 9):** none. The picture is from 2011; the dated LRO path is June 2026.
 
-**Interplay:**
-- Height and temperature can stay on; the marker sits above them.
-- "As seen from Earth now" hides the marker while the Earth view is active, because the site may be on the visible disc but tiny. GPT's view is invited here.
-- No new globe redraw cost beyond one marker; the panel images are ordinary `<img>` elements.
+## 7. Build processing contract — R2
 
-**Access and layout:**
-- Keyboard: the button and radios.
-- Each image gets alt text saying what is visible ("Grey cratered mare. The Lunar Module is the bright dot with a dark shadow to its right…").
-- Narrow widths: the panel is full width and the image scales down.
-- A failed image load gives a plain "Detailed image unavailable" line, and the marker stays.
+**Geometry** (all 1-based inclusive, k = 1 convention):
+- **Site crop (0.5 m):**
+  - extent: lines 33,593–34,616, samples 5,603–6,626, 1,024 × 1,024, inside checkpoint 1's full-width lines
+  - the LM's predicted position falls in output pixel (512, 512) (0-based), 0.04 m north and 0.17 m west of that pixel's centre (`lroc_geom.py` output); recorded, not "mathematically centred"
+  - all 1,048,576 pixels valid, none special; the builder asserts this
+- **Area window (2 m):**
+  - extent: lines 7,527–9,526, samples 1–2,110
+  - **sample 2,111 (the east edge column) is dropped**, so the width is 4,220 m and the height 4,000 m
+  - output 1,055 × 1,000 at 4 m
+  - ground bounds of the output's outer edges: N 0.74015568°, S 0.60824413°, W 23.37227576°, E 23.51146363°
+  - the site footprint inside the area output (0-based, x right, y down): x 700.5–828.5, y 436.25–564.25; the rectangle is drawn from these numbers
 
-## 7. Build data contract (for the later build, not now)
+**Downsampling (area only):**
+- Each output pixel is a 2 × 2 block. Invalid codes (−32768…−32764) are **excluded before averaging**.
+- Output = mean of the valid DN if **at least 2 of 4** are valid; otherwise no data.
+- Measured valid counts per block, 0 to 4: 30,586 / 2 / 1,999 / 2 / 1,022,411. So 30,588 output pixels are no data and 2,001 partial blocks are averaged.
 
-**Assets:**
-- `assets/moon/lroc/a11-site-0p5m.jpg`: 1,024 × 1,024, lines 33,593–34,616 and samples 5,602–6,625 of the 0.5 m product (1-based).
-- `assets/moon/lroc/a11-area-4m.jpg`: 1,055 × 1,000, 2 × 2 means of the 2 m product, lines 7,528–9,527 (1-based), all samples.
-- Both use the stretch in §4.3, are JPEG quality 0.8, and come with a `SOURCE.json` (product LIDs, MD5s, ranges, stretch, crop and the builder's hash).
+**No-data mask:**
+- JPEG cannot carry an exact categorical mask, so the area view gets a 1-bit PNG mask of the same size, drawn as a hatched overlay.
+- The mask comes from the valid-count rule above, not from image brightness.
+- No-data pixels in the JPEG are filled with a constant mid grey under the overlay.
+- The site view needs no mask (zero invalid pixels; asserted).
 
-**Builder:**
-- `phase1/moonsci/build_lroc.py --check`, run against retained source files: the whole 2 m file (MD5-checked) and the 17,285,120-byte range of the 0.5 m file (SHA-256 `3bd1b862…a2fa`, recorded at checkpoint 1).
-- The JPEG encoder is Pillow, with sizes re-measured. The pane's encoder measured 225 KB and 360 KB, so expect similar.
+**Stretch** (same for both views):
+- applied after averaging, on the float mean
+- `v = clamp(floor((DN − 144) × 255 / 95 + 0.5), 0, 255)`, so DN 144 maps to 0 and DN 239 to 255
+- 144 and 239 are the 1st and 99th percentiles of the site crop
+- the LM's brightest pixels (DN > 239) clip to white, which the stretch implies; display only
 
-**Source retention** follows the Diviner rule: the source files go in the Mac's `_source-data/moon-lro-science-lroc/`, not committed. The blocker is that the pane can only save files through Downloads, and Downloads access was refused this session. **D5** asks how to proceed.
+**Encoding:**
+- 8-bit greyscale (mode L) JPEG with no chroma subsampling, quality 80, baseline, not optimised
+- Pillow, version pinned at build (12.3.0 in this workspace) and recorded in `SOURCE.json`
+- Sizes are **measured from the built files**; rev 1's pane-encoder figures (about 225 KB and 360 KB) are trial numbers only
 
-**Served-file manifest:** two new asset files plus `SOURCE.json`. `moon.html`, `moonglobe.js`/`moonsci.js`, `sources.html` and `REGISTER.md` would change, with the usual narrow Animals pin maintenance.
+**Files:**
+- `assets/moon/lroc/a11-site-0p5m.jpg`
+- `assets/moon/lroc/a11-area-4m.jpg`
+- `assets/moon/lroc/a11-area-4m-mask.png`
+- `assets/moon/lroc/SOURCE.json`, recording product LIDs and PRODUCT_IDs, MD5s, ranges, crop bounds, k convention, valid rule, stretch, encoder and version, and the builder's hash
 
-## 8. Verification plan for the build
+**Builder:** `phase1/moonsci/build_lroc.py --check`, from the **retained** source bytes (§8) only.
 
-- **Unit (pure):** pixel ↔ coordinate maths against both labels' corners and the LM landmark. Footprint rectangle position.
-- **Page suite** (new `moon-lroc-ui`, with deliberate breaks):
-  - off by default, with no image request until switched on
-  - marker at the site's latitude and longitude, and turn-to on
-  - panel facts (date, ID, scale, credit, "not reflectance")
-  - radios, keyboard, narrow 360/390/721 px
-  - image failure path
-  - off removes both
-  - independence from height, temperature, "Lit as now" and the LRO path (each state restored)
-  - Earth-view interplay
-  - no change to `lroc_color_2k.jpg`
-- **Asset checks:** `SOURCE.json` hashes; LM brightest pixel within 1 m of the published position in the site JPEG; scale bar length against the pixel scale.
-- **Existing suites** stay green: moon-height-ui, moon-diviner-ui, moon-globe, moon-lit, moon-lro-path, moon-light and Animals.
-- **Verification limits (item 11):** real phone, Safari, screen reader and hardware renderer are not checked unless done.
+## 8. Retention of build inputs — R4
 
-## 9. Not proposed now (scope choices, with revisit conditions)
+**Current state:** fetched and checked, **NOT RETAINED** (checkpoints line 5).
+- "Complete" in lines 1–2 means fetched and checked, not stored.
+- The 0.5 m range is not verified by the archive MD5, which covers the whole file. Its provenance is the 206 status, the exact Content-Range, the total length equal to the label size, the ETag equal to the label MD5, and our SHA-256 `3bd1b862…a2fa`. It was re-fetched twice with the same hash.
 
-- **Draping regional imagery on the globe:** not honest at 1.45 km a screen pixel. Revisit only with a globe that zooms to kilometre scale, which is a different feature.
-- **Other sites** (for example Apollo 15 or 17, Tycho's central peak, Chang'e landers): one at a time, after this one. Each needs its own product check and landmark or feature test.
-- **LROC photometry sequences** (lighting change at one site): a possible later option.
-- **NAC DTM heights at the site:** belongs with option 12a.
-- **The LROC website's Featured Images:** copyrighted (§5); not used.
+**Needed, on the Mac in `_source-data/moon-lro-science-lroc/`, not committed:**
+- the checkpoint 1 range (17,285,120 B)
+- the whole 2 m file (59,023,560 B)
+- both PDS4 labels, both attached PDS3 headers, the README, CATALOG/DSMAP.CAT, and DOCUMENT/RDRSIS.PDF (which also closes the frame read, §4.4)
 
-## 10. Costs: measured, kept apart from estimates
+Each gets a retention line with its path and its re-read hash once stored.
+
+**Blocker:**
+- The pane can save files only to `~/Downloads`. My request for this session to read `~/Downloads` was refused twice by the automatic approval check: first "Cowork Folder Access", then "Unauthorized Access".
+- I have not repeated it. Its route needs Chad to name the folder himself.
+
+**Fallbacks considered:**
+- Moving the bytes through the conversation in base64 pieces is not practical at these sizes. Even the lossless crop subsets (2 MB site, 8.4 MB area source) come to about 14 MB of base64.
+- Keeping only hashes is not a build path (GPT, R4).
+
+**D5:** Chad either grants this session access to `~/Downloads` in his own words, or adds the folder with "Add folder" in the Claude desktop app. Then:
+1. the pane saves each file
+2. I move it into `_source-data/`, re-hash it, and write its retention line before the next file is saved
+3. I read the SIS
+
+No other download is needed: the 944 MB 0.5 m file is never fetched whole.
+
+**Checkpoint timing deviation (disclosed):** the two `lroc_pixels` runs (checkpoint lines 3–4) each re-read both already-checkpointed files in one run, so the second fetch began before the first was recorded. These were verification re-reads of identical bytes, and nothing new was acquired or kept. The retention step will write each line before the next file.
+
+## 9. Verification plan for the build — R2/R3
+
+**Source (before encoding), in the builder `--check`:**
+- re-hash the retained inputs
+- recompute `lroc_geom.py` and the landmark checks of §4.2 on the retained unstretched pixels, plus the four special-code counts
+- check the crop bounds and the valid-count histogram against this proposal's numbers
+- stop on any saturation code in a window
+
+**Encoded images (tolerances, no brightest-pixel test):**
+- dimensions, greyscale, quality and version as recorded
+- **orientation:** correlation of each decoded JPEG with the stretched source is above 0.98, and the north–south and east–west flipped controls are below 0.5
+- mean absolute difference from the stretched source is at most 3 levels (to be measured and fixed at build)
+- the mask equals the valid-count rule exactly (PNG, lossless)
+- the decoded site JPEG shows a local feature at the LM's predicted pixel: a white blob covering pixel (512, 512) ± 2 px, which the stretch implies
+
+**Overlays:** the locator latitude/longitude, the footprint rectangle and the pointer come from the geometry (§7) and are tested against those numbers, not against image brightness.
+
+**Page suite (`moon-lroc-ui`, with deliberate breaks):**
+- off by default, with no image request until switched on
+- turn-to on, from both the ordinary view and the Earth view; the Lit choice and the height/temperature mode kept
+- the locator hidden on the far side and past the limb after rotation
+- clicks pass through to the readouts
+- Earth view while open hides the locator; returning shows it again
+- off: camera unchanged, no reopened Earth view, focus to the button
+- late loads discarded (off during load; view switched during load)
+- failure and Retry
+- keyboard (button, radios, pointer checkbox, Retry); narrow 360, 390 and 721 px
+- the dated LRO path on and off in combination
+- `lroc_color_2k.jpg` unchanged
+
+**Existing suites stay green:** moon-height-ui, moon-diviner-ui, moon-globe, moon-lit, moon-lro-path, moon-light, Animals. Breaks must report "BREAK applied (pattern found)".
+
+**Not verified unless done (item 11):** real phone, Safari, screen reader, hardware renderer. The locator's draw cost is measured, not assumed.
+
+## 10. Not proposed now (scope choices, with revisit conditions)
+
+- **Draping regional imagery on the globe:** not honest at 1.45 km a screen pixel. Revisit only with a globe that zooms to kilometre scale.
+- **Other sites:** one at a time, each with its own product check and landmark test.
+- **Photometry sequences:** later option.
+- **Site heights:** option 12a.
+
+## 11. Costs: measured, kept apart from estimates
 
 **Measured (pane, 26 Nov):**
+- 0.5 m range: 17,285,120 B, fetched in 6.3 s; the 2 m whole file: 59,023,560 B in 12.2 s.
+- Each `lroc_pixels` run (both re-reads plus checks) took 26–38 s.
+- Trial encoder sizes (pane, rev 1): site about 225 KB, area about 360 KB at q 0.8.
 
-| | Value |
+**Estimated:** the built files are of the same order; they will be measured at build. A visitor who opens the feature loads one view at a time, on demand. Visitors who don't open it load nothing.
+
+## 12. Decisions
+
+**Chad (26 Nov), on GPT's recommendation:**
+- **D1:** Apollo 11
+- **D2:** both views
+- **D3:** pointer offered, off by default
+- **D4:** switch-off leaves the camera where it is
+
+**Open:**
+- **D5:** source retention route (§8)
+- **D6 (new, small):** the 2 × 2 rule "at least 2 of 4 valid", and the no-data style (hatched overlay). Both are recommended; Chad may prefer another style.
+
+## 13. GPT's rev 1 review: where each point is answered
+
+| GPT | Answer |
 |---|---|
-| 0.5 m block fetch | 17,285,120 B in 6.3 s |
-| 2 m whole file | 59,023,560 B in 12.2 s |
-| Site JPEG (1,024², 0.5 m) | 224,518 B at q0.8; 325,419 B at q0.9 |
-| Area JPEG (1,055 × 1,000, 4 m) | 360,459 B at q0.8; 502,077 B at q0.9 |
-| 512² at 1 m | 71,622 B at q0.8 |
-
-**Estimated:** a page visitor who switches the feature on downloads about 0.6 MB once (cacheable). Nothing is downloaded for visitors who don't.
-
-## 11. Decisions for Chad (after GPT's review)
-
-- **D1 Site:** Apollo 11 (recommended), or another site.
-- **D2 Views:** area (4 m) plus site (0.5 m), about 585 KB on demand (recommended). Or the site view only (about 225 KB). Or a lighter area view at 8 m (528 × 500; not measured, expected well under 360 KB).
-- **D3 LM pointer:** offered, off by default (recommended); or not offered.
-- **D4 Switching off:** leaves the globe where it is (recommended, matches the other buttons); or returns to the previous view.
-- **D5 Source retention for the build:** (a) grant the pane's Downloads folder for this work so the source files reach `_source-data/` (recommended); (b) move the needed bytes through the pane in pieces (about 4 MB of crops as base64; slow and heavy); or (c) build the JPEGs in the pane with committed code and keep only hashes, with the archive as the source of record.
+| R1 frame, conventions, x-sign, narrowed claim, reproducible checks, independent anchors, negative controls, bounds as bounding box | §3, §4.1 (`lroc_geom.py`), §4.2 (`lroc_pixels.js`), §4.4. Frame: directly read sources name none; ME supported by LROC's list and page and by the SIS v1.2 quote. The volume SIS read stays open until retention (§8). Claims narrowed in §0 and §4. DTM figures marked vertical. |
+| R2 build test, special values incl. −32764, 2 × 2 valid rule, odd column, crop bounds, stretch and encoder, native pixel spacing ≠ screen, 3 × 19 px | §3 table, §7, §9; the caption wording in §6 |
+| R3 Earth view, locator vs footprint, occlusion, clicks, loading, late responses, keyboard, focus, LRO path, measured draw cost, scale bars | §6, §9 |
+| R4 retention and honest checkpoints, ETag ≠ MD5, Downloads as an authorisation issue | §8; checkpoints lines 3–5 |
+| Rights wording; host basis | §2 row, §5 |
+| Evidence-image hashes and dimensions | evidence list (header): corrected, and recorded as screenshots only |
