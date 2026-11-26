@@ -12,9 +12,11 @@
 | `c99da22` | **payload**: `moonlroc.js`, `moonlroc.css`, the `moon.html` hooks, the `moon-lroc-ui` suite (`LR_MAIN`) |
 | `ba9785c` | Animals suite pins only (`LR_MAIN` `c99da22`, `LR_PARENT` `d2ef9a0`; 13e, 13v, 13w) |
 | `d669eb6`, `b87db76`, `c94b43a` | `moon-lroc-ui` suite only: test fixes found by the breaks (§5) |
+| `6191193` | first version of this packet (superseded by this one) |
+| **`3ed8f82`** | **page fix in `moonlroc.js`** (locator visibility from the live camera; §3, §6) with suite test B7 and break `stale` |
 | the next commit | this packet (the branch head) |
 
-**Preview commit for review: the branch head (the commit that adds this packet; it differs from the validated tree `c94b43a` only by this file).** The page files are identical from `c99da22` onwards; later commits change tests and records only.
+**Preview commit for review: the branch head, the commit that adds this revised packet.** It differs from the validated tree `3ed8f82` only by this file. **Page files: `c99da22`, plus `moonlroc.js` changed once in `3ed8f82`.** `moon.html` is unchanged since `c99da22`, so the Animals pins stand.
 
 ## 2. Build (retained inputs only)
 
@@ -73,6 +75,7 @@
   - It has `pointer-events: none` and is labelled under the globe as a locator, "not the image’s footprint".
   - **Change from rev 2.1 §6, for GPT:** the proposal said "drawn in WebGL, depth-tested". The library's HTML layer gives a fixed on-screen size, a geometric behind-the-globe test (camera cone to the limb) and no WebGL draw.
   - The library's renderer rewrites `display` on every frame, so hiding uses `visibility`.
+  - **Visibility is worked out from the live camera** each time the library asks (visible when camera · site > R²), the same geometry `moonglobe.js` uses for the LRO marker. The library's own cached behind-the-globe answer was not reliable when the locator is first placed (§6).
 - **Panel:** two views as radios; each picture loads when first chosen. Each view has:
   - a ground-distance scale bar (1 km or 100 m), sized from the picture's displayed width and resized with it
   - "North up, east right. Sun low in the west, so shadows point east."
@@ -89,11 +92,11 @@
 
 ## 4. Validation
 
-Page files are identical from `c99da22` to the head; later commits change tests and records only. The breaks ran on a detached frozen worktree with its own server. The other suites ran on the branch checkout at `b87db76`, untouched while they ran. The final `moon-lroc-ui` run, the `size` break and `moon-height-ui` with its source ran at `c94b43a`.
+**Page files at the reviewed head:** `c99da22`, plus `moonlroc.js` from `3ed8f82`. Suites ran on the branch checkout at `3ed8f82`, untouched while they ran. The final `moon-lroc-ui` run and all 15 breaks ran on a detached frozen worktree at `1dc62c1` (`3ed8f82` plus test B8), served from its own server.
 
 | Suite | Result |
 |---|---|
-| `moon-lroc-ui` (new) | **53 / 0** (`b87db76` and `c94b43a`) |
+| `moon-lroc-ui` (new) | **56 / 0** at `1dc62c1` (54 / 0 at `3ed8f82`, before B8) |
 | `moon-diviner-ui` | 178 / 0 |
 | `moon-height-ui` | 110 / 0 (with `LOLA_SRC` pointing at the retained LOLA float file; without it the suite reports 101 / 1 for the missing input only) |
 | `moon-globe` | 67 / 0 |
@@ -107,45 +110,79 @@ Page files are identical from `c99da22` to the head; later commits change tests 
 
 **Measured:** WebGL draw calls per rendered frame are **1 with the detail on and 1 with it off** (`renderer.info.render.calls`). The locator is HTML, so it adds no WebGL draw. Its HTML-layer layout cost was not separately measured.
 
-**Served comparison:** `served_manifest.mjs --check` against main's Moon temperature manifest reports the changed `moon.html` and the new files, as expected for a branch. A new manifest belongs to the release candidate.
+**Served comparison:** `served_manifest.mjs --check` against main's Moon temperature manifest reports `moon.html`, `moonlroc.css` and `moonlroc.js` as different or new, as expected for a branch. A new manifest belongs to the release candidate.
 
-## 5. Deliberate breaks (14; each logged "BREAK applied (pattern found)")
+## 5. Deliberate breaks (15; each logged "BREAK applied (pattern found)")
 
-All ran on the frozen tree `b87db76` (`size` re-run at `c94b43a`):
+All ran on the frozen tree `1dc62c1`:
 
 | Break | What it does | Caught by |
 |---|---|---|
+| `stale` | trusts the library's cached behind-the-globe answer | B8a, B8b (and B7) |
 | `turn` | no turn to the site | B1, F8 |
 | `late` | a late picture shown after a view switch | D1 |
 | `offlate` | a late picture shown after switch-off | D2 |
 | `pe` | the locator takes pointer events | B3, F10 |
-| `novis` | the locator is never hidden | F1, F3, F5 |
+| `novis` | the locator is never hidden | F1, F3, F5 and more |
 | `earthloc` | the Earth view is ignored | F5 |
 | `fp` | the footprint box is shifted | C3 |
 | `ptr` | the pointer is misplaced | C11 |
 | `bar` | the scale bar has a fixed width | C5, C7, C12 |
-| `nd` | the hatch is shown in the wrong view | C4, C10 (D3) |
+| `nd` | the hatch is shown in the wrong view | C4, C10 |
 | `retry` | Retry is never shown | D3, D4, D5 |
 | `offcam` | switch-off moves the camera | E1 |
 | `eager` | both pictures load at once | B5, C8 |
 | `size` | the picture size check is removed | D6 |
 
-**Test faults found by the breaks and fixed (test files only, disclosed):**
+**Measured results** (`breaks-final2.log`, on the Mac copy):
+
+| Break | Pattern found | Suite result | Failing checks |
+|---|---|---|---|
+| `stale` | yes | 53/3 | B7, B8a, B8b |
+| `turn` | yes | 54/2 | B1, F8 |
+| `late` | yes | 55/1 | D1 |
+| `offlate` | yes | 55/1 | D2 |
+| `pe` | yes | 54/2 | B3, F10 |
+| `novis` | yes | 52/4 | B8b, F1, F3, F5 |
+| `earthloc` | yes | 55/1 | F5 |
+| `fp` | yes | 55/1 | C3 |
+| `ptr` | yes | 55/1 | C11 |
+| `bar` | yes | 53/3 | C5, C7, C12 |
+| `nd` | yes | 54/2 | C4, C10 |
+| `retry` | yes | 53/3 | D3, D4, D5 |
+| `offcam` | yes | 55/1 | E1 |
+| `eager` | yes | 54/2 | B5, C8 |
+| `size` | yes | 55/1 | D6 |
+
+**Test faults the breaks exposed, all fixed in test files only (disclosed):**
 - **`offlate`** was not caught at first. D2 ran on a page that had already loaded the site picture, so the browser's image cache answered before the switch-off. D2 now uses a fresh page and asserts "still loading at the click" (`d669eb6`).
-- **`retry`** at first hung on the hidden button instead of failing. D4 now records the failure, and the browser closes on any early stop (`b87db76`).
-- **`size`** at first stopped the suite (a setup failure) instead of failing D6. D6 now waits for any settled state, then asserts (`c94b43a`).
+- **`retry`** at first hung on the hidden button. D4 now records the failure, and the browser closes on any early stop (`b87db76`).
+- **`size`** at first stopped the suite instead of failing D6. D6 now waits for any settled state, then asserts (`c94b43a`).
+- **`stale`** was not caught by the timing-dependent B7 under parallel load. B8 checks the rule deterministically (`1dc62c1`).
 
-The first nine breaks also ran once on the earlier test file (`c99da22`) with the same outcome, except `offlate`. The final record above is the `b87db76` run.
+## 6. A page fault found after the first packet, and fixed
 
-## 6. Not done, and limits
+**How it was found:** a screenshot run for this packet, against the earlier head `6191193`, showed the locator **hidden** right after switching on.
+- It needed reduced motion and no pause between the globe becoming ready and the click.
+- A reproducer confirmed it: hidden for 2 s, until any camera move.
+
+**Cause:** the library's behind-the-globe answer at the moment the locator is first placed can describe the camera from before the turn. Earlier code hid by `display`, which the library's renderer overwrote every frame, so the fault was masked. Switching to `visibility` exposed it.
+
+**Fix (`3ed8f82`, `moonlroc.js` only):** the locator's visibility comes from the live camera each time the library asks: camera · site > R², the geometry `moonglobe.js` uses for the LRO marker. The reproducer now shows the locator straight away in all four cases (with and without reduced motion and pause).
+
+**New tests:** B7 (end to end, timing-dependent) and B8 (deterministic, both directions). Break `stale` checks them.
+
+**Superseded:** the first packet (`6191193`), which predates the fix.
+
+## 7. Not done, and limits
 
 - **Not verified:** real phone, Safari, screen reader, hardware renderer (headless Chrome with SwiftShader; narrow 360, 390 and 721 px tested).
-- **Visual checks were by screenshot in that renderer only.** The ring's on-screen position equals the library's own projection of the site to within 2 px. That is not a check of the globe picture's local registration, which is about 5 km a pixel.
+- **Visual checks were by screenshot in that renderer only.** The ring's on-screen position equals the library's own projection of the site to within 2 px (B2). That is not a check of the globe picture's local registration, which is about 5 km a pixel.
 - **Release work, later:** Sources section (`sources.html#moonlroc`), REGISTER entry, served-file manifest, and release pins.
 
-## 7. For GPT
+## 8. For GPT
 
-Review the branch head (validated tree `c94b43a`); Mac copy `_review/moon-lroc-ui/`. Points for your view:
-- the locator implementation change (§3)
-- the area JPEG tolerance (§2)
-- the test fixes the breaks forced (§5)
+Review the branch head (validated tree `1dc62c1`); the Mac copy is in `_review/moon-lroc-ui/`. Points for your view:
+- the locator implementation change from rev 2.1 §6 (HTML layer, live-camera visibility; §3, §6)
+- the area JPEG tolerance of 6 (§2)
+- the test faults the breaks forced (§5)
