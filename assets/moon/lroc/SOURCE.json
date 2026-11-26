@@ -1,0 +1,182 @@
+{
+ "schema": 1,
+ "revision": "lroc-a11-R1",
+ "builder": "phase1/moonsci/build_lroc.py",
+ "builder_sha256": "c8afc31ed3046d898e565556c66a1cecfcff4c963196ce4c49c3f7e1dd9a8f8a",
+ "encoder": {
+  "pillow": "12.3.0",
+  "libjpeg": "6.2",
+  "zlib": "1.3.1.zlib-ng",
+  "jpeg": {
+   "quality": 80,
+   "optimize": false,
+   "progressive": false
+  },
+  "mode": "L (greyscale, no chroma subsampling)"
+ },
+ "observation": {
+  "image": "M150368601 L/R",
+  "start_utc": "2011-01-22T20:48:53Z",
+  "stop_utc": "2011-01-22T20:49:11Z",
+  "camera": "LRO Narrow Angle Camera"
+ },
+ "products": {
+  "site": {
+   "pds4_lid": "urn:nasa:pds:lro-l-lroc-5-rdr:lrolrc_2001_data:sdp.nac_dtm.apollo11.nac_dtm_apollo11_m150368601_50cm",
+   "pds3_product_id": "NAC_DTM_APOLLO11_M150368601_50CM",
+   "file_md5_label": "95decbebbf283e46d6146c47fec988ed",
+   "range_bytes": [
+    567049840,
+    584334959
+   ],
+   "range_sha256": "3bd1b8627c8ba81d33a3ac756ec999b7276ec40356f1b3d3c99d57defc71a2fa"
+  },
+  "area": {
+   "pds4_lid": "urn:nasa:pds:lro-l-lroc-5-rdr:lrolrc_2001_data:sdp.nac_dtm.apollo11.nac_dtm_apollo11_m150368601_2m",
+   "pds3_product_id": "NAC_DTM_APOLLO11_M150368601_2M",
+   "file_md5_label": "187f3d1dac32aff7f00c512ec4907cdf",
+   "file_sha256": "73de3c6ec94109cc466adf87dbbcc320116e5d41f3f6f473fbb22cc1e32aeff8"
+  }
+ },
+ "retained_inputs": {
+  "LROC_A11_M150368601_50CM_bytes567049840-584334959.bin": {
+   "bytes": 17285120,
+   "sha256": "3bd1b8627c8ba81d33a3ac756ec999b7276ec40356f1b3d3c99d57defc71a2fa"
+  },
+  "NAC_DTM_APOLLO11_M150368601_2M.IMG": {
+   "bytes": 59023560,
+   "sha256": "73de3c6ec94109cc466adf87dbbcc320116e5d41f3f6f473fbb22cc1e32aeff8"
+  },
+  "NAC_DTM_APOLLO11_M150368601_50CM_PDS3HEADER_bytes0-16879.bin": {
+   "bytes": 16880,
+   "sha256": "5bbfe9e375945435c7f57b9bde3577286a1ab03651b4f57c3b739977cc48240a"
+  },
+  "NAC_DTM_APOLLO11_M150368601_50CM.xml": {
+   "bytes": 12523,
+   "sha256": "7bd41644078a82d3208a9e41d17a92c7e461a21e22efd325f822bb91b1d80ae8"
+  },
+  "NAC_DTM_APOLLO11_M150368601_2M.xml": {
+   "bytes": 12504,
+   "sha256": "ac7849d4ee93afe39514100b674faf98887410f8ff0dbb4a9ac7fddc55f97879"
+  }
+ },
+ "archive": "NASA PDS Imaging Node (pds.mcp.nasa.gov; redirected from pds.lroc.im-ldi.com), LRO-L-LROC-5-RDR-V1.0 / LROLRC_2001",
+ "frame": "mean Earth/polar axis, planetocentric, east positive (LROC RDR SIS v1.6, 22 Aug 2020, \u00a75.5); sphere 1737.4 km",
+ "pixel_convention": "centre of the upper-left pixel = (line, sample) (1.0, 1.0); offsets to the projection origin positive right/below (PDS3 header NOTE; SIS \u00a76.4)",
+ "layout": {
+  "site_header_offset_bytes": 16880,
+  "area_image_offset_bytes": 8444,
+  "decode": "int16 little-endian"
+ },
+ "pds4_conflicts_recorded": {
+  "2m_array_offset": {
+   "pds4_label": 4222,
+   "pds3_header": 8444,
+   "used": "pds3_header"
+  },
+  "50cm_array_offset": {
+   "pds4_label": 16880,
+   "pds3_header": 16880,
+   "used": "pds3_header"
+  },
+  "upperleft_corner_x": {
+   "pds4_label_m": 4748752.75,
+   "pds3_implied_centre_of_pixel_1_1_m": -4748752.749999905,
+   "used": "pds3_header"
+  }
+ },
+ "crops_1based_inclusive": {
+  "site": {
+   "lines": [
+    33593,
+    34616
+   ],
+   "samples": [
+    5603,
+    6626
+   ]
+  },
+  "area": {
+   "lines": [
+    7527,
+    9526
+   ],
+   "samples": [
+    1,
+    2110
+   ],
+   "dropped_sample": 2111
+  }
+ },
+ "source_window_sha256_int16le": {
+  "site": "18a0603b34a01b36403af17750cf5483fe3753a3fc89a42832b9aa71d16e1fd8",
+  "area": "4cd6d42d1286901a1091636fc3c7792f62a3668bffbd4cb0d1a3b8aedd74138f"
+ },
+ "downsampling": {
+  "area": "2x2 blocks; invalid codes excluded before averaging; mean of valid DN if at least 2 of 4 valid, else no data (Chad, D6); partial blocks averaged (provenance)",
+  "valid_count_histogram_0_to_4": [
+   30579,
+   10,
+   1999,
+   10,
+   1022402
+  ],
+  "no_data_output_pixels": 30589,
+  "partial_blocks_averaged": 2009
+ },
+ "stretch": "v = clamp(floor((DN - 144) * 255 / 95 + 0.5), 0, 255) after averaging; display only, not reflectance; DN carry no scale or offset (README)",
+ "no_data_fill": "grey 128 under a hatched overlay; mask a11-area-4m-mask.png (alpha 255 = no data), from the valid-count rule",
+ "geometry": {
+  "pointer_in_site": {
+   "x": 0.5001484476579208,
+   "y": 0.5004103087011273
+  },
+  "site_footprint_in_area": {
+   "x": 0.663981043013978,
+   "y": 0.4362500000016562,
+   "w": 0.12132701421800948,
+   "h": 0.12799999999995906
+  },
+  "area_bounds_deg": {
+   "n": 0.7401556782502621,
+   "s": 0.6082441333829903,
+   "w": 23.372275755294993,
+   "e": 23.511463634118087
+  },
+  "site_bounds_deg": {
+   "n": 0.6826092668016963,
+   "s": 0.6657245890586909,
+   "w": 23.464693868250833,
+   "e": 23.48158111800379
+  },
+  "area_ground_m": {
+   "width": 4220.000000001266,
+   "height": 4000.0000000012
+  },
+  "site_ground_m": {
+   "width": 511.99999999998977,
+   "height": 511.99999999998977
+  }
+ },
+ "native_pixel_spacing_m": {
+  "site": 0.49999999999999,
+  "area_after_2x2": 4.0000000000012
+ },
+ "credit": "NASA/GSFC/Arizona State University",
+ "rights": "PDS-delivered LROC data products are public domain (LROC terms, read 26 Nov 2026); images derived by Mother Earth from the PDS products",
+ "review_cadence": "yearly and at each build: check the PDS4 label versions and the archive MD5s against this record",
+ "files": {
+  "a11-site-0p5m.jpg": {
+   "bytes": 223227,
+   "sha256": "e8989c1c93413150e2c026d2e3ebb6587b43b601eff5f447fcb3ac89b9054643"
+  },
+  "a11-area-4m.jpg": {
+   "bytes": 359687,
+   "sha256": "930d9ad856e78825f70671c214f94a5b744a21313d49e512cea6d0e4999f8946"
+  },
+  "a11-area-4m-mask.png": {
+   "bytes": 6002,
+   "sha256": "ad59003dbf15f613fb316ae3fe44eddc7aee079987d0cf285ce0db919987f4cd"
+  }
+ }
+}
