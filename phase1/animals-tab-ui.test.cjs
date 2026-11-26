@@ -93,7 +93,7 @@ const MH_ADD = [/\n<link rel="stylesheet" href="moonsci\.css\?v=\d+">/, /      <
 // those two additions set aside, to everything it held before (TIDES_MAIN and the chain behind it).
 const MH_SRC_SHORTCUT = ' · <a href="#moonheight">Moon height</a>', MH_SRC_SEC = /  <h2 id="moonheight">[\s\S]*?\n\n(?=  <h2 id="sunglobe">)/;
 const heightSourcesOk = t => t.split(MH_SRC_SHORTCUT).length === 2 && t.includes(MH_SRC_SHORTCUT + ' · <a href="#tides">Tides</a>') && (t.match(/<h2 id="moonheight">/g) || []).length === 1 && MH_SRC_SEC.test(t)
-  && /Values north of 89\.5°N are withheld because inconsistencies were found in the source products\./.test(t) && /doi:10\.17189\/tnyt-7007/.test(t);
+  && /Values north of 89\.5°N are withheld because inconsistencies were found in the source products[.:]/.test(t) && /doi:10\.17189\/tnyt-7007/.test(t);
 const noHeightSources = t => t.replace(MH_SRC_SHORTCUT, '').replace(MH_SRC_SEC, '');
 const heightOk = t => MH_ADD.every(re => (t.match(new RegExp(re.source, 'g')) || []).length === 1) && /moonglobe\.js\?v=202612260500/.test(t);
 const noHeight = t => MH_ADD.reduce((a, re) => a.replace(re, ''), t).replace('moonglobe.js?v=202612260500', 'moonglobe.js?v=202612071200');
