@@ -1,0 +1,19 @@
+decode/node: file 1776231 B; 1036800 values; withheld 2880 (expected 2880); wrong withheld/kept markers 0 ; worst |file - source| 0.5000 m (bound 0.5)
+decode/browser: {"fetched":1776231,"decoded":2073600,"n":1036800,"gz":true,"fetchMs":50.5,"decodeMs":20.1}
+decode/browser: all 1036800 values compared with the same file decoded by Node; differing: 0 
+  highest cell (5.4125N 201.3665E): index 487525, page 10504, expected 10504, source float 10504.143 m
+  lowest cell (70.4S 187.6E): index 923790, page -8879, expected -8879, source float -8878.821 m
+  withheld (89.9N 10E): index 40, page -32768, expected -32768, source float 0.000 m
+  withheld edge (89.51N 100E): index 1840, page -32768, expected -32768, source float -1320.787 m
+  first kept row (89.49N 100E): index 3280, page -1342, expected -1342, source float -1341.678 m
+  seam west side (0N 359.99E): index 519839, page -722, expected -722, source float -722.214 m
+  seam east side (0N 0.01E): index 518400, page -722, expected -722, source float -721.944 m
+  antimeridian (0N 180E): index 519120, page 2837, expected 2837, source float 2836.936 m
+  south pole row (89.9S 0E): index 1035360, page 103, expected 103, source float 102.523 m
+  a zero-metre cell: index 10945, page 0, expected 0, source float 0.207 m
+  first negative cell: index 2880, page -1241, expected -1241, source float -1240.782 m
+  extremes outside withheld rows: page [ -8879, 10504 ] expected [ -8879, 10504 ]
+render/reduce: idle 5 s on the current page: animation frames 1944, WebGL draw calls 216
+render/reduce: background tab (visibilityState reported 'visible'), 5 s: animation frames 72, WebGL draw calls 8
+render/no-preference: idle 5 s on the current page: animation frames 2106, WebGL draw calls 234
+render/no-preference: background tab (visibilityState reported 'visible'), 5 s: animation frames 162, WebGL draw calls 18

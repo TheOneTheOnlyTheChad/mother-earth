@@ -11,13 +11,24 @@ B3. exact 0.0 values: 1010 rows [0]
     row 717 lat -89.375: mean     20.4 m  min  -1177.5  max   1743.8
     row 718 lat -89.625: mean   -351.5 m  min  -2780.4  max   1610.3
     row 719 lat -89.875: mean     31.1 m  min  -2166.6  max   1671.2
+B3b. labels:
+      {'PRODUCT_ID': 'LDEM_4_FLOAT', 'PRODUCT_VERSION_ID': 'V3.0', 'SAMPLE_TYPE': 'PC_REAL', 'SAMPLE_BITS': '32', 'UNIT': 'KILOMETER', 'SCALING_FACTOR': '1', 'OFFSET': '1737.4', 'LINES': '720', 'LINE_SAMPLES': '1440'}
+      {'PRODUCT_ID': 'LDEM_4', 'PRODUCT_VERSION_ID': 'V3.0', 'SAMPLE_TYPE': 'LSB_INTEGER', 'SAMPLE_BITS': '16', 'UNIT': 'METER', 'SCALING_FACTOR': '0.5', 'OFFSET': '1737400.', 'LINES': '720', 'LINE_SAMPLES': '1440'}
+      |float - int16| over all cells: max 1423.309 m; cells above one int16 step (0.5 m, +1e-3): 1038; max outside rows 0-1: 0.5000 m
+      rows with any cell above one step: [0, 1]
+      row 0 (+89.875): max 469.7 m, mean 44.6 m, cells above bound 430; float row mean -18.2 m, int16 row mean -2.4 m, int16 zeros 1412, int16 max 0.0 m
+      row 1 (+89.625): max 1423.3 m, mean 416.1 m, cells above bound 608; float row mean -671.3 m, int16 row mean -257.8 m, int16 zeros 611, int16 max 223.0 m
+      row 2 (+89.375): max 0.5 m, mean 0.2 m, cells above bound 0; float row mean -901.5 m, int16 row mean -901.2 m, int16 zeros 0, int16 max 186.5 m
+      row 360 (-0.125): max 0.5 m, mean 0.2 m, cells above bound 0; float row mean 730.4 m, int16 row mean 730.4 m, int16 zeros 1, int16 max 8464.0 m
+      row 719 (-89.875): max 0.5 m, mean 0.3 m, cells above bound 0; float row mean 31.1 m, int16 row mean 31.1 m, int16 zeros 1, int16 max 1671.0 m
 B4. returns per cell min/median/max 64 6225.0 26671 | cells with 0 returns 0
 B5. seam |col0 - col1439| mean km 0.181  typical neighbour |d| km 0.228
 B6. mean row-to-row |d| km: all 0.347  at 45N 0.322  at equator 0.27  at 45S 0.33
 B7. correlation height vs picture brightness, shift in 0.25 deg cells (lon): {-3: 0.5034, -2: 0.5083, -1: 0.5151, 0: 0.5197, 1: 0.5134, 2: 0.5066, 3: 0.502}
     (lat): {-3: 0.5014, -2: 0.5062, -1: 0.5135, 0: 0.5197, 1: 0.5137, 2: 0.5058, 3: 0.5001}  east-west mirrored: 0.339  north-south flipped: 0.1102
-B8. whole-metre rounding: max error m 0.5002
-    16-bit PNG of whole metres (+10000 offset): 1535833 B;  int16 raw gzip -9: 1778840 B
+B8. whole-metre rounding (float64): max error m 0.5
+    proposed int16+gzip grid (rows 0-1 withheld): 1776231 B, sha256 af4450019840918da4a62812f4969ad07a0c77bf3f878ef59ca7e8961cc7d43d
+    16-bit PNG of whole metres (+10000 offset): 1535821 B;  int16 raw gzip -9: 1778857 B
     colour picture 1440x720: {'PNG': 1157752, 'WEBP': 131288, 'JPEG': 174149}
     colour picture 2048x1024: {'PNG': 1852886, 'WEBP': 172860, 'JPEG': 275530}
 C. gcp_00n10n_rows0-19199.tab: lon -179.75..-175.25 lat 0.25..9.75 local-time bins 96

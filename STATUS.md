@@ -4,6 +4,12 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 26 Nov 2026
 
+## 26 Nov 04:38 UTC (clock reading) — **Moon/LRO science: GPT's rev 1 review filed; proposal rev 2 for GPT's recheck. Docs only; nothing built; no hub change** (page: none; Moon/LRO science thread)
+- **Filed unchanged:** `reviews/2026-11-26-moon-lro-proposal-rev1-gpt-review.md` (relayed by Chad as pasted text; no file in ChatGPT/Mother Earth/; text sha256 `1ab5d0d5…31a3`). GPT supports elevation first; asks for rev 2 before build.
+- **Rev 2:** lossless readout grid (int16 + gzip, `DecompressionStream`, no canvas), tested in Chrome on all 1,036,800 values (0 differ), 1,776,231 B; float/int16 polar comparison reproduced in `assess_samples.py` (rows 0–1 disagree in 1,038 cells, up to 1,423 m; cause not established; "withheld because inconsistencies were found in the source products"); visible striped mask; registration, coverage and resolution claims narrowed; lighting/camera/loading contract; **current Moon globe measured redrawing continuously while idle (216–269 draw calls / 5 s)**, so rev 1's "renders only on interaction" is withdrawn; complete file list (incl. Animals pins of `moon.html`/`moonglobe.js`/`sources.html` and a new served manifest); rights from the PDS Geosciences FAQ (public domain, cite). Diviner and Sky parked.
+- **Records:** `docs/concepts/MOON-LRO-SCIENCE-PROPOSAL.md` rev 2; `docs/research/moon-lro-science/` (`SAMPLES.md` §5, `assess_samples.py`, `measure_browser.cjs`, outputs).
+- **Next:** GPT rechecks rev 2. Then Chad's decisions D1–D4 and his own go before any branch build.
+
 ## 26 Nov 04:10 UTC (clock reading) — **Moon globe and LRO science: data assessment and proposal rev 1 filed for GPT's review. Docs only; nothing built; no hub change** (page: none; Moon/LRO science thread)
 - **Filed unchanged:** GPT's brief `docs/concepts/MOON-LRO-SCIENCE-BRIEF-GPT-2026-11-25.md` (sha256 `212c7573…6d0e`, commit `6acbe54`).
 - **Chad's go (26 Nov):** archive recheck, bounded small samples, data assessment and docs-only proposal; elevation first, Diviner separately; keep the Moon's appearance, lighting and dated LRO behaviour; Sky texture only as an optional, separately scoped suggestion; measured sample costs apart from estimated integration costs; no production changes. Scope: every page that shows the Moon (Chad, 26 Nov).
