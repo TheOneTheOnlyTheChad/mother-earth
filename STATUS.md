@@ -5,7 +5,7 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 # 26 Nov 2026
 
 ## 26 Nov 08:20 UTC (clock reading) — **Animals: IWC scope confirmed in writing: the 2015 estimate 18,111, its 5th–95th percentile range 15,580–20,700, Relative Abundance "Very Good" and 1995–2015 change "Strongly Increased" may be shown with the status sentence, credited to the International Whaling Commission with a link. No further IWC clarification needed. Not a build or release go.** (page: none; Animals thread)
-- **Record:** `docs/research/animals-source-audit/ENQUIRIES-EXPANSION.md` rev 1.12. By Chad's and GPT's account (GPT read the full thread); the reply's own text not yet seen by Claude, to be kept privately.
+- **Record:** `docs/research/animals-source-audit/ENQUIRIES-EXPANSION.md` rev 1.12, provenance corrected in rev 1.13 (08:22 UTC): her direct written reply, "Please feel free to use the additional information as described below" (10:03 SAST as relayed), kept privately. This IWC reply and the ATAP reply are the two emails of 26 Nov; none outstanding.
 - **Whale example:** IWC side complete; parked on Cape Vidal and Chad's go.
 
 ## 26 Nov 08:16 UTC (clock reading) — **Moon height closed out. Live: Moon height `d6a26b6`; main `96a931d` before this commit. Nothing pending in this thread** (Moon/LRO science thread)
