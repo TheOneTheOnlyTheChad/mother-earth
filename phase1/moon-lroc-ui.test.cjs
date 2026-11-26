@@ -143,10 +143,16 @@ function patchCss(s) {
     await T.p.check('input[name="mg-lroc-view"][value="area"]'); await waitState(T.p, 'shown'); await T.p.waitForTimeout(1800);
     const s = await st(T.p);
     ok('D1 a late site picture is dropped after switching back to area', s.view === 'area' && /a11-area-4m/.test(s.shown) && /a11-area-4m/.test(await T.p.getAttribute('#mg-lroc-img', 'src')), s);
+    await T.close(); }
+  { // a fresh page, so no earlier load of the site picture can answer from the browser's image cache
+    const T = await mk({ assets: { site: { delay: 1500 } } });
+    await T.p.click('#mg-lroc'); await waitState(T.p, 'shown');
     await T.p.check('input[name="mg-lroc-view"][value="site"]'); await T.p.waitForTimeout(200);
+    const mid = await st(T.p);
     await T.p.click('#mg-lroc'); await T.p.waitForTimeout(1800);
     const s2 = await st(T.p);
-    ok('D2 switched off during a load: the late picture never reopens the panel', !s2.on && s2.state === 'off' && await T.p.evaluate(() => document.getElementById('mg-lroc-panel').hidden && !document.getElementById('mg-lroc-img').getAttribute('src')), s2);
+    ok('D2 switched off during a load (still loading at the click): the late picture never reopens the panel', mid.state === 'loading' && mid.view === 'site' && T.hits.site === 1 && !s2.on && s2.state === 'off'
+      && await T.p.evaluate(() => document.getElementById('mg-lroc-panel').hidden && !document.getElementById('mg-lroc-img').getAttribute('src')), { mid, s2, hits: T.hits });
     await T.close(); }
   { const T = await mk({ assets: { area: { status: 404 } } });
     await T.p.click('#mg-lroc'); await waitState(T.p, 'failed');
