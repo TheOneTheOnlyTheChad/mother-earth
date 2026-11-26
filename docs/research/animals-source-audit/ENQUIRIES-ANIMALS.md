@@ -1,6 +1,6 @@
 # Animals: enquiries record
 
-24 Nov 2026 02:45 UTC (clock reading) · rev 3 (rev 3 adds NOAA's first reply and fills section A from the email thread Chad pasted on 24 Nov, see §A and "Replies"; rev 2: 19 Nov 2026 15:18 UTC; rev 1: 19 Nov 2026 14:37 UTC) · for GPT · record only. Rule as in `docs/research/ENQUIRIES-2026-11.md`: sending grants no permission and silence grants none; an enquiry is marked sent only when Chad confirms it; no duplicate and no follow-up is sent unless Chad decides to.
+26 Nov 2026 08:14 UTC (clock reading) · rev 4 (rev 4 adds the first substantive ATAP reply as a factual summary, see §B and "Replies"; the full text is kept privately, following GPT's filing rule of 25 Nov: public records carry a factual summary, not a private email) · 24 Nov 2026 02:45 UTC · rev 3 (rev 3 adds NOAA's first reply and fills section A from the email thread Chad pasted on 24 Nov, see §A and "Replies"; rev 2: 19 Nov 2026 15:18 UTC; rev 1: 19 Nov 2026 14:37 UTC) · for GPT · record only. Rule as in `docs/research/ENQUIRIES-2026-11.md`: sending grants no permission and silence grants none; an enquiry is marked sent only when Chad confirms it; no duplicate and no follow-up is sent unless Chad decides to.
 
 **Correction.** STATUS entries of 18 and 19 Nov, three review packets and Claude's messages in this thread described both enquiries as "unsent". That was wrong from the point Chad sent them. Chad, 19 Nov: he sent the enquiries from his own email; the original NOAA address bounced; he then confirmed "cool sent". This file replaces "the two unsent enquiries" everywhere.
 
@@ -28,12 +28,12 @@ Corrected in rev 2. Source: Chad's statement of 19 Nov 2026, from the correspond
 |---|---|
 | About | whether a completed or generalised dataset from the Acoustic Tracking Array Platform could be shown as detections at receivers, and whether a regularly updated summary exists |
 | Recipient | ATAP, hosted by SAIAB. Now with **Dr Taryn Murray (SAIAB)** |
-| Status | **Contact established. Awaiting a substantive response. No resend needed** |
+| Status | **Contact established. First substantive reply 26 Nov 2026 (rev 4): offers SAIAB-owned datasets for discussion, suggests duckbill rays first. No data, terms or permission yet. See "Replies"** |
 | What happened, in order | 1. Chad sent the enquiry from his own email; the **original address bounced**. 2. The enquiry was **redirected to Dr Taryn Murray**. 3. She **replied on 19 Nov 2026 asking for the missing enquiry**. 4. Chad **supplied the full enquiry at 09:22 on 19 Nov** (the time as Chad gave it; time zone not stated, his usual is SAST) |
 | Addresses | the bounced address is not on record. Dr Murray's address is held by Chad and is not written in this repository (standing rule: no email addresses in the public repo) |
 | Dates | bounce and redirect: not on record. Her reply and Chad's full enquiry: 19 Nov 2026 |
 | Text | Draft B, `SHARKS-DOLPHINS.md` §6 rev 1.1 (branch `animals-proposal`). Whether the full enquiry of 19 Nov was that text word for word is not on record |
-| Reply | Dr Murray's request for the missing enquiry (19 Nov). **No substantive reply yet** |
+| Reply | Dr Murray's request for the missing enquiry (19 Nov). **First substantive reply, 26 Nov 2026 (rev 4)** |
 | What a reply would decide | whether South African shark and ray detections can be considered. A different kind of data from the white shark journey (detections at receivers, not satellite fixes) and a different dataset from the Zenodo file |
 | Do not | resend, follow up or draft a duplicate. Her reply grants no permission; silence grants none |
 
@@ -43,6 +43,32 @@ Corrected in rev 2. Source: Chad's statement of 19 Nov 2026, from the correspond
 - No enquiry has been sent to the authors of the three preview datasets (Bartlam-Brooks and Harris; Kock and co-authors; Baird and co-authors). The release assessment names the one question that would need one.
 
 ## Replies
+
+### B, ATAP (SAIAB): first substantive reply, 26 Nov 2026
+
+**How it reached this record.** Chad pasted it into the Claude thread on 26 Nov 2026, the first of two replies that morning, and had already sent it to GPT. Claude has not seen the inbox. The paste showed it as received "7:52 AM (2 hours ago)" in Chad's mail view, time zone not stated, addressed to Chad only; the workspace clock read 08:13:20 UTC (10:13 SAST) when it arrived. Subject not shown in the paste. Its text is not reproduced here; the full email is kept privately (Mac `research/animals-correspondence/2026-11-26-atap/`, sha256 `62635c93…30b7`).
+
+**What it says (factual summary).** From Dr Taryn Murray, SAIAB.
+- She has looked at the website and is positive about the idea.
+- For ease of access, any data would need to be SAIAB's own; she is the current data owner of those data.
+- **Datasets she names, with published migration information:**
+
+| Species | Status she gives |
+|---|---|
+| Duckbill ray, *Aetomylaeus bovinus* | Published; Critically Endangered. She suggests these as the best fit at this stage |
+| Adult leervis (garrick), *Lichia amia* | Being written up for publication |
+| Diamond ray, *Gymnura natalensis* | Research ongoing; a sub-sample only |
+| One whitespotted eagle ray, *Aetobatus ocellatus*, moving between South Africa and southern Mozambique | **Not available yet**: they want to write it up themselves |
+
+- Other tagged species, the larger sharks especially, belong to other research groups and would need separate enquiries.
+- She proposes first discussing whether the duckbill rays and leervis interest Chad, and then providing the relevant information.
+
+**What it is, and is not (Claude's reading; not yet GPT's).**
+- It is an offer to discuss, from the stated data owner. **It is not data, and it is not permission.** No terms, licence, attribution, location protection or non-commercial condition is stated yet.
+- Nothing about any species is cleared. Any dataset offered is a new study with its own source audit before any proposal.
+- The eagle ray is **not available**. It is not to be asked for or shown.
+- Larger sharks: no message to other groups unless Chad decides.
+- Answering her is Chad's. His answer follows his rule of 23 Nov 2026: Mother Earth is his own personal control centre, not for public use, and the page and repository can currently be reached by anyone with the link.
 
 ### A, NOAA bottlenose dolphins: first reply, 23 Nov 2026
 

@@ -4,6 +4,10 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 26 Nov 2026
 
+## 26 Nov 08:14 UTC (clock reading) — **Animals: first substantive ATAP reply (Dr Taryn Murray, SAIAB) filed. Offers SAIAB-owned datasets for discussion, duckbill rays (published, Critically Endangered) suggested first; leervis being written up; diamond rays a sub-sample; the eagle ray NOT available. No data, terms or permission yet.** (page: none; Animals thread)
+- **Record:** `docs/research/animals-source-audit/ENQUIRIES-ANIMALS.md` rev 4, factual summary; the full email kept privately on the Mac.
+- **Next:** GPT's review (Chad sent it); answering her is Chad's. Any dataset is a new study with its own source audit.
+
 ## 26 Nov 08:12 UTC (clock reading) — **Moon height released: merge `d6a26b6` (page only; no hub deployment). 42 of 42 served files verified** (page: `d6a26b6` live; Moon/LRO science thread)
 - **GPT's release review filed unchanged** (`reviews/2026-11-26-moon-height-release-rc-gpt-review.md`, sha256 `e01922f1…df73`): PASS for release content at `afb42d5`; no blocking finding.
 - **Chad's own line (26 Nov):** "Approve: release Moon height from `moon-height-rc` at `afb42d5` to main, page only; no hub deployment. Run the 42-file served verification against the reviewed Moon height manifest and record the result."
