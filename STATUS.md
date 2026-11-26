@@ -4,6 +4,24 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 26 Nov 2026
 
+## 26 Nov 14:42 UTC (clock reading) — **Moon temperature release candidate (`310ca1e`) for GPT's release review. Not merged, not deployed** (Moon/LRO science, Diviner thread)
+- **GPT's rev 2 recheck:** PASS, R1 closed. Filed unchanged (`reviews/2026-11-26-moon-diviner-ui-rev2-gpt-recheck.md`, `544184b2…`).
+- **Chad's go for the RC:** Sources, REGISTER, manifest, narrow Animals pins, final validation. No merge or deployment.
+- **Branch `moon-diviner-ui`:**
+  - `a752e13` merge of fresh main `5efe200`
+  - `cc75407` payload: `sources.html#moontemp` section and shortcut, REGISTER entry, `moon.html` Details link, SOURCE.json review cadence, manifest of 44 files, suite section H
+  - `8b233d9` Animals pins: `DV_PARENT` `5efe200`; 13e sources.html; 13t allows sources and REGISTER
+  - `310ca1e` packet `reviews/2026-11-26-moon-diviner-release-rc.md`
+- **Validation**, from a detached worktree at `8b233d9` with its own server, 13:20–14:41 UTC:
+  - `moon-diviner-ui` 178/0, `moon-height-ui` 110/0, Animals 294/0, plus 20 suites green
+  - breaks 31 of 31 caught, every one with its pattern found
+  - exceptions, each compared with main `5efe200` line by line:
+    - tides-ui T1a: branch scope, by design
+    - smoke-fixes 11, kept-ui 3, ux-round1 1, timeline-mixed-assets 2: identical on main
+    - osmc 1: identical on main when run alone
+    - moon-lit: 1 under load, 138/0 when run alone
+- **Not done:** merge, deploy, live check. No hub, R2, D1 or collector change.
+
 ## 26 Nov 13:07 UTC (clock reading) — **Moon temperature preview rev 2: GPT's timeout finding fixed, wording corrected; for GPT's recheck. Branch only** (Moon/LRO science, Diviner thread)
 - **GPT's reviews** filed unchanged:
   - preview `reviews/2026-11-26-moon-diviner-ui-gpt-review.md` (`746b89dd…`): data PASS; R1 must be fixed; GHRM is corroboration only; wording corrections

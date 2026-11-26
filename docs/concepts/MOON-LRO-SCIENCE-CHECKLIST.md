@@ -1,6 +1,6 @@
 # Moon globe and LRO science — spec checklist
 
-Rev 8 · 26 Nov 2026, 13:07 UTC (clock reading; rev 7 11:58, rev 6 10:22, rev 5 09:54, rev 4 09:42, rev 3 09:20, rev 2 08:59, rev 1 08:31 UTC) · written by Claude on Chad's instruction (26 Nov) · **persistent record; update it as each item moves** · docs only.
+Rev 9 · 26 Nov 2026, 14:42 UTC (clock reading; rev 8 13:07, rev 7 11:58, rev 6 10:22, rev 5 09:54, rev 4 09:42, rev 3 09:20, rev 2 08:59, rev 1 08:31 UTC) · written by Claude on Chad's instruction (26 Nov) · **persistent record; update it as each item moves** · docs only.
 
 **What this is.** The record of every item in GPT's original brief, `docs/concepts/MOON-LRO-SCIENCE-BRIEF-GPT-2026-11-25.md`. It also covers the scope Chad added on 26 Nov: every page that shows the Moon. It is **not** the narrowed height proposal (`docs/concepts/MOON-LRO-SCIENCE-PROPOSAL.md` rev 2.1), which covered only the first release.
 
@@ -19,7 +19,7 @@ Rev 8 · 26 Nov 2026, 13:07 UTC (clock reading; rev 7 11:58, rev 6 10:22, rev 5 
 |---|---|---|
 | 1 | Existing all-round appearance, orientation, polar disclosure, lighting, dated LRO path ("Existing Moon view", "Existing LRO view", requirement 1) | **done: preserved** |
 | 2 | LOLA elevation-first layer ("Recommended first feature", requirements 2–4) | **done: released and closed** |
-| 3 | Diviner temperature ("Recommended first feature", second paragraph) | **preview `moon-diviner-ui` rev 2 (GPT's R1 timeout fix and wording) with GPT for recheck (not merged)** |
+| 3 | Diviner temperature ("Recommended first feature", second paragraph) | **release candidate `moon-diviner-ui` at `310ca1e` with GPT for release review (not merged, not deployed)** |
 | 4 | LROC regional detailed imagery | to assess |
 | 5 | CRaTER radiation | to assess |
 | 6 | LEND neutron and hydrogen products | to assess |
@@ -79,12 +79,21 @@ Rev 8 · 26 Nov 2026, 13:07 UTC (clock reading; rev 7 11:58, rev 6 10:22, rev 5 
 - **Review cadence:** yearly and at each build, check for a newer version against the PDS errata and the LOLA Data Node. Last checked 26 Nov 2026.
 - **Next:** none for this layer. Options in item 12.
 
-## 3. Diviner temperature — preview `moon-diviner-ui` with GPT for review
+## 3. Diviner temperature — release candidate with GPT for release review
 
 - **Brief asked:** a bounded Diviner example, either one documented map product or a short dated observation interval.
   - Keep channel brightness temperature apart from derived or bolometric temperature, and record local time, viewing geometry and aggregation.
   - No generic "Moon temperature now", and no apparent thermal response synchronised to the day/night control.
   - Check the `-9999` warning against the exact product. Missing is never 0 K.
+- **Update (14:42 UTC clock reading): release candidate with GPT for release review. Not merged, not deployed.**
+  - **GPT's rev 2 recheck:** PASS; R1 closed (`reviews/2026-11-26-moon-diviner-ui-rev2-gpt-recheck.md`, filed unchanged). Chad's go for the release candidate.
+  - **Branch `moon-diviner-ui`, final commit `310ca1e`:** fresh main `5efe200` merged in; release payload `cc75407`; Animals pins `8b233d9`; packet `reviews/2026-11-26-moon-diviner-release-rc.md`.
+  - **Added:** `sources.html#moontemp`, the REGISTER entry, the page's "Details" link, the SOURCE.json review cadence, and the served manifest `reviews/evidence/2026-11-26-moon-diviner-manifest.json` (44 files).
+  - **Validated on a frozen worktree at `8b233d9`:**
+    - `moon-diviner-ui` 178/0, `moon-height-ui` 110/0, Animals 294/0, and 20 more suites green
+    - 31 of 31 breaks caught, all with the pattern found (0 setup failures)
+    - exceptions carried with main-baseline evidence: tides-ui T1a (branch scope); smoke-fixes, kept-ui, ux-round1, timeline-mixed-assets and osmc identical on main; moon-lit 138/0 when run alone
+  - **Next:** GPT's release review; then Chad's own Approve line naming `310ca1e`; merge, then served-hash verification of the 44 paths and a live smoke.
 - **Update (13:07 UTC clock reading): preview rev 2 with GPT for recheck. Not merged, not deployed.**
   - **GPT's preview review** (`reviews/2026-11-26-moon-diviner-ui-gpt-review.md`, filed unchanged): data and normal behaviour PASS; one fix required (R1: a timeout during an unabortable stage could still commit); the GHRM finding is corroboration, not a cause; wording corrections.
   - **GPT's global-report review** filed unchanged (`reviews/2026-11-26-moon-diviner-global-report-gpt-review.md`, PASS).
@@ -296,3 +305,4 @@ Suggested order (Claude's suggestion, for Chad to decide): LROC regional example
 - Rev 6 (26 Nov 2026, 10:22 UTC): §3: GPT's v2 recheck (PASS), D4b done (17 bands, all PASS), §6.4 global report (branch `moon-diviner-trial` `b918187`). No other item moved.
 - Rev 7 (26 Nov 2026, 11:58 UTC): §3: Chad's freeze and acceptance, Claude's Powell read, the `moon-diviner-ui` preview (head `cdc9aed`). No other item moved.
 - Rev 8 (26 Nov 2026, 13:07 UTC): §3: GPT's preview and global-report reviews, the R1 fix and wording (preview rev 2, head `34368ee`); §2 erratum on the height breaks. No other item moved.
+- Rev 9 (26 Nov 2026, 14:42 UTC): §3: GPT's rev 2 recheck (PASS), the release candidate (`310ca1e`). No other item moved.
