@@ -102,23 +102,23 @@ Rev 3 · 26 Nov 2026, 09:20 UTC (clock reading; rev 2 08:59, rev 1 08:31 UTC) ·
   - on the Mac in `Documents/Mother Earth/_source-data/moon-lro-science-2026-11-26/`, with the new ones in its `diviner/` folder: seven GCP patches, two Level 3 TBOL and two Level 2 LTIM cycle maps at 4 ppd, three GHRM midnight 1° patches, and the SIS v1.21 PDF (read, not committed)
   - hashes in SAMPLES §3 and §6.3
 - **Products checked:** GCP, GHRM, GDR Level 2/3 per-cycle maps, PCP, PRP, RCP, the derived bundle 2 (EPF) and the RDR. No newer GCP version exists; the derived bundle was last changed 2 Feb 2024.
-- **Proposed (for GPT's review, then Chad's decisions D1–D7):**
+- **Proposed (rev 2, for GPT's recheck, then Chad's decisions D1–D8):**
   - GCP `tbol`, 2009–2015, two maps "around local noon" (11:30–12:30) and "around local midnight" (23:30–00:30)
-  - each 0.5° cell = an unweighted mean of the available 15-minute bin values, with the bin count and spread in the readout
-  - noon withheld poleward of 70°, midnight poleward of 80°
-  - evenly lit; mutually exclusive with height; Moon tab only
-  - route A: stream the 18 whole band files in the browser pane with archive-MD5 checks, after a one-file stop point
+  - each 0.5° cell = our unweighted mean of the available quarter-hour bin values, with the bin count always shown and the range between bins only for two or more bins
+  - noon withheld poleward of 70°, midnight poleward of 80°, as display policy
+  - evenly lit; one science-mode coordinator shared with height; Moon tab only
+  - route A: stream the 18 whole band files in the browser pane with archive-MD5 checks and per-band checkpoints, after a first-band trial (D4a), the rest on a second go (D4b); retention D8
 - **Key findings:**
   - `tbol` is the bolometric brightness temperature, computed per bin from the mean radiances of channels 3–9 (SIS v1.21 §8.1). The Paige 2010 definition sentence was read only in a third-party copy, labelled as secondary.
   - A 15-minute bin alone is patchy (15–18 of 96 bins empty in whole patches). A one-hour window fills all sampled cells at midnight and all but 7 + 1 + 1 of 1,400 at noon.
   - Within-window spread is 1–3 K at noon and 1–2 K at midnight at low and mid latitudes. It rises at high latitude (noon 10–20 K per row at 70–80°N; tens of K beyond 80°).
-  - Dawn and dusk windows are not usable (spread 18–85 K mean).
-  - The GHRM 2009–2022 midnight mosaic agrees with the GCP midnight window within 0.20–0.50 K at four cells.
+  - Dawn and dusk windows are unsuited to a one-hour representative map (mean spread 18–85 K); that is real change, which a diurnal feature could show.
+  - The GHRM 2009–2022 midnight mosaic agrees with the GCP midnight window within 0.20–0.50 K at four cells: corroboration only, not a registration proof.
   - Single 2016 cycle maps are sparse (4–6% of low-latitude cells by day, 20–36% by night), and local time drifts across the map.
   - Multi-range requests (8–128 ranges) returned every part exactly; overhead is about 143 B per part.
   - Label errors are recorded: the GCP DOI typo; the Level 3 TBOL unit and description text.
 - **Missing-value rules (unchanged):** GCP `-9999` = empty bin and `-9998` = invalid, both shown as no value, never 0 K. The RDR 2019 `-9999` gap cannot affect the 2009–2015 GCP. Negative single-channel values are not displayed.
-- **Not proposed now, with revisit conditions (proposal §10):** single mapping-cycle maps; GHRM high-resolution midnight; polar PCP; an RDR dated interval for 10–11 June 2026; dawn and dusk.
+- **Not proposed for this display, with revisit conditions (proposal §11):** single mapping-cycle maps (a dated-pass feature); single bins and dawn/dusk (a diurnal feature); GHRM high-resolution midnight; polar PCP; an RDR dated interval for 10–11 June 2026.
 - **Blockers:** none. PDS is reachable only from the browser pane; that is a practical constraint.
 - **Decision needed (Chad, after GPT's recheck):** D1 product, D2 window, D3 masks, D4a go for the first-band trial and D4b go for the remaining 17 bands after its report, D5 texture, D6 units, D7 readout, D8 retention. A build starts only on Chad's go; the release only on his own Approve line.
 
