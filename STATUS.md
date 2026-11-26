@@ -4,6 +4,13 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 26 Nov 2026
 
+## 26 Nov 18:58 UTC (clock reading) — **Moon item 4 (LROC): startup-readiness fix, preview rev 3 with GPT. Branch only; not merged, not deployed; no hub change, no new data fetch** (Moon/LRO science, LROC thread)
+- GPT's preview review filed unchanged on main (`80eb098`): normal preview PASS; locator and JPEG tolerance accepted; R1 startup readiness to fix.
+- **Branch `moon-lroc-ui`:** head `ef479e4` (packet rev 3), validated tree `02d2f4a`. Page fix `f4599d6` (`moonlroc.js` only); `moon.html` unchanged.
+- `moon-lroc-ui` 67/0; 19 of 19 breaks caught; Animals 296/0. Other Moon suites not rerun (detail-off paths unchanged).
+- Open for GPT: the button hidden after a globe failure (existing `moonglobe.js` behaviour).
+- Mac `_review/moon-lroc-ui/` refreshed and hash-checked.
+
 ## 26 Nov 17:49 UTC (clock reading) — **Moon item 4 (LROC): page preview `moon-lroc-ui` built, with GPT for review. Branch only; not merged, not deployed; no hub change** (Moon/LRO science, LROC thread)
 - **GPT:** rev 2 recheck (PASS, two prerequisites) and closure/rev 2.1 recheck (PASS) filed unchanged (`reviews/2026-11-26-moon-lroc-proposal-rev2-gpt-recheck.md`, `reviews/2026-11-26-moon-lroc-retention-frame-rev21-gpt-recheck.md`). Chad's go for the page-only preview.
 - **Branch `moon-lroc-ui`:** head `a35a25b`, validated tree `1dc62c1`.

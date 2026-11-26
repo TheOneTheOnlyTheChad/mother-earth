@@ -1,6 +1,6 @@
 # Moon globe and LRO science — spec checklist
 
-Rev 14 · 26 Nov 2026, 17:49 UTC (clock reading; rev 13 16:07, rev 12 15:54, rev 11 15:34, rev 10 15:07, rev 9 14:42, rev 8 13:07, rev 7 11:58, rev 6 10:22, rev 5 09:54, rev 4 09:42, rev 3 09:20, rev 2 08:59, rev 1 08:31 UTC) · written by Claude on Chad's instruction (26 Nov) · **persistent record; update it as each item moves** · docs only.
+Rev 15 · 26 Nov 2026, 18:58 UTC (clock reading; rev 14 17:49, rev 13 16:07, rev 12 15:54, rev 11 15:34, rev 10 15:07, rev 9 14:42, rev 8 13:07, rev 7 11:58, rev 6 10:22, rev 5 09:54, rev 4 09:42, rev 3 09:20, rev 2 08:59, rev 1 08:31 UTC) · written by Claude on Chad's instruction (26 Nov) · **persistent record; update it as each item moves** · docs only.
 
 **What this is.** The record of every item in GPT's original brief, `docs/concepts/MOON-LRO-SCIENCE-BRIEF-GPT-2026-11-25.md`. It also covers the scope Chad added on 26 Nov: every page that shows the Moon. It is **not** the narrowed height proposal (`docs/concepts/MOON-LRO-SCIENCE-PROPOSAL.md` rev 2.1), which covered only the first release.
 
@@ -20,7 +20,7 @@ Rev 14 · 26 Nov 2026, 17:49 UTC (clock reading; rev 13 16:07, rev 12 15:54, rev
 | 1 | Existing all-round appearance, orientation, polar disclosure, lighting, dated LRO path ("Existing Moon view", "Existing LRO view", requirement 1) | **done: preserved** |
 | 2 | LOLA elevation-first layer ("Recommended first feature", requirements 2–4) | **done: released and closed** |
 | 3 | Diviner temperature ("Recommended first feature", second paragraph) | **done: released and closed** (merge `0622e80`) |
-| 4 | LROC regional detailed imagery | **preview built**: branch `moon-lroc-ui` (head `a35a25b`, validated `1dc62c1`) with GPT for review; not merged |
+| 4 | LROC regional detailed imagery | **preview rev 3**: branch `moon-lroc-ui` (head `ef479e4`, validated `02d2f4a`) with GPT for recheck of the startup fix; not merged |
 | 5 | CRaTER radiation | to assess |
 | 6 | LEND neutron and hydrogen products | to assess |
 | 7 | LAMP far-ultraviolet products | to assess |
@@ -256,6 +256,13 @@ Rev 14 · 26 Nov 2026, 17:49 UTC (clock reading; rev 13 16:07, rev 12 15:54, rev
   - **A locator-visibility fault was found by a smoke run and fixed** (live-camera test).
   - **Packet:** `reviews/2026-11-26-moon-lroc-ui-rc.md` on the branch.
   - **Next:** GPT's review; then the release candidate (Sources, REGISTER, manifest, release pins) on Chad's go.
+- **Update (18:58 UTC, clock reading): startup fix, preview rev 3. Branch only.**
+  - GPT's preview review filed unchanged (`reviews/2026-11-26-moon-lroc-ui-gpt-review.md`, main `80eb098`): normal preview PASS; HTML locator and the 6-grey-level area tolerance accepted (Chad too); R1: opening the detail before the globe is ready lost the turn and could poll forever.
+  - Fix `f4599d6` (`moonlroc.js` only): bounded, token-guarded wait (20 s); turn and locator together, once, when ready; off ends the wait; failure or deadline settles as "unavailable".
+  - `moon-lroc-ui` 67/0 (new H1–H10, H7a); 19 of 19 breaks caught (new: noready, nodeadline, latestart, offwait); Animals 296/0 at `02d2f4a`. Disclosed: `eager` pattern updated, `offguard` replaced, one `ptr` harness stall.
+  - Open for GPT: after a globe failure the page's existing behaviour hides the LROC button with the other controls, so an opened panel only closes on reload.
+  - Packet rev 3 on the branch; Mac `_review/moon-lroc-ui/` refreshed (SHA256SUMS).
+  - **Next:** GPT's recheck; then the release candidate on Chad's go.
 - **Other sites:** one at a time later, each with its own product check and landmark test.
 
 ## 5. CRaTER radiation — to assess
@@ -384,3 +391,4 @@ Each stays `option` until Chad classifies it as "assess" or "not pursued", with 
 - Rev 12 (26 Nov 2026, 15:54 UTC): §4: GPT's rev 1 review (revise before build), Chad's D1–D4, proposal rev 2 with the geometry and pixel tooling. No other item moved.
 - Rev 13 (26 Nov 2026, 16:07 UTC): §4: sources retained, frame closed by the volume SIS, 2 m offset error corrected, proposal rev 2.1 and closure report. No other item moved.
 - Rev 14 (26 Nov 2026, 17:49 UTC): §4: GPT's rechecks filed; page preview `moon-lroc-ui` built and with GPT. No other item moved.
+- Rev 15 (26 Nov 2026, 18:58 UTC): §4: GPT's preview review filed; startup fix and preview rev 3 with GPT. No other item moved.
