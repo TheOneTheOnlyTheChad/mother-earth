@@ -36,18 +36,23 @@
     let sw = 0, sr = 0, sc = 0, n = 0;
     for (let r = Math.floor(r0 - rp); r <= r0 + rp; r++) for (let c = Math.floor(c0 - rp); c <= c0 + rp; c++) {
       if (r < 0 || c < 0 || r >= H || c >= W) continue; const v = arr[r * W + c]; if (v >= thr) { const w = v - med; sw += w; sr += w * r; sc += w * c; n++; } }
+    // local maximum: brightest valid pixel within 12 m of the prediction (the test that applies where the LM is not the window's maximum)
+    let lmax = -1e9, lr = 0, lc = 0, lties = 0;
+    for (let r = Math.floor(r0 - rp); r <= r0 + rp; r++) for (let c = Math.floor(c0 - rp); c <= c0 + rp; c++) {
+      if (r < 0 || c < 0 || r >= H || c >= W) continue; const v = arr[r * W + c]; if (v <= -32764) continue;
+      if (v > lmax) { lmax = v; lr = r; lc = c; lties = 1; } else if (v === lmax) lties++; }
     // shadow: darkest 3x3 mean within 16 m east of the prediction
     let dk = 1e9, dr = 0, dc = 0;
     for (let r = Math.floor(r0 - 8 / p.s); r <= r0 + 8 / p.s; r++) for (let c = Math.floor(c0); c <= c0 + 16 / p.s; c++) {
       let s = 0, k = 0; for (let i = -1; i <= 1; i++) for (let j = -1; j <= 1; j++) { const v = arr[(r + i) * W + c + j]; if (v > -32764) { s += v; k++; } }
       if (k === 9 && s / 9 < dk) { dk = s / 9; dr = r; dc = c; } }
-    // negative control: the same 12 m search centred 40 m north and 40 m west of the prediction finds nothing as bright
+    // negative control: the same 12 m search centred 40 m north and 40 m west of the prediction finds nothing as bright as the LM's local maximum
     let cmax = -1e9; const nr = r0 - 40 / p.s, nc = c0 - 40 / p.s;
     for (let r = Math.floor(nr - rp); r <= nr + rp; r++) for (let c = Math.floor(nc - rp); c <= nc + rp; c++) { const v = arr[r * W + c]; if (v > cmax) cmax = v; }
-    return { label, window_max: gmax, window_max_ties: ties, window_max_offset_m: offM(p, L1 + gr, S1 + gc), window_median: med,
+    return { label, local12m_max: lmax, local12m_max_ties: lties, local12m_max_offset_m: offM(p, L1 + lr, S1 + lc), window_max: gmax, window_max_ties: ties, window_max_offset_m: offM(p, L1 + gr, S1 + gc), window_median: med,
       centroid_pixels: n, centroid_offset_m: n ? offM(p, L1 + sr / sw, S1 + sc / sw) : null,
       shadow_3x3_mean: +dk.toFixed(1), shadow_offset_m: offM(p, L1 + dr, S1 + dc),
-      control_40m_NW_max: cmax, control_below_LM_peak: cmax < gmax };
+      control_40m_NW_max: cmax, control_below_LM_local_max: cmax < lmax };
   }
   async function run() {
     const out = { tool: 'lroc_pixels.js', started: new Date().toISOString() };
@@ -92,5 +97,5 @@
       root.LROCPX.result = out;
     } catch (e) { out.phase = 'failed'; out.error = String(e); root.LROCPX.result = out; }
   }
-  root.LROCPX = { run, result: null, VERSION: 'lroc_pixels-1' };
+  root.LROCPX = { run, result: null, VERSION: 'lroc_pixels-2' };
 })(typeof window !== 'undefined' ? window : globalThis);
