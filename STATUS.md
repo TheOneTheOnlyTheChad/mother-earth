@@ -2,6 +2,15 @@
 
 Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 Nov). Current state and next steps: `HANDOVER.md`.
 
+# 26 Nov 2026
+
+## 26 Nov 03:22 UTC (clock reading) — **Tides thread closed out. Live: Tides `54642c5` + dedication `1cc3f87`; main `cf7b4b9` before this commit. Nothing pending on a branch; no hub change** (page: none; Tides thread)
+- **Close-out checklist (START-HERE §9):** Mac `_review/` empty (Tides copies in `_to_delete/20261125-tides-close-out/`); branches `tides-rc`, `tides-nav-rc`, `tides-dedication-rc` deleted on the GitHub page (only other threads' branches remain: `animals-assessment-rc`, `cape-town-public-proposal`, `cape-town-station-rc`, `earth-from-space-fixtures-rc`, `earth-from-space-rc`, `earth-from-space-stage-d-docs-r2`, `widths-preview-rc`); Mac synced at the final commit, preserve-first; worktrees clean and pushed.
+- **Current served comparison:** `reviews/evidence/2026-11-25-tides-dedication-manifest.json` (37 files). The release manifest stays as the release record, so `phase1/tides/release_manifest.mjs --check` reports `tides.html` different by design.
+- **Animals suite pins:** `TIDES_MAIN` `54cbc0d` / `TIDES_PARENT` `ea8cffc` (13o/13p) and Sources byte-identity to `TIDES_MAIN` (13b/13e). Any change to `sources.html` needs the same narrow, reviewed pin update.
+- **Open (Tides, low priority, not started):** GPT's wording narrowing in Sources and REGISTER, "nothing is fetched while the page is open" → "no tide observations or live feeds are fetched" (needs the Sources pin update above, GPT's look, Chad's Approve). Real phone, Safari and screen reader not checked. The Sun reference-globe investigation is a separate workstream.
+- **Next:** Chad names the next thread's feature. Handover block: HANDOVER "TIDES, NEXT THREAD STARTS HERE".
+
 # 25 Nov 2026
 
 ## 25 Nov 19:15 UTC (clock reading) — **Tides dedication line live: merge `1cc3f87` on main, 37 of 37 served files verified; page only, no hub change** (page: Tides; Tides thread)
