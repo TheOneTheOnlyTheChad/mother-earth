@@ -4,6 +4,22 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 26 Nov 2026
 
+## 26 Nov 13:07 UTC (clock reading) — **Moon temperature preview rev 2: GPT's timeout finding fixed, wording corrected; for GPT's recheck. Branch only** (Moon/LRO science, Diviner thread)
+- **GPT's reviews** filed unchanged:
+  - preview `reviews/2026-11-26-moon-diviner-ui-gpt-review.md` (`746b89dd…`): data PASS; R1 must be fixed; GHRM is corroboration only; wording corrections
+  - global report `…-global-report-gpt-review.md` (`743606dd…`): PASS
+- **Chad:** fix R1 and the corrections; keep the masks and scales; no merge or deployment.
+- **R1:** the 15 s deadline now ends the request, so a held PNG or picture decode finishing later is released, never shown.
+  - A first attempt (`7a3aeb0`) also silenced ordinary failure messages; the height suite caught it, and it was fixed in `1a842f9`.
+  - G1–G4: 16/0. `BREAK=deadline` fails 10; `BREAK=deadlinetimer` fails 6.
+- **Wording:** equivalent blackbody temperature; GHRM caveat (page, Sources line, SOURCE.json); percentiles rounded outward; grid-cell shares; the appearance picture's 5 km.
+- **Errata:**
+  - site 0 vs Giordano Bruno (site 2), the T⁴ proxy, local reflections, and selection (rev 1 packet)
+  - spread tails, cell shares and the checkpoint deviation (global report)
+  - the height release's `late`/`nocache` breaks (`6d355d2`)
+- **Tests:** `moon-diviner-ui` 175/0, `moon-height-ui` 110/0, Animals 294/0, moon-globe 67, desktop 286, mobile 131; `nomask` is now counted assertions (73 failed).
+- **Branch `moon-diviner-ui` head `34368ee`**, packet `reviews/2026-11-26-moon-diviner-ui-rc-rev2.md`. One test run was discarded and re-run, because checking out main in the same tree changed its files.
+
 ## 26 Nov 11:58 UTC (clock reading) — **Moon temperature (Diviner): page preview `moon-diviner-ui` built, for GPT's review. Branch only; not merged, not deployed** (Moon/LRO science, Diviner thread)
 - **Chad:**
   - accepted the D4b checkpoint-timing deviation; future acquisitions write a durable checkpoint per band before proceeding
