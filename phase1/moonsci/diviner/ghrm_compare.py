@@ -83,7 +83,7 @@ fails = []
 print('== GHRM midnight (fitted at 00:00, 2009-2022, 128 ppd) against our GCP midnight window (mean of up to 4 bins 23:30-00:30, 2009-2015)')
 res = {'high-contrast': [], 'background': []}
 res4 = {'high-contrast': [], 'background': []}
-ctrl = {k: {'high-contrast': [], 'background': []} for k in ('true', 'N', 'S', 'E', 'W', '180', 'mirrorEW', 'mirrorNS')}
+ctrl = {k: {'high-contrast': [], 'background': []} for k in ('true', 'N', 'S', 'E', 'W', '180', 'local3x3mirrorEW', 'local3x3mirrorNS')}
 for k, s in enumerate(sites):
     a = blocks[k * 36864:(k + 1) * 36864].reshape(192, 192).astype(np.float64)
     g = np.full((3, 3), np.nan)
@@ -99,8 +99,8 @@ for k, s in enumerate(sites):
     for name, (dr, dc) in {'true': (0, 0), 'N': (-1, 0), 'S': (1, 0), 'E': (0, 1), 'W': (0, -1), '180': (0, 360)}.items():
         o = v[(np.arange(r - 1, r + 2) + dr)[:, None], (np.arange(c - 1, c + 2) + dc)[None, :] % 720]
         ctrl[name][s['kind']].append(np.nanmean(np.abs(o - g)))
-    ctrl['mirrorEW'][s['kind']].append(np.nanmean(np.abs(ours[:, ::-1] - g)))
-    ctrl['mirrorNS'][s['kind']].append(np.nanmean(np.abs(ours[::-1, :] - g)))
+    ctrl['local3x3mirrorEW'][s['kind']].append(np.nanmean(np.abs(ours[:, ::-1] - g)))
+    ctrl['local3x3mirrorNS'][s['kind']].append(np.nanmean(np.abs(ours[::-1, :] - g)))
     cb = a[64:128, 64:128]
     t4 = float(np.nanmean(cb ** 4) ** 0.25)          # radiance-equivalent block value: a temperature of the mean T^4, not of the mean T
     res4[s['kind']].append(ours[1, 1] - t4)
@@ -114,6 +114,7 @@ for kind in ('high-contrast', 'background'):
     d4 = np.array(res4[kind])
     print(f'  {kind}: against the GHRM radiance-equivalent (mean T^4)^1/4: median {np.nanmedian(d4):+.2f} K, range {np.nanmin(d4):+.2f} .. {np.nanmax(d4):+.2f} K')
 print('\n== registration controls: mean |ours - GHRM| over each site\'s 3 x 3 block, averaged over sites')
+print('   (the local3x3 mirrors reverse each site\'s own 3 x 3 patch, not the whole global grid; a passing result supports the orientation and does not exclude local pointing or effective-footprint differences)')
 for kind in ('high-contrast', 'background'):
     line = ', '.join(f'{name} {np.mean(ctrl[name][kind]):.2f}' for name in ctrl)
     print(f'  {kind}: {line} K')
@@ -124,5 +125,8 @@ for kind in ('high-contrast', 'background'):
         print(f'  high-contrast: the true alignment scores best on average: {worst_ok}; best at {per_site} of {len(ctrl["true"][kind])} sites individually')
         if not worst_ok:
             fails.append('true alignment is not the best on average at the high-contrast sites')
-print('\nRESULT: ' + ('PASS (registration controls); differences reported without a tolerance' if not fails else 'FAIL: ' + '; '.join(fails)))
+print('\nThe (mean T^4)^1/4 column is an idealised blackbody spatial-aggregation proxy. It does not establish how much of the inter-product difference is due to')
+print('averaging order: the products also differ in channel processing, period, local-time fitting, sampling and georeferencing. The high-contrast sites are')
+print('maxima of our own grid (selection bias); they are not a random or independent validation sample.')
+print('\nRESULT: ' + ('PASS (registration controls); differences reported without a tolerance and without attributing causes' if not fails else 'FAIL: ' + '; '.join(fails)))
 sys.exit(1 if fails else 0)

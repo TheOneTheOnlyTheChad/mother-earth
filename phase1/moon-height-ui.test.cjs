@@ -45,6 +45,7 @@ const near = (a, b, tol = 30) => a.every((v, k) => Math.abs(v - b[k]) <= tol);
       if (BREAK === 'nofirst') B('if (!firstErr) firstErr = e; ctl.abort(); throw e;', 'if (!firstErr) firstErr = e; throw e;');
       if (BREAK === 'norevoke') B('if (madeTex) { URL.revokeObjectURL(madeTex); H.revoked++; }', '');
       if (BREAK === 'nopin') B('if (raw.byteLength !== HF.grid.rawBytes || await hex(raw) !== HF.grid.rawSha) throw', 'if (false) throw');
+      if (BREAK && !globalThis.__brkLogged) { globalThis.__brkLogged = 1; console.log('BREAK applied (pattern found): ' + BREAK); }
       r.fulfill({ status: 200, contentType: 'application/javascript', body: s }); });
     await ctx.route('**/assets/moon/lola/ldem4-m-R1.i16.gz*', async r => { hits.grid++;
       if (opt.gridDelay) await new Promise(res => setTimeout(res, opt.gridDelay));

@@ -24,7 +24,8 @@
  * goes back to the mode shown). Leaving science mode (the active layer's own button) brings the picture back and restores "Lit as now"
  * for the current minute if it was on; the Earth view is not reopened. Every request takes a new token and aborts the previous one;
  * only the latest may commit. Leaving also cancels anything pending, so a late answer cannot reopen science mode. Anything a failed,
- * cancelled or late attempt made (object URLs, decoded arrays) is released. The LRO overlay is never touched. */
+ * cancelled or late attempt made (object URLs, decoded arrays) is released. The 15 s deadline ends the request itself (its message is
+ * shown at once); a stage still running then (PNG drawing, picture decode) finishes into nothing. The LRO overlay is never touched. */
 (() => {
   'use strict';
   const $ = id => document.getElementById(id);
@@ -220,7 +221,7 @@
     ticks.innerHTML = ''; for (const k of steps) { const s = document.createElement('span'); s.style.left = ((k - md.lo) / (md.hi - md.lo) * 100) + '%';
       s.textContent = k === md.lo ? `≤ ${k} K` : k === md.hi ? `≥ ${k} K` : String(k); if ([300, 375, 80, 100].includes(k)) s.className = 'mgt-minor'; ticks.appendChild(s); }   // minor ticks give way on narrow screens
     tleg.querySelector('[data-t="bar"]').setAttribute('aria-label', `Colour scale from dark purple at ${md.lo} kelvin or less to yellow at ${md.hi} kelvin or more`);
-    tleg.querySelector('[data-t="clip"]').textContent = `Colours stop at the scale’s ends: ${md.clipLo}% of the shown cells with a value are below ${md.lo} K and ${md.clipHi}% are above ${md.hi} K. The readout gives their value.`;
+    tleg.querySelector('[data-t="clip"]').textContent = `Colours stop at the scale’s ends: ${md.clipLo}% of the shown grid cells with a value are below ${md.lo} K and ${md.clipHi}% are above ${md.hi} K (shares of 0.5° grid cells, not of surface area). The readout gives their value.`;
   }
 
   // ============================== the coordinator ==============================
@@ -233,11 +234,13 @@
     if (MS.pend) cancel();
     const tok = ++MS.tok, ctl = new AbortController(); MS.pend = { target, tok, ctl };
     if (!MS.active || LAYER[MS.active] !== LAYER[target]) LAYER[target].hidden(); paint();
-    const tm = setTimeout(() => ctl.abort(), TIMEOUT_MS);
+    // The deadline ends the REQUEST, not just its fetches (GPT review R1): a stage that cannot be aborted (drawing the PNG, decoding a
+    // picture) may still finish later, but by then this request is no longer pending, so its result is released and never shown.
+    const tm = setTimeout(() => { if (MS.pend && MS.pend.tok === tok) { cancel(); LAYER[target].failed(new Why('it took too long'), target); } }, TIMEOUT_MS);
     let res = null, err = null;
     try { res = await LAYER[target].prepare(target, ctl); } catch (e) { err = e; }
     clearTimeout(tm);
-    if (tok !== MS.tok || !MS.pend || MS.pend.tok !== tok) { if (res) res.drop(); return; }   // superseded, cancelled or left: a late answer changes nothing
+    if (tok !== MS.tok || !MS.pend || MS.pend.tok !== tok || ctl.signal.aborted) { if (res) res.drop(); return; }   // superseded, cancelled, timed out or left: a late answer changes nothing
     MS.pend = null;
     if (err) { syncRadio(); LAYER[target].failed(err, target); paint(); return; }
     // one step: remember (only on entering), leave the Earth view, sunlight off and locked, then the texture

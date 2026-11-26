@@ -28,8 +28,13 @@ ghrm blocks sha256 94cba44ba69c8a3c9c119375b631b010a99c246db0eb1e19ee03c2206c894
   background: against the GHRM radiance-equivalent (mean T^4)^1/4: median +0.29 K, range -0.18 .. +0.64 K
 
 == registration controls: mean |ours - GHRM| over each site's 3 x 3 block, averaged over sites
-  high-contrast: true 2.26, N 6.31, S 6.01, E 6.54, W 5.45, 180 5.62, mirrorEW 4.01, mirrorNS 3.33 K
+   (the local3x3 mirrors reverse each site's own 3 x 3 patch, not the whole global grid; a passing result supports the orientation and does not exclude local pointing or effective-footprint differences)
+  high-contrast: true 2.26, N 6.31, S 6.01, E 6.54, W 5.45, 180 5.62, local3x3mirrorEW 4.01, local3x3mirrorNS 3.33 K
   high-contrast: the true alignment scores best on average: True; best at 5 of 10 sites individually
-  background: true 0.60, N 1.31, S 1.55, E 1.01, W 1.04, 180 1.99, mirrorEW 1.01, mirrorNS 1.53 K
+  background: true 0.60, N 1.31, S 1.55, E 1.01, W 1.04, 180 1.99, local3x3mirrorEW 1.01, local3x3mirrorNS 1.53 K
 
-RESULT: PASS (registration controls); differences reported without a tolerance
+The (mean T^4)^1/4 column is an idealised blackbody spatial-aggregation proxy. It does not establish how much of the inter-product difference is due to
+averaging order: the products also differ in channel processing, period, local-time fitting, sampling and georeferencing. The high-contrast sites are
+maxima of our own grid (selection bias); they are not a random or independent validation sample.
+
+RESULT: PASS (registration controls); differences reported without a tolerance and without attributing causes

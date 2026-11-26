@@ -53,6 +53,13 @@
   "nature": "our display policy, not the edge of Diviner coverage and not a guarantee of small spread inside it",
   "frozen": "Chad, 26 Nov 2026"
  },
+ "comparison_ghrm": {
+  "what": "Centre-cell differences, this map minus the GHRM midnight tbol mosaic (dghrm_tbol_m_70s70n_img) as 0.5-degree block means, at 20 sites",
+  "result": "ten selected high-contrast midnight sites (our own grid maxima): -1.9 to +16.7 K, median +8.7 K; ten fixed background sites: +0.05 to +0.82 K",
+  "caveat": "The products use different processing, sampling and periods; the causes of the differences have not been isolated. This comparison is not an accuracy estimate. The high-contrast sites were selected from this map, so they are not a random sample.",
+  "registration": "the true alignment scored better on average than one-cell shifts, a 180-degree shift and local 3 x 3 reflections; this supports the grid orientation, and does not exclude local pointing or effective-footprint differences",
+  "evidence": "phase1/moonsci/diviner/ghrm_compare.py; docs/research/moon-lro-science/diviner-ghrm/"
+ },
  "scales": {
   "noon": {
    "low_K": 281,
@@ -76,12 +83,13 @@
    "no_valid_cells": 1610,
    "withheld_cells": 28800
   },
+  "shares_are_of": "equal-angle 0.5 deg grid cells, not lunar surface area",
   "rule": "one fixed sequential ramp; per mode the ends are the 1st and 99th percentiles of valid displayed cells, rounded outward to whole K; computed once, never per view; clipped cells keep their exact value in the readout",
   "frozen": "Chad, 26 Nov 2026"
  },
  "build": {
   "script": "phase1/moonsci/build_diviner.py",
-  "script_sha256": "aec4f0a2ce9bf581239b83c928f556acc4776c8a6d5dfe08719187916b59c261",
+  "script_sha256": "1f8ab2fb842beda5ad0a5f8cdb9bea622d7bf42f473530bde2a25195c418eabd",
   "check": "python3 -I phase1/moonsci/build_diviner.py --ext <retained extractions> --check",
   "grid_digest": "1cd629dd3be74f752452ea55366efd9ebff6d279bfedab30a7f1d9d4ebcc9f7b"
  },

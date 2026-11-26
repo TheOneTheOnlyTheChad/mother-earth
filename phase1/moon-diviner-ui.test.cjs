@@ -62,6 +62,11 @@ const setCell = (b, m, i, v, n, r) => { b.writeUInt16LE(v, OFF.value[m] + 2 * i)
       if (BREAK === 'n1') B("n === 1 ? 'one bin; range unavailable'", "n === 1 ? 'range between bins 0 K'");
       if (BREAK === 'leak') B("const drop = () => { for (const u of made) { URL.revokeObjectURL(u); T.revoked++; } };", "const drop = () => {};");
       if (BREAK === 'celsius') B('const s = x - 2731.5,', 'const s = x - 2730,');
+      // R1 (GPT preview review): the deadline must end the request, and the commit gate must refuse an aborted request
+      const DL = "const tm = setTimeout(() => { if (MS.pend && MS.pend.tok === tok) { cancel(); LAYER[target].failed(new Why('it took too long'), target); } }, TIMEOUT_MS);";
+      if (BREAK === 'deadline') { B(DL, 'const tm = setTimeout(() => ctl.abort(), TIMEOUT_MS);'); B(' || ctl.signal.aborted) { if (res) res.drop(); return; }', ') { if (res) res.drop(); return; }'); }   // the reviewed code
+      if (BREAK === 'deadlinetimer') B(DL, 'const tm = setTimeout(() => ctl.abort(), TIMEOUT_MS);');   // the gate alone: the pending request never settles
+      if (BREAK && !globalThis.__brkLogged) { globalThis.__brkLogged = 1; console.log('BREAK applied (pattern found): ' + BREAK); }
       r.fulfill({ status: 200, contentType: 'application/javascript', body: s }); });
     await ctx.route('**/assets/moon/diviner/gcp-tbol-nm-R1.bin.gz*', async r => { hits.temp++;
       if (opt.tempDelay) await new Promise(res => setTimeout(res, opt.tempDelay));
@@ -77,6 +82,11 @@ const setCell = (b, m, i, v, n, r) => { b.writeUInt16LE(v, OFF.value[m] + 2 * i)
     await ctx.route('**/assets/moon/lola/ldem4-colour-R1.png*', r => { hits.htex++; r.continue().catch(() => {}); });
     await ctx.addInitScript(() => { window.__u = { made: [], revoked: [] }; const mk = URL.createObjectURL.bind(URL), rv = URL.revokeObjectURL.bind(URL);
       URL.createObjectURL = b => { const u = mk(b); window.__u.made.push(u); return u; }; URL.revokeObjectURL = u => { window.__u.revoked.push(u); rv(u); }; });
+    if (opt.hold) await ctx.addInitScript(() => {   // R1: hold the PNG callback and the picture decode until released (stages the deadline cannot abort)
+      window.__hold = { blob: false, decode: false, blobs: [], decodes: [] };
+      const tb = HTMLCanvasElement.prototype.toBlob; HTMLCanvasElement.prototype.toBlob = function (cb, ...a) { if (window.__hold.blob) { window.__hold.blobs.push(() => tb.call(this, cb, ...a)); return; } return tb.call(this, cb, ...a); };
+      const dc = HTMLImageElement.prototype.decode; HTMLImageElement.prototype.decode = function () { if (window.__hold.decode) return new Promise((res, rej) => window.__hold.decodes.push(() => dc.call(this).then(res, rej))); return dc.call(this); };
+      window.__release = () => { const n = window.__hold.blobs.length + window.__hold.decodes.length; for (const f of window.__hold.blobs.splice(0)) f(); for (const f of window.__hold.decodes.splice(0)) f(); return n; }; });
     if (opt.noBlob) await ctx.addInitScript(() => { const o = HTMLCanvasElement.prototype.toBlob; HTMLCanvasElement.prototype.toBlob = function (cb, ...a) { if (window.__noBlob) return cb(null); return o.call(this, cb, ...a); }; });
     if (opt.noAbort) await ctx.addInitScript(() => { AbortController.prototype.abort = function () {}; });
     if (opt.count) await ctx.addInitScript(() => { window.__c = { draw: 0 }; for (const C of [window.WebGLRenderingContext, window.WebGL2RenderingContext]) { if (!C) continue;
@@ -102,11 +112,68 @@ const setCell = (b, m, i, v, n, r) => { b.writeUInt16LE(v, OFF.value[m] + 2 * i)
   const litOn = async p => { await press(p, '#mg-lit'); await p.waitForFunction(() => MoonGlobe.light().state === 'on', null, { timeout: 15000 }).catch(() => {}); };
   const NOW_MIN = () => Math.floor(Date.now() / 60000) * 60000;
 
+  // ---- G (R1, GPT's preview review): the 15 s deadline ends the request even while a stage that cannot be aborted is still running
+  //      (the temperature PNG callback; the height picture decode). Entry and replacement for each; the late result is released.
+  const held = p => p.evaluate(() => window.__hold.blobs.length + window.__hold.decodes.length);
+  const waitHeld = p => p.waitForFunction(() => window.__hold.blobs.length + window.__hold.decodes.length > 0, null, { timeout: 20000 }).then(() => true, () => false);
+  const DEADLINE_WAIT = 16000;
+  { // G1 temperature entry, PNG callback held past the deadline; then a retry, with the stale result released during the retry
+    const { ctx, p } = await mk({ hold: true }); await litOn(p);
+    await p.evaluate(() => { window.__hold.blob = true; }); await press(p, '#mg-temp');
+    ok('G1 setup: the PNG callback is held while entering', await waitHeld(p) && (await sci(p)).pending === 'temp-noon');
+    await p.waitForTimeout(DEADLINE_WAIT);
+    const s = await sci(p), L = await p.evaluate(() => MoonGlobe.light()), t = await text(p, '#mg-temp-read');
+    ok('G1 at the deadline (callback still held): the request has settled; nothing changed; the reason is shown', s.pending === null && s.active === null && s.saved === null && s.commits === 0
+      && L.on && /lroc_color_2k/.test(await texUrl(p)) && !(await p.evaluate(() => document.getElementById('mg-lit').disabled)) && (await attr(p, '#mg-temp', 'aria-pressed')) === 'false'
+      && /Temperature map could not be loaded: it took too long\. The globe is unchanged\./.test(t), { s, t });
+    await p.evaluate(() => { window.__hold.blob = false; }); await press(p, '#mg-temp'); await p.evaluate(() => window.__release()); await p.waitForTimeout(500);
+    ok('G1 retry succeeds while the stale result is released', await waitActive(p, 'temp-noon') && (await sci(p)).commits === 1 && !/could not be loaded/.test(await text(p, '#mg-temp-read')));
+    ok('G1 the late PNG became an object URL that was released, never cached or shown: exactly one live URL (the retry\'s)', (await live(p)) === 1 && (await p.evaluate(() => window.__u.made.length)) === 2 && (await p.evaluate(() => window.__u.revoked.length)) === 1);
+    await ctx.close(); }
+  { // G2 temperature replacement noon -> midnight, PNG held: noon stays, radio back on noon, saved lighting kept
+    const { ctx, p } = await mk({ hold: true }); await litOn(p);
+    await press(p, '#mg-temp'); await waitActive(p, 'temp-noon'); const tu = await texUrl(p), s0 = await sci(p);
+    await p.evaluate(() => { window.__hold.blob = true; }); await radio(p, 'midnight'); ok('G2 setup: midnight PNG held', await waitHeld(p));
+    await p.waitForTimeout(DEADLINE_WAIT);
+    const s = await sci(p);
+    ok('G2 at the deadline: noon still shown, radio back on noon, saved lighting unchanged, reason shown', s.active === 'temp-noon' && s.pending === null && (await texUrl(p)) === tu && (await checkedRadio(p)) === 'noon'
+      && JSON.stringify(s.saved) === JSON.stringify(s0.saved) && /it took too long\. The map shown is unchanged\./.test(await text(p, '#mg-temp-read')), s);
+    const n = await p.evaluate(() => window.__release()); await p.waitForTimeout(1500);
+    ok('G2 after the late PNG: still noon, nothing cached for midnight, only the noon texture alive', n === 1 && (await sci(p)).active === 'temp-noon' && (await texUrl(p)) === tu && !(await p.evaluate(() => MoonTemp.state().cached.mid)) && (await live(p)) === 1);
+    await p.evaluate(() => { window.__hold.blob = false; }); await radio(p, 'midnight'); ok('G2 retry of midnight succeeds', await waitActive(p, 'temp-mid'));
+    await ctx.close(); }
+  { // G3 height entry, picture decode held past the deadline
+    const { ctx, p } = await mk({ hold: true }); await litOn(p);
+    await p.evaluate(() => { window.__hold.decode = true; }); await press(p, '#mg-height');
+    ok('G3 setup: the height picture decode is held while entering', await waitHeld(p) && (await sci(p)).pending === 'height');
+    await p.waitForTimeout(DEADLINE_WAIT);
+    const s = await sci(p);
+    ok('G3 at the deadline: settled, nothing changed, reason shown', s.pending === null && s.active === null && (await p.evaluate(() => MoonGlobe.light().on)) && /lroc_color_2k/.test(await texUrl(p))
+      && /Height map could not be loaded: it took too long\. The globe is unchanged\./.test(await text(p, '#mg-height-read')) && (await attr(p, '#mg-height', 'aria-pressed')) === 'false', s);
+    await p.evaluate(() => window.__release()); await p.waitForTimeout(1500);
+    ok('G3 the late picture is released, nothing cached', (await live(p)) === 0 && !(await p.evaluate(() => MoonHeight.state().cached.tex)) && (await sci(p)).active === null);
+    await p.evaluate(() => { window.__hold.decode = false; }); await press(p, '#mg-height'); ok('G3 retry succeeds', await waitActive(p, 'height'));
+    await ctx.close(); }
+  { // G4 replacement temperature -> height, picture decode held
+    const { ctx, p } = await mk({ hold: true });
+    await press(p, '#mg-temp'); await waitActive(p, 'temp-noon'); const tu = await texUrl(p), s0 = await sci(p);
+    await p.evaluate(() => { window.__hold.decode = true; }); await press(p, '#mg-height'); ok('G4 setup: height picture decode held', await waitHeld(p));
+    await p.waitForTimeout(DEADLINE_WAIT);
+    const s = await sci(p);
+    ok('G4 at the deadline: temperature still shown, saved unchanged, reason in the height line', s.active === 'temp-noon' && s.pending === null && (await texUrl(p)) === tu && JSON.stringify(s.saved) === JSON.stringify(s0.saved)
+      && /Height map could not be loaded: it took too long\. The map shown is unchanged\./.test(await text(p, '#mg-height-read')), s);
+    await p.evaluate(() => window.__release()); await p.waitForTimeout(1500);
+    ok('G4 the late picture is released: temperature stays, only its texture alive', (await sci(p)).active === 'temp-noon' && (await texUrl(p)) === tu && (await live(p)) === 1);
+    await p.evaluate(() => { window.__hold.decode = false; }); await press(p, '#mg-height'); ok('G4 retry succeeds', await waitActive(p, 'height'));
+    await ctx.close(); }
+  if (process.env.ONLY === 'G') { await br.close(); console.log(`moon-diviner-ui (G only): ${pass} passed, ${fail} failed${BREAK ? ' (BREAK=' + BREAK + ')' : ''}`); process.exit(fail ? 1 : 0); }
+
   // ---- A, D (network) and F (height never used)
   { const { ctx, p, hits, errs } = await mk();
     ok('F off at start: picture, legend hidden, radios disabled, no temperature request', /lroc_color_2k/.test(await texUrl(p)) && await hidden(p, '#mg-temp-leg') && hits.temp === 0
       && (await p.evaluate(() => [...document.querySelectorAll('#mg-temp-mode input')].every(r => r.disabled))) && (await attr(p, '#mg-temp', 'aria-pressed')) === 'false');
-    await press(p, '#mg-temp'); ok('A temperature switches on (noon by default)', await waitActive(p, 'temp-noon'));
+    await press(p, '#mg-temp'); const onA = await waitActive(p, 'temp-noon'); ok('A temperature switches on (noon by default)', onA);
+    if (!onA) { fail++; console.log('FAIL A: the rest of this block is not run, because temperature did not switch on (counted as one failure)'); } else {
     ok('D one request on first use', hits.temp === 1, hits);
     ok('B texture is a drawn picture (blob)', /^blob:/.test(await texUrl(p)));
     // every code, both modes
@@ -145,7 +212,7 @@ const setCell = (b, m, i, v, n, r) => { b.writeUInt16LE(v, OFF.value[m] + 2 * i)
     await press(p, '#mg-temp'); await waitIdle(p); await press(p, '#mg-temp'); await waitActive(p, 'temp-mid');
     ok('D no requests for the second mode or later toggles', hits.temp === 1, hits);
     ok('F opening again opens the mode last shown (radio kept)', (await checkedRadio(p)) === 'midnight');
-    ok('F no page errors', errs.length === 0, errs);
+    ok('F no page errors', errs.length === 0, errs); }
     await ctx.close(); }
 
   // ---- A: range cap wording (crafted valid file: one cell with code 254, one cell n = 2 range 0)
@@ -326,7 +393,11 @@ const setCell = (b, m, i, v, n, r) => { b.writeUInt16LE(v, OFF.value[m] + 2 * i)
     ok('F legend: title, scale line naming both scales, keys, clipping, rounding, explainer', await (async () => { const t = await text(p, '#mg-temp-leg');
       return /brightness temperature around local noon/.test(t) && /Colour scale: noon 281–395 K\. The midnight map uses 70–105 K\. The same colour does not mean the same temperature on the two maps\./.test(t)
         && /No valid data in this window/.test(t) && /Withheld by our display limit/.test(t) && /0\.93% .* below 281 K and 0\.43% .* above 395 K/.test(t) && /rounded to 0\.1 K; the rounding is not the accuracy/.test(t)
-        && /not the temperature of any one surface/.test(t) && /not today’s temperature/.test(t) && /≤ 281 K/.test(t) && /≥ 395 K/.test(t); })());
+        && /equivalent blackbody temperature/.test(t) && /effective radiative temperature/.test(t) && /not the physical temperature of any one surface/.test(t)
+        && /Differently processed Diviner maps can give different values, especially at sharp warm features\. See Sources for our comparison\./.test(t) && /shares of 0\.5° grid cells, not of surface area/.test(t) && /not today’s temperature/.test(t) && /≤ 281 K/.test(t) && /≥ 395 K/.test(t); })());
+    ok('F Sources line: scales are percentiles rounded outward; the GHRM comparison with its caveat; not an accuracy estimate', await (async () => { const t = await text(p, '#craft-sources');
+      return /1st and 99th percentiles of the shown grid cells, rounded outward to whole kelvin/.test(t) && /−1\.9 to \+16\.7 K \(median \+8\.7 K\)/.test(t) && /causes of the differences have not been isolated/.test(t) && /not an accuracy estimate/.test(t); })());
+    ok('F the 5 km sentence names the appearance picture; the 0.5° cell size is stated', /The appearance picture holds about 5 km to a pixel/.test(await text(p, '#moon-globe')) && /temperature map’s cells are 0\.5° \(about 15 km/.test(await text(p, '#moon-globe')));
     await p.focus('#mg-temp-mode input[value="noon"]'); await p.keyboard.press('ArrowRight'); ok('F keyboard: arrow key in the radio group switches to midnight', await waitActive(p, 'temp-mid'));
     ok('F scale line repeated on mode change, in the legend and the live readout', /Colour scale: midnight 70–105 K\. The noon map uses 281–395 K\./.test(await text(p, '#mg-temp-leg')) && /Now showing around local midnight\. Colour scale: midnight 70–105 K/.test(await text(p, '#mg-temp-read')));
     await p.evaluate(() => MoonGlobe.point(9.75, 30.25)); await p.focus('#mg-temp-centre'); await p.keyboard.press('Enter'); await p.waitForTimeout(200);
