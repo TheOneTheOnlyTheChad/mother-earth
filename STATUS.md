@@ -4,6 +4,25 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 26 Nov 2026
 
+## 26 Nov 10:22 UTC (clock reading) — **Diviner D4b: all 17 remaining bands fetched and verified; §6.4 global report to GPT and Chad. Branch only, no page change** (Moon/LRO science, Diviner thread)
+- **GPT's v2 recheck:** PASS, the hold is closed. Filed unchanged as `reviews/2026-11-26-moon-diviner-pane-job-v2-gpt-recheck.md` (`10b097c1…1801421`).
+- **Acquisition** (Chad's go for D4b), tooling v2 `83dc53a` with hash checks in the pane. 09:59:17–10:14:26 UTC (page clock), one band at a time:
+  - 17 of 17 archive MD5s matched; 156,211,313 B and 1,382,400 records each; header identical; no `-9998`
+  - five kept sample ranges byte-identical
+  - stream median 29.8 s (max 83.9 s); peak JS heap 48.9 MB, not growing across bands
+  - 18 extractions on the Mac (59.9 MB gzip in total), re-hashed by `ingest.sh` and again from staged copies in the workspace
+- **Checkpoints:** 18 lines; line 1 unchanged. Lines 2–18 were written after the 17th band from evidence that was durable per band (report §3).
+- **Independent reduction** (`global_report.py`, numpy): 18 of 18 band planes equal the pane's byte for byte; anchors pass; a negative control fails.
+- **§6.4 results:**
+  - no valid data in 1.43% (noon) and 0.70% (midnight) of shown cells
+  - n = 1 in up to 20% of noon cells (10–20°N)
+  - noon range p99 7–10 K at low latitudes, 31–38 K at 60–70°, growing without a step past 70°
+  - midnight tight to 80°
+  - cap never hit
+  - candidate scales: noon 281–395 K, midnight 70–105 K
+- **Records:** `reviews/2026-11-26-moon-diviner-global-report.md`, `phase1/moonsci/diviner/global_report.py` and its output, on branch `moon-diviner-trial` `b918187` (not for merge). Checklist rev 6.
+- **Not done:** freezing the masks and scales (waits for GPT's review and Chad); the page build; Claude's read of Powell 2023. No main page files changed; no hub, R2, D1 or collector change. The 18 extraction copies stay in `~/Downloads` (the shell cannot delete them).
+
 ## 26 Nov 09:54 UTC (clock reading) — **Diviner: GPT passes the first-band data; pane-job fix (tooling v2) for GPT's recheck; D4b on hold. Branch only** (Moon/LRO science, Diviner thread)
 - **GPT's review** is filed unchanged as `reviews/2026-11-26-moon-diviner-first-band-trial-gpt-review.md` (`74dd5fe5…9b43`).
   - **Data PASS:** GPT independently re-read the extraction, matched 38,400 sampled values, rebuilt all 28,800 cell results and reproduced the plane SHA-256.
