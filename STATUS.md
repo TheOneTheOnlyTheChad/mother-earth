@@ -4,6 +4,28 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 26 Nov 2026
 
+## 26 Nov 16:07 UTC (clock reading) — **Moon item 4 (LROC): sources retained, frame closed, proposal rev 2.1 and closure report for GPT. Docs only; no page build, merge or deployment** (Moon/LRO science, LROC thread)
+- **Chad:** Downloads access granted for this work; D6 accepted (at least 2 of 4 valid pixels, hatched no-data).
+- **Retained** on the Mac (`_source-data/moon-lro-science-lroc/`), one file at a time, each re-hashed and checkpointed before the next (retention lines 1–8):
+  - the 0.5 m range (17.3 MB)
+  - the whole 2 m file (59.0 MB; MD5 on the Mac = label)
+  - the 0.5 m PDS3 header
+  - both PDS4 labels, the README and DSMAP.CAT
+  - the volume RDR SIS PDF (MD5 = ETag)
+  - Downloads copies are in `~/Downloads/_to_delete-lroc/` for Chad to empty.
+- **Frame closed:** SIS v1.6 (22 Aug 2020) §5.5, mean Earth/polar axis, planetocentric, east positive, DE421. §6.4 and both headers define pixel centres at (1.0, 1.0).
+- **Error corrected:**
+  - The 2 m PDS3 header is two records, so the image starts at byte 8,444; the PDS4 label says 4,222.
+  - The earlier pane 2 m figures were read one line early, and the "DN 24,407 outlier" was header text.
+  - `phase1/moonsci/lroc/lroc_source_check.py` (PASS; output committed) proves the cause and corrects the values: LM 2 m local maximum 0.95 m; valid range 4–502; 2 × 2 counts 30,579/10/1,999/10/1,022,402.
+  - The 0.5 m figures are unaffected.
+- **Records:**
+  - report `reviews/2026-11-26-moon-lroc-retention-frame-closure.md`
+  - proposal rev 2.1
+  - `lroc_pixels.js` version 3
+  - checklist rev 13
+- **Next:** GPT's recheck, then Chad's build go.
+
 ## 26 Nov 15:54 UTC (clock reading) — **Moon item 4 (LROC): proposal rev 2 for GPT's recheck, answering R1–R4. Docs only; nothing built; source bytes not yet retained** (Moon/LRO science, LROC thread)
 - **GPT's rev 1 review:** concept and Apollo 11 product supported; revise before build. Filed unchanged (`reviews/2026-11-26-moon-lroc-proposal-rev1-gpt-review.md`, `0e76683a…`).
 - **Chad:** D1 Apollo 11, D2 both views, D3 pointer off by default, D4 camera left where it is on switch-off. He asked for a docs-only rev 2.
