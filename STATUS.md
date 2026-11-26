@@ -4,7 +4,7 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 26 Nov 2026
 
-## 26 Nov 06:05 UTC (clock reading) — **Moon height layer: branch preview `moon-height-rc` for GPT's review. Not merged, nothing deployed, no hub change** (page: none live; Moon/LRO science thread)
+## 26 Nov 06:02 UTC (clock reading) — **Moon height layer: branch preview `moon-height-rc` for GPT's review. Not merged, nothing deployed, no hub change** (page: none live; Moon/LRO science thread)
 - **GPT's rev 2 recheck filed** (`reviews/2026-11-26-moon-lro-proposal-rev2-gpt-recheck.md`, relayed by Chad): PASS as a build proposal, with implementation notes. Proposal rev 2.1 narrows §11 and records the notes.
 - **Chad's own line (26 Nov):** "I accept D1–D4. Go ahead with the `moon-height-rc` branch preview under rev 2.1, incorporating GPT’s notes. Page only; return the candidate for GPT review. No merge or deployment."
 - **Built:** payload `f884b7c` (9 files: `moonsci.js`, `moonsci.css`, `assets/moon/lola/*` (grid `af445001…`, texture `e9281ca2…`, SOURCE.json), `phase1/moonsci/build_lola.py`, `phase1/moon-height-ui.test.cjs`, edits to `moon.html` and `moonglobe.js`); Animals pins `5e835de` (13e moon.html, 13q, 13r, 13s). Findings while building: clicks now read from the click event (`toGlobeCoords`), not globe.gl's per-frame hover; the withheld cap is also a grey polygon on top (about one extra draw per frame).
