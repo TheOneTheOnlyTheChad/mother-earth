@@ -8,6 +8,7 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
 <link rel="stylesheet" href="style.css?v=202612250800">
 <link rel="stylesheet" href="moonsci.css?v=202612261100">
+<link rel="stylesheet" href="moonlroc.css?v=202612261700">
 </head>
 <body class="doc craft" data-body="moon">
 <header class="top">
@@ -66,6 +67,7 @@
         <label><input type="radio" name="mg-temp-mode" value="noon" checked disabled> around local noon</label>
         <label><input type="radio" name="mg-temp-mode" value="midnight" disabled> around local midnight</label>
       </fieldset>
+      <button type="button" id="mg-lroc" aria-pressed="false">Show a detailed site: Apollo 11 (LROC)</button>
     </div>
     <p id="mg-lit-read" class="mglro" aria-live="off" hidden></p>
     <div id="mg-height-leg" class="mgh" hidden>
@@ -91,11 +93,33 @@
     <p id="mg-temp-read" class="mglro" aria-live="polite" hidden></p>
     <p id="mg-both" class="mgboth" role="note" hidden>Lighting uses the current UTC minute. The LRO path is a dated example from 10–11 June 2026.</p>
     <p id="mg-lro-read" class="mglro" aria-live="polite" hidden></p>
+    <p id="mg-lroc-loc" class="mglro" hidden></p>
+    <section id="mg-lroc-panel" class="mgl" aria-labelledby="mg-lroc-h" hidden>
+      <h4 id="mg-lroc-h">Detailed site: the Apollo 11 landing site <span class="ev">Observed</span></h4>
+      <fieldset class="mgt-mode"><legend>View</legend>
+        <label><input type="radio" name="mg-lroc-view" value="area" checked> Area, about 4.2 km across (4 m a pixel)</label>
+        <label><input type="radio" name="mg-lroc-view" value="site"> Site, 512 m across (0.5 m a pixel)</label>
+      </fieldset>
+      <label id="mg-lroc-ptr-l" class="mgl-ptr" hidden><input type="checkbox" id="mg-lroc-ptr"> Show the Apollo 11 Lunar Module descent stage (position from LROC’s 2016 list)</label>
+      <p id="mg-lroc-state" class="mglro" role="status"></p>
+      <button type="button" id="mg-lroc-retry" hidden>Retry</button>
+      <figure id="mg-lroc-fig" class="mgl-fig" hidden>
+        <div class="mgl-img"><img id="mg-lroc-img" alt=""><div id="mg-lroc-nd" class="mgl-nd" hidden></div><div id="mg-lroc-fp" class="mgl-fp" hidden></div><div id="mg-lroc-arrow" class="mgl-arrow" hidden></div><div class="mgl-orient" aria-hidden="true">N ↑ · E →</div></div>
+        <div class="mgl-bar" aria-hidden="true"><span id="mg-lroc-bar"></span><b id="mg-lroc-barl"></b></div>
+        <figcaption>
+          <p>North up, east right. Sun low in the west, so shadows point east.</p>
+          <p id="mg-lroc-nd-key" class="dim" hidden><span class="mgl-ndkey" aria-hidden="true"></span>Hatched: no image data.</p>
+          <p id="mg-lroc-cap"></p>
+          <p class="dim">The box on the area view marks the site view. The picture shows the surface on one day in 2011 under that day’s light; the globe’s lighting and layers do not change it.</p>
+        </figcaption>
+      </figure>
+    </section>
     <p class="cscale"><span>Use Zoom in and Zoom out, or pinch on supported devices, to look closer: the Moon grows inside its box. The appearance picture holds about 5 km to a pixel at the equator, so it blurs up close. The temperature map’s cells are 0.5° (about 15 km north–south and at the equator, narrower east–west towards the poles).</span>
     <span>Opens evenly lit so the whole surface can be seen: that is not how the Moon is lit today. “Lit as now” shades it from the calculated direction of the Sun at this device’s current UTC minute.</span>
     <span>“Show height (LOLA)” replaces the picture with a colour map of measured height (2009–2016 laser data) and switches sunlight off while it is shown.</span>
     <span>“Show temperature (Diviner)” replaces it with a map of brightness temperature around each place’s own local noon or midnight (2009–2015 data), also with sunlight off. Only one map is shown at a time.</span>
     <span>Appearance map from NASA’s Scientific Visualization Studio, made from Lunar Reconnaissance Orbiter data: tuned for looks, not measurement. Poleward of 70° it is filled from a lower-resolution map.</span>
+    <span>“Show a detailed site: Apollo 11 (LROC)” turns the globe to the Apollo 11 landing site, marks it with a ring and shows one dated LRO camera picture of it below, at two scales. The globe itself stays at about 5 km a pixel.</span>
     <span>Drawn to fill the view. Sizes are not comparable between the Earth, Moon and Sun pages. The globe and the spacecraft drawing below are separate views. “Show LRO’s dated path” puts the 10–11 June 2026 example on the globe, at the time chosen in the drawing; no current position is shown.</span></p>
     <noscript><p class="cunavail">The globe needs JavaScript.</p></noscript>
   </section>
@@ -147,5 +171,6 @@
 <script src="moonlight.js?v=202612071100"></script>
 <script src="moonglobe.js?v=202612260500"></script>
 <script src="moonsci.js?v=202612261400"></script>
+<script src="moonlroc.js?v=202612261700"></script>
 </body>
 </html>
