@@ -23,3 +23,9 @@ body.craft .mgt-mode legend{float:left;margin-right:8px;padding:0;color:var(--di
 body.craft .mgt-mode input:disabled+*,body.craft .mgt-mode label:has(input:disabled){opacity:.55}
 body.craft #mg-temp-centre[hidden]{display:none}
 @media (max-width:520px){body.craft .mgt .mgh-ticks .mgt-minor{display:none}}
+/* Moon south-polar LEND layer (moonsci.js): one fixed diverging ramp (ColorBrewer PuOr, brown below the band, purple above), two hatches */
+body.craft .mgn-bar{background:linear-gradient(90deg,#7f3b08,#b35806,#e08214,#fdb863,#fee0b6,#f7f7f7,#d8daeb,#b2abd2,#8073ac,#542788,#2d004b)}
+body.craft .mgn-miss{background:repeating-linear-gradient(135deg,#6b6b6b 0 2px,#2e2e2e 2px 6px)}
+body.craft .mgn-wh{background:repeating-linear-gradient(45deg,#e6e6e6 0 2px,#9a9a9a 2px 6px)}
+body.craft .mgn-out{background:linear-gradient(90deg,#5e5e5e,#a3a3a3,#7a7a7a)}
+body.craft #mg-lend-pole[hidden],body.craft #mg-lend-centre[hidden]{display:none}

@@ -7,7 +7,7 @@
 <meta name="description" content="Lunar Reconnaissance Orbiter: where its published trajectory places it, with the source and time beside every position.">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
 <link rel="stylesheet" href="style.css?v=202612250800">
-<link rel="stylesheet" href="moonsci.css?v=202612261100">
+<link rel="stylesheet" href="moonsci.css?v=202612271700">
 <link rel="stylesheet" href="moonlroc.css?v=202612261700">
 <link rel="stylesheet" href="mooncrater.css?v=202612271200">
 </head>
@@ -68,6 +68,9 @@
         <label><input type="radio" name="mg-temp-mode" value="noon" checked disabled> around local noon</label>
         <label><input type="radio" name="mg-temp-mode" value="midnight" disabled> around local midnight</label>
       </fieldset>
+      <button type="button" id="mg-lend" aria-pressed="false">Show south-polar neutron record (LEND)</button>
+      <button type="button" id="mg-lend-pole" hidden>Turn to the south pole</button>
+      <button type="button" id="mg-lend-centre" hidden>Read neutron record at centre</button>
     </div>
     <p id="mg-lit-read" class="mglro" aria-live="off" hidden></p>
     <div id="mg-height-leg" class="mgh" hidden>
@@ -91,6 +94,19 @@
       <p class="dim">The readout gives the number of quarter-hour bins used and, for two or more, the range between them: a spread, not an uncertainty. <span data-t="clip"></span> Values are rounded to 0.1 K; the rounding is not the accuracy.</p>
     </div>
     <p id="mg-temp-read" class="mglro" aria-live="polite" hidden></p>
+    <div id="mg-lend-leg" class="mgh mgn" hidden>
+      <p><b>Neutron detector record near the south pole — LEND, 2011–2016 average (archived)</b> <span class="ev">Measured</span></p>
+      <p>This map compares values in LEND’s archived <code>CSETN_RATE</code> field (its collimated epithermal neutron sensors), averaged over 2011–2016. For display we average them over 60 km-wide discs and compare them with the 80–85°S band. Archive documents disagree about the field’s normalization and background treatment, so these percentages are not a calibrated change in lunar neutron flux, nor a measurement of hydrogen or ice.</p>
+      <p class="mgt-scale">Relative difference from the 80–85°S band, fixed scale −2.5% to +2.5%</p>
+      <div class="mgh-bar mgn-bar" role="img" aria-label="Diverging colour scale from brown at minus 2.5 percent through white at 0 to purple at plus 2.5 percent"></div>
+      <div class="mgh-ticks" aria-hidden="true"><span style="left:0">−2.5%</span><span style="left:20%">−1.5</span><span style="left:50%">0</span><span style="left:80%">+1.5</span><span style="left:100%">+2.5%</span></div>
+      <p><span class="mgt-key mgn-miss" aria-hidden="true"></span>Not in the archive: LEND’s archive holds no value for this cell</p>
+      <p><span class="mgt-key mgn-wh" aria-hidden="true"></span>Withheld by our display rule: formal estimate above 0.5 percentage points, or the 60 km disc runs past the product’s 80°S edge</p>
+      <p><span class="mgt-key mgn-out" aria-hidden="true"></span>Outside this product’s coverage (north of 80°S): the usual picture is shown</p>
+      <p>± is a formal counting-error estimate that assumes the archive’s errors are independent; it is not the full uncertainty.</p>
+      <p class="dim">Neutron measurements can be used with models to estimate hydrogen. Such estimates depend on assumptions, including how any hydrogen is buried or layered, and published LEND estimates differ. Lower values here are not attributed to any one cause. How sharply LEND’s collimated sensors resolve the surface is disputed in published work. Our 60 km disc is a display choice. Archived record (NASA PDS), not live. <a href="#craft-sources">Sources</a></p>
+    </div>
+    <p id="mg-lend-read" class="mglro" aria-live="polite" hidden></p>
     <p id="mg-both" class="mgboth" role="note" hidden>Lighting uses the current UTC minute. The LRO path is a dated example from 10–11 June 2026.</p>
     <p id="mg-lro-read" class="mglro" aria-live="polite" hidden></p>
     <div id="mg-lroc-ctl" class="mgctl">
@@ -121,6 +137,7 @@
     <span>Opens evenly lit so the whole surface can be seen: that is not how the Moon is lit today. “Lit as now” shades it from the calculated direction of the Sun at this device’s current UTC minute.</span>
     <span>“Show height (LOLA)” replaces the picture with a colour map of measured height (2009–2016 laser data) and switches sunlight off while it is shown.</span>
     <span>“Show temperature (Diviner)” replaces it with a map of brightness temperature around each place’s own local noon or midnight (2009–2015 data), also with sunlight off. Only one map is shown at a time.</span>
+    <span>“Show south-polar neutron record (LEND)” draws archived neutron-detector values on the region south of 80°S (2011–2016 average), with the usual picture elsewhere and sunlight off. “Turn to the south pole” brings that region into view.</span>
     <span>Appearance map from NASA’s Scientific Visualization Studio, made from Lunar Reconnaissance Orbiter data: tuned for looks, not measurement. Poleward of 70° it is filled from a lower-resolution map.</span>
     <span>“Show a detailed site: Apollo 11 (LROC)” turns the globe to the Apollo 11 landing site, marks it with a ring and shows one dated LRO camera picture of it below, at two scales. The globe itself stays at about 5 km a pixel.</span>
     <span>Drawn to fill the view. Sizes are not comparable between the Earth, Moon and Sun pages. The globe and the spacecraft drawing below are separate views. “Show LRO’s dated path” puts the 10–11 June 2026 example on the globe, at the time chosen in the drawing; no current position is shown.</span></p>
@@ -185,6 +202,7 @@
       <li><b>Height (optional):</b> LOLA gridded topography <code>LDEM_4_FLOAT</code>, product version V3.0, data set LRO-L-LOLA-4-GDR-V1.0 (PDS4 <code>urn:nasa:pds:lro_lola_rdr:data_gridded:ldem_4_float::1.0</code>), LOLA Science Team, NASA GSFC; bundle DOI <a href="https://doi.org/10.17189/tnyt-7007" target="_blank" rel="noopener">10.17189/tnyt-7007</a> (Smith &amp; Neumann 2023). Laser data from 13 July 2009 to 29 November 2016, height relative to a 1,737.4 km sphere on a 0.25° grid. PDS data are in the public domain. We round each cell to whole metres and draw one colour per cell; values north of 89.5°N are withheld because the float and integer versions of this grid disagree there by up to 1.4 km. <a href="sources.html#moonheight">Details</a>.</li>
       <li><b>Temperature (optional):</b> Diviner Global Cumulative Product, data set LRO-L-DLRE-5-GCP-V1.0, field <code>tbol</code> (“Bolometric average calibrated brightness temperature”), Diviner team, UCLA; bundle DOI <a href="https://doi.org/10.17189/wj0s-w188" target="_blank" rel="noopener">10.17189/wj0s-w188</a> (Paige, Sullivan &amp; Williams 2022). Nadir observations from 5 July 2009 to 1 April 2015, binned by the team into 0.5° cells and quarter hours of local time from the mean radiances of channels 3–9. PDS data are in the public domain. Shown here: <b>our</b> unweighted mean of the available bins between 11:30 and 12:30, or 23:30 and 00:30, local time, with the number of bins and the range between them. Poleward of 70° (noon) and 80° (midnight) the map is withheld by our display policy. Fixed colour scales: noon 281–395 K, midnight 70–105 K (the 1st and 99th percentiles of the shown grid cells, rounded outward to whole kelvin; shares are of 0.5° grid cells, not of surface area). General meaning of bolometric temperature: Powell et al. 2023, <i>JGR Planets</i> 128, e2022JE007532, §2.5. <b>Comparison:</b> at ten selected high-contrast midnight sites, this map’s cell values differed from a separately processed high-resolution Diviner midnight mosaic by −1.9 to +16.7 K (median +8.7 K); ten background sites differed by less than 1 K. The products use different processing, sampling and periods; the causes of the differences have not been isolated. This comparison is not an accuracy estimate. <a href="sources.html#moontemp">Details</a>.</li>
       <li><b>Detailed site (optional):</b> LROC Narrow Angle Camera orthophotos of the Apollo 11 landing site, products <code>NAC_DTM_APOLLO11_M150368601_50CM</code> and <code>NAC_DTM_APOLLO11_M150368601_2M</code>, data set LRO-L-LROC-5-RDR-V1.0 in the NASA PDS (Imaging Node), from one observation, M150368601, on 22 January 2011, 20:48:53–20:49:11 UTC. PDS data products are in the public domain (LROC’s terms). Credit: NASA/GSFC/Arizona State University. Shown: a 512 m square at the product’s 0.5 m a pixel, and an area about 4.2 km across averaged from 2 m to 4 m a pixel (no-data blocks hatched); both stretched for display, not a measured reflectance. The ring on the globe marks the published position of the Lunar Module descent stage (LROC’s 2016 list), not the picture’s footprint. <a href="sources.html#moonlroc">Details</a></li>
+      <li><b>South-polar neutron record (optional):</b> LEND (Lunar Exploration Neutron Detector) averaged science product <code>urn:nasa:pds:lro_lend:data_science_averaged:lend_rdr_alds_20111211::1.0</code>, NASA PDS Geosciences Node; LRO LEND Data Bundle, Mitrofanov, I. (2022), DOI <a href="https://doi.org/10.17189/p89b-8w72" target="_blank" rel="noopener">10.17189/p89b-8w72</a>. Field <code>CSETN_RATE</code> (collimated epithermal sensors) on 0.5° cells, 80–90°S, averaged by the LEND team over 11 December 2011 – 14 September 2016; the product was last updated in the archive in 2017. PDS data are in the public domain. The archive’s documents describe this field as a unitless normalized ratio, as a relative count rate and as counts per second, and disagree about background subtraction; we do not resolve this, show no raw value or unit, subtract nothing and convert nothing. Shown: <b>our</b> inverse-variance-weighted mean of the archived cell values within 30 km (a 60 km-wide disc) of each cell, as a percent difference from the 80.25–84.75°S band, with a first-order formal counting-error estimate that assumes independent archive errors; cells are withheld where that estimate exceeds 0.5 percentage points or where the disc runs past 80°S. The effective spatial resolution of LEND’s collimated sensors is disputed (for example Eke et al. 2012, ApJ 747, 6; Teodoro et al. 2014; McClanahan et al. 2024, Planet. Sci. J. 5:217). No hydrogen or water amount is shown.</li>
       <li><b>CRaTER event counts (optional):</b> LRO’s Cosmic Ray Telescope for the Effects of Radiation, NASA PDS (Planetary Plasma Interactions Node), Level 2 secondary science collection <code>urn:nasa:pds:lro-crater:data-der-sec</code> v2.4, release 67; Spence, H.E. (2026), DOI <a href="https://doi.org/10.17189/2c1t-ph72" target="_blank" rel="noopener">10.17189/2c1t-ph72</a>. Field <code>GOOD</code> (“Good Events Counter”), one record per readout of about a second, files <code>CRAT_L2_SEC_2026161_V01.TAB</code> and <code>…2026162…</code>. PDS data are in the public domain. Shown: <b>our</b> sums in 10-minute groups by UTC record time, as events a second, with an approximate counting benchmark; incomplete or non-nominal groups are withheld. Instrument counts at the spacecraft, not a dose, a flux or a surface value. <a href="sources.html#mooncrater">Details</a></li>
       <li><b>Moon radius:</b> 1,737.4 km (NASA/JPL Horizons, “Radius (IAU)”).</li>
     </ul>
@@ -194,7 +212,7 @@
 <script src="craft.js?v=202612071000"></script>
 <script src="moonlight.js?v=202612071100"></script>
 <script src="moonglobe.js?v=202612260500"></script>
-<script src="moonsci.js?v=202612261400"></script>
+<script src="moonsci.js?v=202612271700"></script>
 <script src="moonlroc.js?v=202612261700"></script>
 <script src="mooncrater.js?v=202612271200"></script>
 </body>
