@@ -1,6 +1,6 @@
 # Animals: enquiries record
 
-26 Nov 2026 08:14 UTC (clock reading) · rev 4 (rev 4 adds the first substantive ATAP reply as a factual summary, see §B and "Replies"; the full text is kept privately, following GPT's filing rule of 25 Nov: public records carry a factual summary, not a private email) · 24 Nov 2026 02:45 UTC · rev 3 (rev 3 adds NOAA's first reply and fills section A from the email thread Chad pasted on 24 Nov, see §A and "Replies"; rev 2: 19 Nov 2026 15:18 UTC; rev 1: 19 Nov 2026 14:37 UTC) · for GPT · record only. Rule as in `docs/research/ENQUIRIES-2026-11.md`: sending grants no permission and silence grants none; an enquiry is marked sent only when Chad confirms it; no duplicate and no follow-up is sent unless Chad decides to.
+27 Nov 2026 15:52 UTC (clock reading) · rev 5 (rev 5 adds section C and the IUCN Red List Unit's reply of 27 Nov 2026 as a factual summary; the enquiry itself is recorded on branch `animals-assessment-rc`) · 26 Nov 2026 08:14 UTC · rev 4 (rev 4 adds the first substantive ATAP reply as a factual summary, see §B and "Replies"; the full text is kept privately, following GPT's filing rule of 25 Nov: public records carry a factual summary, not a private email) · 24 Nov 2026 02:45 UTC · rev 3 (rev 3 adds NOAA's first reply and fills section A from the email thread Chad pasted on 24 Nov, see §A and "Replies"; rev 2: 19 Nov 2026 15:18 UTC; rev 1: 19 Nov 2026 14:37 UTC) · for GPT · record only. Rule as in `docs/research/ENQUIRIES-2026-11.md`: sending grants no permission and silence grants none; an enquiry is marked sent only when Chad confirms it; no duplicate and no follow-up is sent unless Chad decides to.
 
 **Correction.** STATUS entries of 18 and 19 Nov, three review packets and Claude's messages in this thread described both enquiries as "unsent". That was wrong from the point Chad sent them. Chad, 19 Nov: he sent the enquiries from his own email; the original NOAA address bounced; he then confirmed "cool sent". This file replaces "the two unsent enquiries" everywhere.
 
@@ -37,12 +37,44 @@ Corrected in rev 2. Source: Chad's statement of 19 Nov 2026, from the correspond
 | What a reply would decide | whether South African shark and ray detections can be considered. A different kind of data from the white shark journey (detections at receivers, not satellite fixes) and a different dataset from the Zenodo file |
 | Do not | resend, follow up or draft a duplicate. Her reply grants no permission; silence grants none |
 
+## C. IUCN Red List (assessment card, R1 and R2)
+
+| | |
+|---|---|
+| About | showing, on five Animals cards, each species' global Red List Category with the assessment's scope and dates; the release dependencies R1 (permission for the date, year and scope fields) and R2 (a copy under the terms' section 5) of `docs/concepts/ANIMALS-ASSESSMENT-CARD-BUILD-BRIEF.md` §1 |
+| Recipient | the IUCN Red List Unit |
+| Status | **Sent by Chad, 23 Nov 2026, 04:49 SAST.** Text: `docs/research/animals-source-audit/ENQUIRY-DRAFT-IUCN.md` rev 2.3 on branch `animals-assessment-rc` (`ab1a223`). **First reply 27 Nov 2026 (rev 5). See "Replies"** |
+| Address | held by Chad; not written in this repository |
+
 ## What is not on record, and why
 - Claude could not find the previous thread's messages about the bounce and the resend with its search of past chats, so in rev 1 the addresses, dates and the sent text were left blank and not guessed. Rev 2 fills section B from Chad's own statement of 19 Nov. Section A (NOAA) is unchanged: its addresses, date and sent text are still not on record, and Chad can supply them or a screenshot. **Rev 3:** section A is now filled from the email thread Chad pasted on 24 Nov, except the original enquiry's exact text and the date of the bounced first message.
 - **A and B are separate enquiries to separate recipients.** Nothing recorded for ATAP says anything about NOAA, and the reverse.
 - No enquiry has been sent to the authors of the three preview datasets (Bartlam-Brooks and Harris; Kock and co-authors; Baird and co-authors). The release assessment names the one question that would need one.
 
 ## Replies
+
+### C, IUCN Red List: first reply, 27 Nov 2026
+
+**How it reached this record.** Chad pasted it into the Claude thread on 27 Nov 2026 and had already sent it to GPT. Claude has not seen the inbox. The paste showed it as received "5:40 PM (9 minutes ago)" in Chad's mail view, time zone not stated; the workspace clock read 15:51:17 UTC (17:51 SAST) shortly after. From the Red List Unit, addressed to Chad only, subject as sent. Its text is not reproduced here; the full email is kept privately (Mac `research/animals-correspondence/2026-11-27-iucn/`, sha256 `8c160fd6…d7a2`).
+
+**What it answers, point by point against the enquiry as sent (rev 2.3).**
+
+| Point asked | Answer |
+|---|---|
+| 1. Show, in a sentence of our own with the full citation and a link, the category in words, that the assessment is global, the date assessed and year published (with any amended or errata note), and the edition checked against with the date checked, for the five named species | **Permitted**: the use in point 1 "fits within" the Terms of Use |
+| 2. Whether that covers holding the five records in the public repository and serving them in a small static JSON file | **Not answered in terms** |
+| 3. What may be shown if the date, year or scope needed permission | Not needed: point 1 is permitted |
+| 4. Whether section 5's copy applies | **No copy required** "in this case" |
+| 5. Using the API to check the current assessment for the five species | **Welcome to use the API** to extract this data |
+| (Cadence, given unasked) | New assessments are released 1 to 3 times a year; dates on the Red List's assessment updates page |
+
+**What it settles (Claude's reading, for GPT; not a decision).**
+- **R1, the page:** settled. The fields in point 1 may be shown on the page, cited and linked.
+- **R1, the served JSON and the public repository:** the enquiry asked this as a separate question (point 2) and the reply does not address it in terms. Whether point 1's permission is read to include it, or one short question is warranted, is for GPT and Chad.
+- **R2:** settled. No copy is required for this use.
+- **API:** allowed for this data. A scripted re-check (A-D4 option B) is still its own small proposal with its own review; it does not hold up the release.
+- **Cadence:** 1 to 3 releases a year. The planned six-monthly check (next due 22 May 2027) can be reviewed against the update dates.
+- **Nothing is released.** The assessment card stays on `animals-assessment-rc` until Chad's release lines; the release checklist (`reviews/2026-11-23-animals-assessment-release-checklist-draft.md` rev 1.1) applies from step 2 once R1 is judged closed.
 
 ### B, ATAP (SAIAB): first substantive reply, 26 Nov 2026
 
