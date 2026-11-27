@@ -4,6 +4,13 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 26 Nov 2026
 
+## 27 Nov 14:50 UTC (clock reading) — **Moon item 5 (CRaTER): RELEASED and CLOSED. Page only; no hub change** (Moon spec, CRaTER thread)
+- GPT's release review PASS, filed unchanged (`reviews/2026-11-27-moon-crater-release-rc-gpt-review.md`). Chad: "Approve: release the CRaTER event-count chart from moon-crater-ui at 6ed18c3 to main, page only; no hub deployment."
+- **Merge `ba41c8a`** of `6ed18c3` into `05dc479` (14:44:27 UTC commit time); tree equals `6ed18c3` plus main's three records files. Packet brought over by a records-only merge of `cffec00`.
+- **Served:** 54/54 match the reviewed manifest `85cca2ad…` at 14:46:44 UTC (expected list from the manifest file). **Live check** 14:47–14:48 UTC passed: off by default, one file on opening, group 72 at 12:00, the labelled extra group at the final time, close and reopen, Details to `sources.html#mooncrater` (first click showed the pane's cached pre-release Sources page, `max-age=600`).
+- REGISTER live; bundle identifier corrected to `urn:nasa:pds:lro-crater` (GPT's note; no served change). Checklist rev 28. Record `reviews/2026-11-27-moon-crater-release.md`. Rollback `git revert -m 1 ba41c8a`.
+- Branch `moon-crater-ui` deleted after verification; Mac review copy archived. Next Moon item: Chad's choice (6 LEND, 7 LAMP, 8 Mini-RF remain).
+
 ## 27 Nov 14:24 UTC (clock reading) — **Moon item 5 (CRaTER): release candidate with GPT for release review. Branch only; not merged, not deployed; no hub change** (Moon spec, CRaTER thread)
 - GPT's preview review PASS, filed unchanged on the branch (`reviews/2026-11-27-moon-crater-ui-gpt-review.md`). Chad's go for the release candidate.
 - **Candidate `6ed18c3`** on `moon-crater-ui`: payload `4927a02` (Sources `#mooncrater`, REGISTER, Details links, manifest, bound comment, `moon-diviner-ui` H maintenance); Animals pins `6ed18c3`; fresh main `67a615c` merged. Packet `reviews/2026-11-27-moon-crater-release-rc.md` (head `dd7ea16`). Mac `_review/moon-crater-release-rc/`.
