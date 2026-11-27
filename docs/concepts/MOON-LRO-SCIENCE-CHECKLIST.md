@@ -1,6 +1,6 @@
 # Moon globe and LRO science — spec checklist
 
-Rev 21 · 27 Nov 2026, 09:20 UTC (clock reading; rev 20 06:43, rev 19 04:58, rev 18 03:25, rev 17 27 Nov 02:48, rev 16 26 Nov 21:05, rev 15 18:58, rev 14 17:49, rev 13 16:07, rev 12 15:54, rev 11 15:34, rev 10 15:07, rev 9 14:42, rev 8 13:07, rev 7 11:58, rev 6 10:22, rev 5 09:54, rev 4 09:42, rev 3 09:20, rev 2 08:59, rev 1 08:31 UTC) · written by Claude on Chad's instruction (26 Nov) · **persistent record; update it as each item moves** · docs only.
+Rev 22 · 27 Nov 2026, 09:34 UTC (clock reading; rev 21 09:20, rev 20 06:43, rev 19 04:58, rev 18 03:25, rev 17 27 Nov 02:48, rev 16 26 Nov 21:05, rev 15 18:58, rev 14 17:49, rev 13 16:07, rev 12 15:54, rev 11 15:34, rev 10 15:07, rev 9 14:42, rev 8 13:07, rev 7 11:58, rev 6 10:22, rev 5 09:54, rev 4 09:42, rev 3 09:20, rev 2 08:59, rev 1 08:31 UTC) · written by Claude on Chad's instruction (26 Nov) · **persistent record; update it as each item moves** · docs only.
 
 **What this is.** The record of every item in GPT's original brief, `docs/concepts/MOON-LRO-SCIENCE-BRIEF-GPT-2026-11-25.md`. It also covers the scope Chad added on 26 Nov: every page that shows the Moon. It is **not** the narrowed height proposal (`docs/concepts/MOON-LRO-SCIENCE-PROPOSAL.md` rev 2.1), which covered only the first release.
 
@@ -26,7 +26,7 @@ Rev 21 · 27 Nov 2026, 09:20 UTC (clock reading; rev 20 06:43, rev 19 04:58, rev
 | 7 | LAMP far-ultraviolet products | to assess |
 | 8 | Mini-RF radar products | to assess |
 | 9 | Science and trajectory pairing; observation footprints (requirements 5–7) | to assess, only where a selected example benefits |
-| 10a | Sky zoom-out textured Moon (Chad's wider scope) | **release candidate with GPT** (`moon-sky-texture-ui`, tested `4c8aecd`) |
+| 10a | Sky zoom-out textured Moon (Chad's wider scope) | **done and live** (main `1280c0d`, 27 Nov 2026; 51/51 served files match the reviewed manifest `15e96c52…`) |
 | 10b | Tides Moon (Chad's wider scope) | **closed decision: unchanged** |
 | 11 | Verification limits (requirement 8) | open record; carried with every item |
 | 12a | Higher-resolution LOLA grids | option |
@@ -340,7 +340,7 @@ Rev 21 · 27 Nov 2026, 09:20 UTC (clock reading; rev 20 06:43, rev 19 04:58, rev
 - **Blockers:** none known.
 - **Decision needed:** per item, if a pairing is proposed.
 
-## 10a. Sky zoom-out textured Moon — release candidate with GPT
+## 10a. Sky zoom-out textured Moon — done and live (27 Nov 2026)
 
 - **Scope:** Chad's 26 Nov widening. Today the Sky zoom-out shows a plain grey sphere (`skyscene.js`, emissive `0x9a9a9a`) at true size and distance.
 - **Status:** parked from the height release for its own round (proposal §7, D4). Not assessed beyond the rev 1 notes.
@@ -366,7 +366,7 @@ Rev 21 · 27 Nov 2026, 09:20 UTC (clock reading; rev 20 06:43, rev 19 04:58, rev
   - Packet: `reviews/2026-11-27-moon-sky-texture-release-rc.md`.
   - Validation on frozen `4c8aecd`: texture 197/0, Sky 351/79/77, Animals 300/0, night lights, tides-nav, desktop-overflow, Moon temperature all clean.
   - `smoke-fixes` stops identically on unchanged main (not this change).
-- **Decision needed (Chad):** after GPT's release review, his own Approve line naming the exact commit.
+- **27 Nov (released):** GPT's release review PASS. Chad: "Approve: release the Sky zoom-out Moon picture from `moon-sky-texture-ui` at `1280c0d` to main, page only; no hub deployment." Main was fast-forwarded to `1280c0d` at 09:31:52 UTC; 51/51 served files match the reviewed manifest; the bounded live check passed. Record: `reviews/2026-11-27-moon-sky-texture-release.md`. **Closed.**
 
 ## 10b. Tides Moon — closed decision: unchanged
 
@@ -407,7 +407,7 @@ Each stays `option` until Chad classifies it as "assess" or "not pursued", with 
 1. **Diviner:** assessment and proposal first, not a build. *(26 Nov: released, merge `0622e80`; item 3 done and closed.)*
 2. Then the remaining items **one at a time**, in the order Chad chooses. *(27 Nov: item 4, LROC Apollo 11, released, merge `8e7d262`.)*
 
-**Remaining open items after LROC (27 Nov):** 10a (assessed 27 Nov; proposal rev 1 with GPT); 5, 6, 7, 8 (to assess); 9 (only inside the item it serves); 12a–c (options to classify); 11 (carried). Suggested order (Claude's suggestion, for Chad to decide): the Sky Moon decision (10a), then CRaTER (5), LEND (6), LAMP (7) and Mini-RF (8). Pairing (9) and the options (12) are taken up only inside the item they serve or when Chad classifies them.
+**Remaining open items after LROC (27 Nov):** 10a done and live (27 Nov); 5, 6, 7, 8 (to assess); 9 (only inside the item it serves); 12a–c (options to classify); 11 (carried). Suggested order (Claude's suggestion, for Chad to decide): the Sky Moon decision (10a), then CRaTER (5), LEND (6), LAMP (7) and Mini-RF (8). Pairing (9) and the options (12) are taken up only inside the item they serve or when Chad classifies them.
 
 ## Change log
 
@@ -432,3 +432,4 @@ Each stays `option` until Chad classifies it as "assess" or "not pursued", with 
 - Rev 19 (27 Nov 2026, 04:58 UTC): §10a: GPT's proposal review filed (PASS with notes), Chad's D1–D6, page preview `moon-sky-texture-ui` at `c132f46` with GPT. No other item moved.
 - Rev 20 (27 Nov 2026, 06:43 UTC): §10a: GPT's preview review (R1) filed; R1 fixed, candidate `ceb6dc8` with GPT for recheck. No other item moved.
 - Rev 21 (27 Nov 2026, 09:20 UTC): §10a: release candidate (tested `4c8aecd`) with GPT for release review. No other item moved.
+- Rev 22 (27 Nov 2026, 09:34 UTC): §10a done and live (main `1280c0d`). No other item moved.

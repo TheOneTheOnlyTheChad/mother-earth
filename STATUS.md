@@ -4,6 +4,15 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 26 Nov 2026
 
+## 27 Nov 09:34 UTC (clock reading) — **Moon item 10a RELEASED: the Moon's picture on the Sky zoom-out Moon is live. Page only; no hub deployment** (Moon spec, item 10a thread)
+- GPT's release review PASS, filed unchanged (`reviews/2026-11-27-moon-sky-texture-release-rc-gpt-review.md`). Chad: "Approve: release the Sky zoom-out Moon picture from `moon-sky-texture-ui` at `1280c0d` to main, page only; no hub deployment."
+- **Release:** main fast-forwarded `018102c..1280c0d` at 09:31:52 UTC; the docs branch is contained.
+- **Served check (09:33:15 UTC):** 51/51 live files match the reviewed manifest `reviews/evidence/2026-11-27-moon-sky-texture-manifest.json` (`15e96c52…`). The list was built from that file.
+- **Live check:** the picture was placed on entry (orientation date 2026-11-27); wording as reviewed; stop B radius 2.81 px; Back released everything.
+- **Carried exception:** `smoke-fixes` stops at its harness wait identically on main and the candidate (cause not established).
+- Record `reviews/2026-11-27-moon-sky-texture-release.md`. Checklist rev 22: **10a closed.**
+- **Next Moon items, one at a time:** 5 CRaTER, 6 LEND, 7 LAMP, 8 Mini-RF (Chad's choice). Sun/Parker waits.
+
 ## 27 Nov 09:20 UTC (clock reading) — **Moon item 10a: release candidate with GPT for release review. Branch only; not merged, not deployed; no hub change** (Moon spec, item 10a thread)
 - GPT's R1 recheck PASS, filed unchanged (`reviews/2026-11-27-moon-sky-texture-ui-r1-gpt-recheck.md`). Chad's go for the release candidate.
 - **Commits:**
