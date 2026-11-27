@@ -95,7 +95,7 @@ All of this was read by Claude on 27 Nov 2026. The PDS host is reachable only fr
 ### 4.3 What the stored number is: unresolved, and left unresolved (R1)
 
 - **The archive disagrees with itself:**
-  - The data-set catalog (and the NASA PDS data-set page) says the ALD rates are normalised by a reference region's average and "are unitless".
+  - The data-set catalog says (GPT found the same on the NASA PDS data-set page) the ALD rates are normalised by a reference region's average and "are unitless".
   - The sample's label calls the field a "relative count rate".
   - The SIS §2.3.2.2 equations define a cell value as an average counting rate in counts per second.
   - The catalog and SIS say the averages use background-subtracted counts, while the SIS says DLD carries no spacecraft background subtraction.
@@ -107,7 +107,7 @@ All of this was read by Claude on 27 Nov 2026. The PDS host is reachable only fr
 | Source (as read) | Statement |
 |---|---|
 | LEND instrument catalog and RDR SIS §2.1 | collimation provides epithermal mapping "with the horizontal resolution of 5 km for LRO at an altitude of 50 km" |
-| McClanahan et al. 2024 (PSJ 5:217, doi:10.3847/PSJ/ad5b55; arXiv v5, 15 Jan 2025), §1.2 and §3, full text | Mitrofanov et al. modelled the field of view at 50 km as FWHM 10 km, ±3σ footprint 25.8 km; the authors' own GEANT4 modelling gives FWHM 11.8 km and a ±3σ footprint of 30.6 km diameter. Elsewhere they use a "30 km diameter" collimated footprint. They also state that claims for CSETN's high spatial resolution "have been the subject of vigorous and still unresolved debate", listing studies on both sides. |
+| McClanahan et al. 2024 (PSJ 5:217, doi:10.3847/PSJ/ad5b55; arXiv v5, 15 Jan 2025): §1.2 read in full text; the "30 km diameter" wording in §3 located by text search | Mitrofanov et al. modelled the field of view at 50 km as FWHM 10 km, ±3σ footprint 25.8 km; the authors' own GEANT4 modelling gives FWHM 11.8 km and a ±3σ footprint of 30.6 km diameter. Elsewhere they use a "30 km diameter" collimated footprint. They also state that claims for CSETN's high spatial resolution "have been the subject of vigorous and still unresolved debate", listing studies on both sides. |
 | Eke et al. 2012 (ApJ 747, 6; abstract) | at least 90% of the lunar part of the CSETN rate comes from neutrons through the collimator walls; effective FWHM comparable with the uncollimated Lunar Prospector spectrometer |
 | Teodoro et al. 2014 (arXiv 1304.8123; abstract) | the footprint is at least as big as an omnidirectional detector's at 50 km; the collimated flux is negligible |
 | Su et al. 2021 (arXiv 2104.03451; search-result text, not the abstract) | a nominal 10 km diameter |
@@ -117,7 +117,7 @@ All of this was read by Claude on 27 Nov 2026. The PDS host is reachable only fr
 
 ## 6. Measurements on the sample (`docs/research/moon-lend/`)
 
-All scripts check the retained files' sha256 first, read the layout from the file's own label where they parse fields, and reproduce their recorded outputs byte for byte. GPT reproduced `assess_lend_2.py` byte for byte, and the reference figures independently.
+All scripts check the retained files' sha256 first and reproduce their recorded outputs byte for byte. `assess_lend_1.py` derives the field layout from the file's own PDS4 label; the other scripts use the same byte offsets (CSETN at bytes 107/111/115, latitude 47, longitude 51), which that label gives. GPT reproduced `assess_lend_2.py` byte for byte, and the reference figures independently.
 
 ### 6.1 `assess_lend_1.py`
 
@@ -180,6 +180,7 @@ Grid, coverage, field statistics, missing cells (§4.2). Output `outputs/assess_
 - Shown values (benchmark, 0.5 pp): −1.86% to +2.16%, median −0.36%; median formal error 0.36 pp.
 - **Exposure:** the median native-cell exposure is 384 s. The median sum over a disc's support is 45,279 s, a sum of per-cell accumulation times and **not** a continuous observing duration.
 - Rev 1's 15 km figures were for a **15 km radius (30 km diameter)**: 489 cells shown under the same rule.
+- **Under the recommended rule (D5 propagated estimate, D6 with the edge rule):** 11,656 shown, 1,440 withheld at the product edge, 317 withheld by the 0.5 pp rule, 987 not in the archive (total 14,400).
 
 ## 7. Rights and citation
 
@@ -303,7 +304,7 @@ Grid, coverage, field statistics, missing cells (§4.2). Output `outputs/assess_
 | D3 | Form | L1; L0 and L2 legitimate |
 | D4 | Display smoothing | 30 km radius (60 km diameter) centre-in-disc, inverse-variance-weighted, as coded |
 | D5 | Error figure | The propagated formal estimate, labelled with its conditions (the benchmark is a legitimate alternative; they differ by at most 0.005 pp here) |
-| D6 | Withholding | Above 0.5 pp of the formal estimate, **and** where the disc crosses the product's 80°S edge (1,440 cells at 80.25° and 80.75°S); missing-affected discs shown with their support disclosed |
+| D6 | Withholding | Above 0.5 pp of the formal estimate, **and** where the disc crosses the product's 80°S edge (1,440 cells at 80.25° and 80.75°S); missing-affected discs shown with their support disclosed. Result: 11,656 shown, 1,757 withheld, 987 not in the archive |
 | D7 | Wording | §8.1 draft |
 | D8 | Hydrogen and water numbers | None on the page; published papers cited by reference only (GPT supports) |
 | D9 | North pole | Not now |

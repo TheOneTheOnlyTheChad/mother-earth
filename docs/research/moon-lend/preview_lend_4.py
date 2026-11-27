@@ -113,6 +113,9 @@ out = {
                         'bench_p50': q(bench[show_b], 50), 'disc_cells': {'min': int(ncell[show_b].min()), 'p50': int(np.median(ncell[show_b])), 'max': int(ncell[show_b].max())},
                         'support_exposure_sum_s_p50': q(exp_sum[show_b], 50)},
     'support_classes': support,
+    'recommended_rule_D6_propagated_cutoff_plus_edge': {'valid_displayed': int((show_p & ~truncated).sum()),
+        'withheld_product_edge': int((own & truncated).sum()), 'withheld_error_rule': int((own & ~truncated & ~show_p).sum()),
+        'archive_missing': int(missing.sum())},
     'native_cell_exposure_s_p50': q(exp[usable], 50),
 }
 print(json.dumps(out, indent=1))

@@ -72,5 +72,11 @@
    "disc_cells_median": null
   }
  },
+ "recommended_rule_D6_propagated_cutoff_plus_edge": {
+  "valid_displayed": 11656,
+  "withheld_product_edge": 1440,
+  "withheld_error_rule": 317,
+  "archive_missing": 987
+ },
  "native_cell_exposure_s_p50": 384.0
 }
