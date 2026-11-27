@@ -25,7 +25,7 @@ Written 27 Nov 2026, 11:47 SAST / 09:47 UTC (clock reading), at the close of the
    - **"Lessons added 27 Nov 2026 (Moon item 10a)" (1–7)**.
 3. `HANDOVER.md`, the top block "MOON ITEM 10a RELEASED AND CLOSED".
 4. `STATUS.md`, the 27 Nov entries from 09:47 UTC back to 03:25 UTC.
-5. **`docs/concepts/MOON-LRO-SCIENCE-CHECKLIST.md` rev 22** (Project copy `claude/concepts/MOON-LRO-SCIENCE-CHECKLIST.md`): the programme record.
+5. **`docs/concepts/MOON-LRO-SCIENCE-CHECKLIST.md` rev 23** (Project copy `claude/concepts/MOON-LRO-SCIENCE-CHECKLIST.md`): the programme record.
 6. `reviews/2026-11-27-moon-sky-texture-release.md` (release record) and `reviews/2026-11-27-moon-sky-texture-release-rc.md` (RC packet).
 7. This note.
 
@@ -39,7 +39,7 @@ Written 27 Nov 2026, 11:47 SAST / 09:47 UTC (clock reading), at the close of the
 
 ## 3. Live state (27 Nov, 09:47 UTC)
 
-- **main:** `8d3a0af` (release records), then this close-out's docs commit. Recheck with `git ls-remote origin main`: other threads push docs to main.
+- **main:** `8d3a0af` (release records), then the close-out docs commits (`7e0ee79` and the one carrying this note's final text). Recheck with `git ls-remote origin main`: other threads push docs to main.
 - **Item 10a release:**
 
 | | |
@@ -63,7 +63,7 @@ Written 27 Nov 2026, 11:47 SAST / 09:47 UTC (clock reading), at the close of the
   - `LR_MAIN`, `DV_MAIN`, `MH_MAIN` and earlier are the baselines behind them; `moonlight.js` stays held to main by 13c.
   - **Any later edit to `index.html`, `skyscene.js`, `sources.html`, `moon.html` or `moonglobe.js` needs a narrow pin-maintenance commit (parent = the payload commit, this suite only) and an Animals rerun.**
 
-## 4. Moon checklist status (rev 22)
+## 4. Moon checklist status (rev 23)
 
 | # | Item | Status |
 |---|---|---|

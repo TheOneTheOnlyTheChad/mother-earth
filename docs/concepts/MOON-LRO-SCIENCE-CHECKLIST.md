@@ -1,6 +1,6 @@
 # Moon globe and LRO science — spec checklist
 
-Rev 22 · 27 Nov 2026, 09:34 UTC (clock reading; rev 21 09:20, rev 20 06:43, rev 19 04:58, rev 18 03:25, rev 17 27 Nov 02:48, rev 16 26 Nov 21:05, rev 15 18:58, rev 14 17:49, rev 13 16:07, rev 12 15:54, rev 11 15:34, rev 10 15:07, rev 9 14:42, rev 8 13:07, rev 7 11:58, rev 6 10:22, rev 5 09:54, rev 4 09:42, rev 3 09:20, rev 2 08:59, rev 1 08:31 UTC) · written by Claude on Chad's instruction (26 Nov) · **persistent record; update it as each item moves** · docs only.
+Rev 23 · 27 Nov 2026, 09:52 UTC (clock reading; rev 22 09:34, rev 21 09:20, rev 20 06:43, rev 19 04:58, rev 18 03:25, rev 17 27 Nov 02:48, rev 16 26 Nov 21:05, rev 15 18:58, rev 14 17:49, rev 13 16:07, rev 12 15:54, rev 11 15:34, rev 10 15:07, rev 9 14:42, rev 8 13:07, rev 7 11:58, rev 6 10:22, rev 5 09:54, rev 4 09:42, rev 3 09:20, rev 2 08:59, rev 1 08:31 UTC) · written by Claude on Chad's instruction (26 Nov) · **persistent record; update it as each item moves** · docs only.
 
 **What this is.** The record of every item in GPT's original brief, `docs/concepts/MOON-LRO-SCIENCE-BRIEF-GPT-2026-11-25.md`. It also covers the scope Chad added on 26 Nov: every page that shows the Moon. It is **not** the narrowed height proposal (`docs/concepts/MOON-LRO-SCIENCE-PROPOSAL.md` rev 2.1), which covered only the first release.
 
@@ -343,7 +343,8 @@ Rev 22 · 27 Nov 2026, 09:34 UTC (clock reading; rev 21 09:20, rev 20 06:43, rev
 ## 10a. Sky zoom-out textured Moon — done and live (27 Nov 2026)
 
 - **Scope:** Chad's 26 Nov widening. Today the Sky zoom-out shows a plain grey sphere (`skyscene.js`, emissive `0x9a9a9a`) at true size and distance.
-- **Status:** parked from the height release for its own round (proposal §7, D4). Not assessed beyond the rev 1 notes.
+- **Status: done and live.** Release commit `1280c0d`; served manifest `reviews/evidence/2026-11-27-moon-sky-texture-manifest.json` (51 files); Animals pins `SK_MAIN` `bc0afd0` / `SK_PARENT` `018102c` (13b, 13x, 13e Sky, 13y, 13z); suite `phase1/sky-moon-texture-ui.test.cjs` (197; 17 breaks); handover `reviews/2026-11-27-moon-sky-texture-handover.md`. The history below is kept as it was written.
+- **Earlier status (before 27 Nov):** parked from the height release for its own round (proposal §7, D4).
 - **Starting point:** rev 1 option S1, noted in proposal §7.
   - Same picture, near side towards Earth.
   - Libration not shown.
@@ -385,6 +386,7 @@ Rev 22 · 27 Nov 2026, 09:34 UTC (clock reading; rev 21 09:20, rev 20 06:43, rev
   - **Idle pausing was not delivered.** It remains a separate, later question for Chad (proposal §5). No release has claimed it.
 - **Diviner release (26 Nov):** the same four checks are still not done (real phone, Safari, screen reader, verified hardware renderer). Used instead: headless Chrome with SwiftShader at narrow widths (minor scale ticks hidden below 520 px, tested), the browser pane on the live site for the functional layer check. Keyboard: the temperature button, mode radios, centre-read button and readout were tested. The extra polar-cap draw belongs to height only (`h.cap(target === 'height')`); the temperature layer adds none. Its draw cost was not measured separately.
 - **LROC release (27 Nov):** the same four checks are still not done. Used instead: headless Chrome with SwiftShader (desktop and 360 px, keyboard path to the toggle, globe-failure fallback), and the browser pane on the live site for the functional check (the tab must be in front: a background tab gets no animation frames, so the globe's HTML layer is not drawn). WebGL draws per frame are unchanged (1 on, 1 off); the HTML locator's CPU and layout cost was not measured.
+- **Sky zoom-out Moon picture (10a, 27 Nov):** the same four checks are still not done. Used instead: headless Chrome with SwiftShader (360–1920 px; DPR 1 and 2), the browser pane on the live site for one bounded functional check. GPU memory (≈10.7 MiB) is an estimate; heap figures are script heap only; rendered brightness (+19–21%) is an image statistic in that environment; free-orbit Moon sizes not measured. `smoke-fixes` is an unresolved baseline exception on main (not caused by Moon work).
 - **Next:** record real-device checks separately whenever they are done. Every later item reports its own limits.
 
 ## 12. Options to classify — not automatic builds
@@ -407,7 +409,7 @@ Each stays `option` until Chad classifies it as "assess" or "not pursued", with 
 1. **Diviner:** assessment and proposal first, not a build. *(26 Nov: released, merge `0622e80`; item 3 done and closed.)*
 2. Then the remaining items **one at a time**, in the order Chad chooses. *(27 Nov: item 4, LROC Apollo 11, released, merge `8e7d262`.)*
 
-**Remaining open items after LROC (27 Nov):** 10a done and live (27 Nov); 5, 6, 7, 8 (to assess); 9 (only inside the item it serves); 12a–c (options to classify); 11 (carried). Suggested order (Claude's suggestion, for Chad to decide): the Sky Moon decision (10a), then CRaTER (5), LEND (6), LAMP (7) and Mini-RF (8). Pairing (9) and the options (12) are taken up only inside the item they serve or when Chad classifies them.
+**Remaining open items after 10a (27 Nov):** 5, 6, 7, 8 (to assess); 9 (only inside the item it serves); 12a–c (options to classify); 11 (carried). Done: 1, 2, 3, 4, 10a; 10b closed decision; 13 outside scope. Chad names the next item; suggested order (Claude's suggestion only): CRaTER (5), LEND (6), LAMP (7), Mini-RF (8). Pairing (9) and the options (12) are taken up only inside the item they serve or when Chad classifies them.
 
 ## Change log
 
@@ -433,3 +435,4 @@ Each stays `option` until Chad classifies it as "assess" or "not pursued", with 
 - Rev 20 (27 Nov 2026, 06:43 UTC): §10a: GPT's preview review (R1) filed; R1 fixed, candidate `ceb6dc8` with GPT for recheck. No other item moved.
 - Rev 21 (27 Nov 2026, 09:20 UTC): §10a: release candidate (tested `4c8aecd`) with GPT for release review. No other item moved.
 - Rev 22 (27 Nov 2026, 09:34 UTC): §10a done and live (main `1280c0d`). No other item moved.
+- Rev 23 (27 Nov 2026, 09:52 UTC): close-out tidy: §10a status line, §11 limits for 10a, remaining-items line. No item moved.

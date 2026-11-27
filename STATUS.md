@@ -18,7 +18,7 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 - **Served check (09:33:15 UTC):** 51/51 live files match the reviewed manifest `reviews/evidence/2026-11-27-moon-sky-texture-manifest.json` (`15e96c52…`). The list was built from that file.
 - **Live check:** the picture was placed on entry (orientation date 2026-11-27); wording as reviewed; stop B radius 2.81 px; Back released everything.
 - **Carried exception:** `smoke-fixes` stops at its harness wait identically on main and the candidate (cause not established).
-- Record `reviews/2026-11-27-moon-sky-texture-release.md`. Checklist rev 22: **10a closed.**
+- Record `reviews/2026-11-27-moon-sky-texture-release.md`. Checklist rev 22: **10a closed** (rev 23: close-out tidy).
 - **Next Moon items, one at a time:** 5 CRaTER, 6 LEND, 7 LAMP, 8 Mini-RF (Chad's choice). Sun/Parker waits.
 
 ## 27 Nov 09:20 UTC (clock reading) — **Moon item 10a: release candidate with GPT for release review. Branch only; not merged, not deployed; no hub change** (Moon spec, item 10a thread)
