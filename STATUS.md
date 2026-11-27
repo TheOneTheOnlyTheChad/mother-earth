@@ -4,6 +4,11 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 27 Nov 2026
 
+## 27 Nov 16:37 UTC (clock reading) — **Moon item 6 (LEND): GPT's rev 1 review filed; proposal rev 2 with GPT for recheck. Docs and focused evidence only; no new acquisition, build, merge or deployment** (Moon spec, LEND thread)
+- GPT's review (REVISE BEFORE BUILD; feasibility supported) filed unchanged: `reviews/2026-11-27-moon-lend-proposal-rev1-gpt-review.md`. Chad: address R1–R3 in rev 2.
+- Rev 2 `docs/concepts/MOON-LEND-PROPOSAL.md`: archived-field quantity with the contradiction left unresolved (R1); formal error propagated with covariance and checked by Monte Carlo, "real signal" withdrawn, comparisons descriptive (R2); 30 km radius / 60 km diameter throughout, geometry, states, schema and test plan frozen (R3). New evidence `preview_lend_4.py`, `check_lend_4.py` (PASS). McClanahan et al. 2024 read in full for §1–1.3 (workspace fetch; not retained).
+- Checklist rev 30. Next: GPT's recheck, then Chad's D1–D9.
+
 ## 27 Nov 16:21 UTC (clock reading) — **Moon item 6 (LEND): assessed; proposal rev 1 with GPT. Docs only; no page build, bulk acquisition, merge or deployment** (Moon spec, LEND thread)
 - Chad's go: continue with item 6 under the agreed bounded instructions; docs-only feasibility assessment and proposal for GPT; keep neutron measurements distinct from inferred hydrogen and accessible water ice.
 - Read in the browser pane (container and Mac shell refused by the proxy for PDS): the PDS Geosciences LEND bundle (v2.0, DOI 10.17189/p89b-8w72, Release 67), RDR catalog, instrument catalog, RDR SIS, processing document, errata and release notes, ALD labels; Gazetteer crater centres; arXiv abstracts (Eke 2012, Teodoro 2014, Su 2021, McClanahan 2023).

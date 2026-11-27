@@ -1,6 +1,6 @@
 # Moon globe and LRO science — spec checklist
 
-Rev 29 · 27 Nov 2026, 16:21 UTC (clock reading; rev 28 14:50, rev 27 14:24, rev 26 11:52, rev 25 10:34, rev 24 10:18, rev 23 09:52, rev 22 09:34, rev 21 09:20, rev 20 06:43, rev 19 04:58, rev 18 03:25, rev 17 27 Nov 02:48, rev 16 26 Nov 21:05, rev 15 18:58, rev 14 17:49, rev 13 16:07, rev 12 15:54, rev 11 15:34, rev 10 15:07, rev 9 14:42, rev 8 13:07, rev 7 11:58, rev 6 10:22, rev 5 09:54, rev 4 09:42, rev 3 09:20, rev 2 08:59, rev 1 08:31 UTC) · written by Claude on Chad's instruction (26 Nov) · **persistent record; update it as each item moves** · docs only.
+Rev 30 · 27 Nov 2026, 16:37 UTC (clock reading; rev 29 16:21, rev 28 14:50, rev 27 14:24, rev 26 11:52, rev 25 10:34, rev 24 10:18, rev 23 09:52, rev 22 09:34, rev 21 09:20, rev 20 06:43, rev 19 04:58, rev 18 03:25, rev 17 27 Nov 02:48, rev 16 26 Nov 21:05, rev 15 18:58, rev 14 17:49, rev 13 16:07, rev 12 15:54, rev 11 15:34, rev 10 15:07, rev 9 14:42, rev 8 13:07, rev 7 11:58, rev 6 10:22, rev 5 09:54, rev 4 09:42, rev 3 09:20, rev 2 08:59, rev 1 08:31 UTC) · written by Claude on Chad's instruction (26 Nov) · **persistent record; update it as each item moves** · docs only.
 
 **What this is.** The record of every item in GPT's original brief, `docs/concepts/MOON-LRO-SCIENCE-BRIEF-GPT-2026-11-25.md`. It also covers the scope Chad added on 26 Nov: every page that shows the Moon. It is **not** the narrowed height proposal (`docs/concepts/MOON-LRO-SCIENCE-PROPOSAL.md` rev 2.1), which covered only the first release.
 
@@ -22,7 +22,7 @@ Rev 29 · 27 Nov 2026, 16:21 UTC (clock reading; rev 28 14:50, rev 27 14:24, rev
 | 3 | Diviner temperature ("Recommended first feature", second paragraph) | **done: released and closed** (merge `0622e80`) |
 | 4 | LROC regional detailed imagery | **done: released and closed** (merge `8e7d262`; Apollo 11) |
 | 5 | CRaTER radiation | **done: released and closed** (merge `ba41c8a`; 10 June 2026 event-count chart) |
-| 6 | LEND neutron and hydrogen products | **partly assessed**: proposal rev 1 with GPT (`docs/concepts/MOON-LEND-PROPOSAL.md`) |
+| 6 | LEND neutron and hydrogen products | **partly assessed**: proposal rev 2 with GPT for recheck (`docs/concepts/MOON-LEND-PROPOSAL.md`) |
 | 7 | LAMP far-ultraviolet products | to assess |
 | 8 | Mini-RF radar products | to assess |
 | 9 | Science and trajectory pairing; observation footprints (requirements 5–7) | to assess, only where a selected example benefits |
@@ -338,7 +338,14 @@ Rev 29 · 27 Nov 2026, 16:21 UTC (clock reading; rev 28 14:50, rev 27 14:24, rev
   - Resolution: published and unresolved dispute, from 5–10 km (team documents) and a 30 km footprint (McClanahan et al. 2023) to at least an uncollimated detector's footprint (Eke et al. 2012; Teodoro et al. 2014).
 - **Recommendation (Claude):** L1, an optional polar map of the archived CSETN count rate as percent difference from the same pole's 80–85° band, 30 km display smoothing (our choice, not the instrument's resolution), withholding by counting error; wording keeps neutron measurement, inferred hydrogen and water ice apart. L0 ("assessed, not shown") and L2 (a crater readout) are legitimate. A hydrogen or WEH map (L3) is not proposed.
 - **Blockers:** none for L1 (south pole). North pole needs one more bounded file on Chad's go (D2). A newer map from DLD would be a bulk acquisition.
-- **Decision needed:** Chad's D1–D7 after GPT's review.
+- **Decision needed:** Chad's D1–D7 after GPT's review. *(Superseded by rev 2: D1–D9.)*
+- **Update (16:37 UTC, clock reading): proposal rev 2 with GPT for recheck. Docs and focused evidence only.**
+  - GPT's rev 1 review filed unchanged (`reviews/2026-11-27-moon-lend-proposal-rev1-gpt-review.md`, sha256 `1859291c…`): REVISE BEFORE BUILD; feasibility supported; reference mean, formal error, counts and disc means reproduced independently.
+  - Chad: address R1–R3 in rev 2; docs and focused evidence only; no new acquisition, build, merge or deployment.
+  - R1: the quantity is the relative difference in the archived `CSETN_RATE` field; the archive's contradiction (unitless ratio / relative rate / counts per second; background) is stated, not resolved; no raw value or unit; hydrogen context from McClanahan et al. 2024 (PSJ 5:217, arXiv v5) read in full for §1–1.3; "top metre" removed; resolution sources versioned.
+  - R2: "real signal" withdrawn; crater comparisons descriptive; the ± figure is a formal counting-error estimate conditional on independent archive errors. Reference and covariance propagated (`preview_lend_4.py`): differs from the rev 1 benchmark by −0.003 to +0.005 pp; 10 of 13,413 cells change state at 0.5 pp; a Monte Carlo check of the formula passes (`check_lend_4.py`).
+  - R3: 30 km **radius** (60 km diameter) everywhere; geometry, four display states, notation, readout, served schema and a focused build/test plan frozen; edge-truncated discs (1,440 cells at 80.25° and 80.75°S) proposed withheld.
+  - Next: GPT's recheck, then Chad's D1–D9 and a separate build go.
 
 ## 7. LAMP far-ultraviolet products — to assess
 
@@ -476,3 +483,4 @@ Each stays `option` until Chad classifies it as "assess" or "not pursued", with 
 - Rev 27 (27 Nov 2026, 14:24 UTC): §5: GPT's preview review (PASS); release candidate `6ed18c3` with GPT for release review; §5 status line and the archive-observations wording brought up to date (rev 2). No other item moved.
 - Rev 28 (27 Nov 2026, 14:50 UTC): §5 released and closed (merge `ba41c8a`, 54/54 served, live check); bundle identifier corrected; §11 limits for 5; remaining-items line and order of work updated. No other item moved.
 - Rev 29 (27 Nov 2026, 16:21 UTC): §6 LEND partly assessed on Chad's go; proposal rev 1 with GPT (`docs/concepts/MOON-LEND-PROPOSAL.md`; evidence `docs/research/moon-lend/`). No other item moved.
+- Rev 30 (27 Nov 2026, 16:37 UTC): §6: GPT's rev 1 review filed; proposal rev 2 with GPT for recheck. No other item moved.

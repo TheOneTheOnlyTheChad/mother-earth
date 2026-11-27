@@ -1,0 +1,76 @@
+{
+ "geometry": {
+  "sphere_radius_km": 1737.4,
+  "disc_radius_km": 30.0,
+  "disc_diameter_km": 60.0,
+  "selection": "cell centre within great-circle distance <= radius of the cell centre",
+  "discs_cross_80S_when_centre_lat_ge": -80.9893
+ },
+ "reference": {
+  "band": "80.25-84.75 S cell centres, usable cells",
+  "cells": 7200,
+  "iv_mean": 4.9413873895,
+  "formal_err": 0.0022184209,
+  "formal_rel_err_pp": 0.0449,
+  "cos_lat_weighted_mean_for_comparison": 4.943801
+ },
+ "cells": {
+  "grid": 14400,
+  "archive_usable": 13413,
+  "archive_missing": 987
+ },
+ "states_benchmark_cutoff": {
+  "valid_displayed": 12340,
+  "withheld_by_rule": 1073,
+  "archive_missing": 987,
+  "note": "outside this product (north of 80 S) is not a cell of this file"
+ },
+ "states_propagated_cutoff": {
+  "valid_displayed": 12344,
+  "withheld_by_rule": 1069
+ },
+ "benchmark_vs_propagated": {
+  "cells_whose_state_differs": 10,
+  "prop_minus_bench_pp": {
+   "min": -0.0031,
+   "p50": -0.001,
+   "max": 0.0048
+  },
+  "cells_whose_disc_shares_cells_with_reference_band": 7920
+ },
+ "shown_benchmark": {
+  "p_min": -1.8622,
+  "p50": -0.3605,
+  "p_max": 2.1617,
+  "bench_p50": 0.3556,
+  "disc_cells": {
+   "min": 67,
+   "p50": 117,
+   "max": 531
+  },
+  "support_exposure_sum_s_p50": 45279.0
+ },
+ "support_classes": {
+  "complete": {
+   "cells": 10554,
+   "shown_benchmark": 10554,
+   "disc_cells_median": 117
+  },
+  "edge_truncated_only": {
+   "cells": 1440,
+   "shown_benchmark": 681,
+   "disc_cells_median": 55
+  },
+  "missing_affected_only": {
+   "cells": 1419,
+   "shown_benchmark": 1105,
+   "disc_cells_median": 415
+  },
+  "both": {
+   "cells": 0,
+   "shown_benchmark": 0,
+   "disc_cells_median": null
+  }
+ },
+ "native_cell_exposure_s_p50": 384.0
+}

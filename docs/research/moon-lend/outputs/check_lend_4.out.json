@@ -1,0 +1,34 @@
+{
+ "seam_359.75_included_from_0.25": true,
+ "boundary": {
+  "max_included_km": 29.2787,
+  "min_excluded_km": 30.0776
+ },
+ "monte_carlo_4000": {
+  "shares_band": {
+   "disc_cells": 81,
+   "shared_with_band": 81,
+   "sim_sd_pp": 0.4531,
+   "propagated_pp": 0.4642,
+   "benchmark_pp": 0.4664,
+   "sim_over_propagated": 0.976
+  },
+  "far_from_band": {
+   "disc_cells": 227,
+   "shared_with_band": 0,
+   "sim_sd_pp": 0.2342,
+   "propagated_pp": 0.2334,
+   "benchmark_pp": 0.229,
+   "sim_over_propagated": 1.004
+  },
+  "edge_80S": {
+   "disc_cells": 44,
+   "shared_with_band": 44,
+   "sim_sd_pp": 0.5904,
+   "propagated_pp": 0.5973,
+   "benchmark_pp": 0.599,
+   "sim_over_propagated": 0.988
+  }
+ },
+ "result": "PASS"
+}
