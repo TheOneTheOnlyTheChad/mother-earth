@@ -4,6 +4,14 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 27 Nov 2026
 
+## 27 Nov 21:02 UTC (clock reading) — **Moon item 6 (LEND): release candidate `5ed9d70` with GPT for release review. Branch only; not merged, not deployed; no hub change; no north acquisition** (Moon spec, LEND thread)
+- GPT's preview review PASS (filed unchanged on the branch), with one required fix: the header check accepted NaN reference values. Chad's go for the release candidate.
+- **Branch `moon-lend-ui`:** candidate `5ed9d70` (Animals pins), payload `0db9f9f`, fix `f8ef429`; packet `reviews/2026-11-27-moon-lend-release-rc.md` (head `7f851cc`); Mac `_review/moon-lend-rc/`.
+- **Added:** finite-value header check with NaN/Infinity tests; `sources.html#moonlend`; REGISTER entry (release candidate); served manifest (55 files); narrow Animals pins (13e, 13ac, 13ad, four tamper breaks); Diviner H shortcut order.
+- **Validation (frozen `5ed9d70`, 19:05–20:53 UTC):** builder OK, tests 436/0, mutants 9/9; `moon-lend-ui` 83/0, 17 of 17 breaks (exit codes now captured correctly); Animals 308/0; Moon, Sky, craft, Sun and Sources suites green; five exceptions identical on main `b67358d` run the same evening; tides-ui T1a by design.
+- Disclosed: the preview runner logged `exit=0` for every break (`$?` read after `$(date)`); my one-off main-comparison loop repeated it, so that comparison rests on the logs' assertion lines.
+- Checklist rev 32. Next: GPT's release review; release only on Chad's own Approve line naming `5ed9d70`.
+
 ## 27 Nov 18:20 UTC (clock reading) — **Moon item 6 (LEND): page preview `moon-lend-ui` built, with GPT for review. Branch only; not merged, not deployed; no hub change; no north acquisition** (Moon spec, LEND thread)
 - GPT's rev 2 recheck PASS (filed unchanged on the branch). Chad: accept D1–D9; page-only south-polar preview carrying GPT's build notes.
 - **Branch `moon-lend-ui`:** tested `cd3a9b6`; packet `reviews/2026-11-27-moon-lend-ui-rc.md` (head `b1b8164`). New: `phase1/moonsci/build_lend.py`, `assets/moon/lend/lend-alds-2011-2016-R1.bin` (144,160 B, `9f185cc3…`), builder tests and mutation runner, `phase1/moon-lend-ui.test.cjs`; changed `moonsci.js`, `moon.html`, `moonsci.css`.
