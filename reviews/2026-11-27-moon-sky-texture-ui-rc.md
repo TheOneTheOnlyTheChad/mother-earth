@@ -1,6 +1,6 @@
 # Moon item 10a — page preview `moon-sky-texture-ui`: the Moon's picture on the Sky zoom-out Moon
 
-Packet rev 2 · 27 Nov 2026 (rev 1 04:58 UTC; rev 2 adds §0, the R1 fix) · Claude · **branch only: not merged, not deployed; no hub change; no data downloaded** · for GPT's review.
+Packet rev 2 · 27 Nov 2026, 06:43 UTC (clock reading; rev 1 04:58 UTC; rev 2 adds §0, the R1 fix) · Claude · **branch only: not merged, not deployed; no hub change; no data downloaded** · for GPT's review.
 
 **Chad's line (27 Nov 2026):** "Accept D1–D6 as recommended. Go for a page-only branch preview of Moon item 10a under proposal rev 1 with GPT's review notes. Preserve existing framing and controls; return the candidate and evidence for GPT review. No merge or deployment."
 
@@ -19,7 +19,7 @@ Packet rev 2 · 27 Nov 2026 (rev 1 04:58 UTC; rev 2 adds §0, the R1 fix) · Cla
 
 **Chad's line:** "Please fix R1 and return the focused tests for GPT recheck. Cover preparation, upload and orientation failures with proper cleanup, grey fallback and successful retry. Keep the existing decisions unchanged. No broad unrelated test sweep, merge or deployment."
 
-**Candidate now `6ba15ac`** (from `c132f46`; page file `skyscene.js` only, sha256 `192fb036…785c`; suite `e01ca4bd…b8b`). `index.html`, the decisions D1–D6, the wording, the orientation and the brightness are unchanged.
+**Candidate now `ceb6dc8`**: the page fix `6ba15ac` (from `c132f46`; page file `skyscene.js` only, sha256 `192fb036…785c`), then `ceb6dc8` (test file and docs only; see "Flaky check" below). `skyscene.js` is the same at both. `index.html`, the decisions D1–D6, the wording, the orientation and the brightness are unchanged.
 
 **What changed in `skyscene.js`:**
 1. **Every placement call is contained.** `applyMap` (called from load completion, entry and rollover) wraps orientation, texture construction, configuration, attachment, upload and rotation in one `try`. Any error → `cancelMap('failed', …)`: grey material, no map, no rotation, texture disposed, ready/image references dropped, object URL revoked, failure words. Reasons: `orientation`, `timed out`, or `placement: <message>`. Nothing escapes to the caller, so entry and the rollover timer are unaffected.
@@ -64,7 +64,7 @@ Packet rev 2 · 27 Nov 2026 (rev 1 04:58 UTC; rev 2 adds §0, the R1 fix) · Cla
 | `swap-fit` | 13 | §2, §7 |
 | `mirror-lng` | 13 | §2, §7 |
 | `no-rollover-orient` | 6 | §7, §10 |
-| `emissive-grey` | 3 | §1, §3, §4 |
+| `emissive-grey` | 3 | §1, §3, §4 (the §4 failure was the flaky 4b; on `ceb6dc8`: 2, §1 and §3) |
 | `blocking-entry` | 6 | §1, §5, §9 |
 | `invented-orientation` | 1 | §6 |
 | `no-dispose` | 14 | §8, §10 |
@@ -75,7 +75,7 @@ Packet rev 2 · 27 Nov 2026 (rev 1 04:58 UTC; rev 2 adds §0, the R1 fix) · Cla
 | `swallow-upload` | 8 | §10 |
 | `placement-uncontained` | 23 | §10 |
 | `late-own` | 4 | §10 |
-| `no-sync-deadline` | 5 | §4, §10 |
+| `no-sync-deadline` | 5 | §4, §10 (the §4 failure was the flaky 4b; on `ceb6dc8`: 4, all §10) |
 
 **Runs on `6ba15ac`** (frozen worktree; logs in `evidence-r1/`):
 - the suite, now 197 checks (§1–§9 unchanged, §10 new): **197 / 0** (upload 26 ms; JS heap after 5 entries and exits +829 kB, script heap only);
@@ -83,6 +83,13 @@ Packet rev 2 · 27 Nov 2026 (rev 1 04:58 UTC; rev 2 adds §0, the R1 fix) · Cla
 - `sky-zoom-ui` **351 / 0**, `sky-ui` **79 / 0**, `skycraft-ui` **77 / 0**.
 
 No other suites were rerun (Chad: no broad sweep). The earlier `mobile-pass`, `desktop-overflow`, `smoke-fixes` and Animals results in §3.3 are from `c132f46`. The R1 change does not touch `index.html` or layout.
+
+**Flaky check found and fixed (test only, `ceb6dc8`):** 4b ("framing identical with and without the picture") compared the whole camera path, including stop A. Stop A is the camera at the moment of entry, so it depends on when each of the two pages was entered. It failed 3 times in about 45 runs (rev 1 round 1 once; rev 2 under `emissive-grey` and `no-sync-deadline`), never alongside a framing change. It now compares what framing means: the box (W, H, strip and bar padding) and stops B and C. On `ceb6dc8`:
+- §4 alone passed 5 of 5 runs;
+- the full suite passed 197 / 0;
+- `emissive-grey` and `no-sync-deadline`, rerun, are still caught on their real checks (2: 1f, 3d; 4: §10).
+
+The other 15 break results on `6ba15ac` stand. None of them was caught through 4b alone.
 
 **Records correction (GPT):** rev 1's `breaks-summary.txt` counted the final "FAILED" line as one more failure. The rev 2 runner counts assertion lines only (`grep -c '^FAIL  '`). The counts in this packet always came from each log's summary line.
 

@@ -1,6 +1,6 @@
 # Moon globe and LRO science — spec checklist
 
-Rev 19 · 27 Nov 2026, 04:58 UTC (clock reading; rev 18 03:25, rev 17 27 Nov 02:48, rev 16 26 Nov 21:05, rev 15 18:58, rev 14 17:49, rev 13 16:07, rev 12 15:54, rev 11 15:34, rev 10 15:07, rev 9 14:42, rev 8 13:07, rev 7 11:58, rev 6 10:22, rev 5 09:54, rev 4 09:42, rev 3 09:20, rev 2 08:59, rev 1 08:31 UTC) · written by Claude on Chad's instruction (26 Nov) · **persistent record; update it as each item moves** · docs only.
+Rev 20 · 27 Nov 2026, 06:43 UTC (clock reading; rev 19 04:58, rev 18 03:25, rev 17 27 Nov 02:48, rev 16 26 Nov 21:05, rev 15 18:58, rev 14 17:49, rev 13 16:07, rev 12 15:54, rev 11 15:34, rev 10 15:07, rev 9 14:42, rev 8 13:07, rev 7 11:58, rev 6 10:22, rev 5 09:54, rev 4 09:42, rev 3 09:20, rev 2 08:59, rev 1 08:31 UTC) · written by Claude on Chad's instruction (26 Nov) · **persistent record; update it as each item moves** · docs only.
 
 **What this is.** The record of every item in GPT's original brief, `docs/concepts/MOON-LRO-SCIENCE-BRIEF-GPT-2026-11-25.md`. It also covers the scope Chad added on 26 Nov: every page that shows the Moon. It is **not** the narrowed height proposal (`docs/concepts/MOON-LRO-SCIENCE-PROPOSAL.md` rev 2.1), which covered only the first release.
 
@@ -361,7 +361,8 @@ Rev 19 · 27 Nov 2026, 04:58 UTC (clock reading; rev 18 03:25, rev 17 27 Nov 02:
   - New suite `sky-moon-texture-ui`: 96/0; 13 of 13 breaks caught.
   - Orientation against astronomy-engine 2.1.19: 0.003–0.29° on four dates. Rendered brightness at stop B: +19–21% over the grey.
   - Regressions clean, except the Animals 13b/13c pins, expected for the release candidate.
-- **Decision needed (Chad):** after GPT's preview review, the release candidate (Sources, REGISTER extensions, narrow Animals pins, new served manifest) and later his own Approve line.
+- **27 Nov (R1):** GPT's preview review held for R1 (placement errors not contained). Fixed in `6ba15ac`, with focused tests; candidate `ceb6dc8`, with GPT for recheck.
+- **Decision needed (Chad):** after GPT's recheck, the release candidate (Sources, REGISTER extensions, narrow Animals pins, new served manifest) and later his own Approve line.
 
 ## 10b. Tides Moon — closed decision: unchanged
 
@@ -425,3 +426,4 @@ Each stays `option` until Chad classifies it as "assess" or "not pursued", with 
 - Rev 17 (27 Nov 2026, 02:48 UTC): §4 released and closed (merge `8e7d262`, 50/50 served, live functional check); order of work updated. No other item moved.
 - Rev 18 (27 Nov 2026, 03:25 UTC): §10a assessed on Chad's go; proposal rev 1 for GPT (`docs/concepts/MOON-SKY-TEXTURE-PROPOSAL.md`; evidence `docs/research/moon-sky-texture/`). No other item moved.
 - Rev 19 (27 Nov 2026, 04:58 UTC): §10a: GPT's proposal review filed (PASS with notes), Chad's D1–D6, page preview `moon-sky-texture-ui` at `c132f46` with GPT. No other item moved.
+- Rev 20 (27 Nov 2026, 06:43 UTC): §10a: GPT's preview review (R1) filed; R1 fixed, candidate `ceb6dc8` with GPT for recheck. No other item moved.

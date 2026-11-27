@@ -4,6 +4,15 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 26 Nov 2026
 
+## 27 Nov 06:43 UTC (clock reading) — **Moon item 10a: R1 fixed (GPT's preview review HOLD), focused tests with GPT for recheck. Branch only; not merged, not deployed** (Moon spec, item 10a thread)
+- GPT's preview review filed unchanged (`reviews/2026-11-27-moon-sky-texture-ui-gpt-review.md`, REVIEW HOLD, R1: placement exceptions bypassed failure cleanup; upload errors swallowed). Chad: fix R1 with focused tests; decisions unchanged; no broad sweep.
+- **Fix `6ba15ac`** (`skyscene.js` only): every `applyMap` caller contained; texture owned at construction; upload errors fail the picture; inputs and placement separated; one limit to a placed picture, with a check after synchronous preparation; data-path comment clarified.
+- **Suite §10:** constructor, colour space, upload and orientation errors × both completion orderings, a rollover failure and a past-the-limit upload. Each ends grey with nothing kept, every texture disposed, no page error and working controls, then retries successfully.
+  - Old-code control on `c132f46`: 50 failures.
+  - Four new breaks. Full suite 197/0; 17 of 17 breaks caught; `sky-zoom-ui` 351/0, `sky-ui` 79/0, `skycraft-ui` 77/0.
+- **Flaky 4b found and fixed** (test only, `ceb6dc8`): it compared the entry-time stop A. Now it compares stops B and C; §4 passed 5 of 5 runs, the full suite 197/0.
+- Candidate **`ceb6dc8`**; packet rev 2 §0; Mac `_review/moon-sky-texture-ui-r1/`.
+
 ## 27 Nov 04:58 UTC (clock reading) — **Moon item 10a: page preview `moon-sky-texture-ui` built, with GPT for review. Branch only; not merged, not deployed; no hub change; no data downloaded** (Moon spec, item 10a thread)
 - **GPT:** proposal rev 1 PASS with notes 1–6, filed unchanged (`reviews/2026-11-27-moon-sky-texture-proposal-rev1-gpt-review.md`). Chad: "Accept D1–D6 as recommended. Go for a page-only branch preview…".
 - **Branch `moon-sky-texture-ui`:** candidate `c132f46`, from `45cc94d` (the docs branch). Page files `skyscene.js` (`8a7e5e22…`) and `index.html` (`125ebba7…`); `moonlight.js` unchanged. Packet `reviews/2026-11-27-moon-sky-texture-ui-rc.md`.
