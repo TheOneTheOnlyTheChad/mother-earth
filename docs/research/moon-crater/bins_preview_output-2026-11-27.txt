@@ -1,0 +1,54 @@
+== baseline
+tamper: None | bins 145 | shown 145 | withheld 0 []
+JSON bytes 28242 sha256 4c3a1d57c2cff93fef31f0b0b986d8ca04c6a86d6962727d94eafe369bebd2df
+rate per s: min 28.860 max 32.788 | first bin 2026-06-10T00:00:00Z 29.742 +- 0.223 | last bin 2026-06-11T00:00:00Z 29.645 +- 0.222
+sum of GOOD over the 144 bins of 10 June: 2573044
+example bins: [{"start": "2026-06-10T00:00:00Z", "end": "2026-06-10T00:10:00Z", "records": 600, "nominal_records": 600, "good_events": 17845, "exposure_s": 600, "rate_per_s": 29.742, "poisson_benchmark_per_s": 0.223}, {"start": "2026-06-10T10:20:00Z", "end": "2026-06-10T10:30:00Z", "records": 600, "nominal_records": 600, "good_events": 17992, "exposure_s": 600, "rate_per_s": 29.987, "poisson_benchmark_per_s": 0.224}, {"start": "2026-06-10T23:50:00Z", "end": "2026-06-11T00:00:00Z", "records": 600, "nominal_records": 600, "good_events": 17849, "exposure_s": 600, "rate_per_s": 29.748, "poisson_benchmark_per_s": 0.223}, {"start": "2026-06-11T00:00:00Z", "end": "2026-06-11T00:10:00Z", "records": 600, "nominal_records": 600, "good_events": 17787, "exposure_s": 600, "rate_per_s": 29.645, "poisson_benchmark_per_s": 0.222}]
+exit 0
+== tamper drop
+tamper: drop | bins 145 | shown 144 | withheld 1 [('2026-06-10T01:00:00Z', 'incomplete', 599, 599)]
+exit 0
+== tamper dup
+BUILD FAIL: TIME not strictly increasing at 2026-06-10T01:00:05
+exit 1
+== tamper order
+BUILD FAIL: TIME not strictly increasing at 2026-06-10T01:00:05
+exit 1
+== tamper setting
+tamper: setting | bins 145 | shown 144 | withheld 1 [('2026-06-10T02:00:00Z', 'non-nominal setting', 600, 599)]
+exit 0
+== tamper neg
+BUILD FAIL: negative integer field at 2026-06-10T00:01:40
+exit 1
+== tamper total
+BUILD FAIL: TOTAL != GOOD + REJECT at 2026-06-10T00:01:40
+exit 1
+== tamper badtime
+BUILD FAIL: TIME not a valid UTC time: 2026-06-10T00:01:61
+exit 1
+== highest and lowest bins
+2026-06-10T06:10:00Z 28.86 +- 0.219
+2026-06-10T19:40:00Z 28.865 +- 0.219
+2026-06-10T13:00:00Z 32.002 +- 0.231
+2026-06-10T12:40:00Z 32.188 +- 0.232
+2026-06-10T12:50:00Z 32.788 +- 0.234
+== 11 June 19:00-20:00 (D2 singles episode): GOOD and REJECT per 10-minute group
+11 Jun GOOD mean per record 29.419
+18:00 GOOD 28.965 REJECT 0.578 S2 11.18
+18:10 GOOD 29.458 REJECT 0.437 S2 10.82
+18:20 GOOD 29.282 REJECT 0.458 S2 10.61
+18:30 GOOD 29.805 REJECT 0.487 S2 10.80
+18:40 GOOD 29.850 REJECT 0.538 S2 10.81
+18:50 GOOD 29.325 REJECT 0.445 S2 11.24
+19:00 GOOD 29.267 REJECT 0.520 S2 11.57
+19:10 GOOD 29.167 REJECT 4.153 S2 49.17
+19:20 GOOD 29.790 REJECT 5.573 S2 65.75
+19:30 GOOD 29.453 REJECT 2.448 S2 42.14
+19:40 GOOD 29.627 REJECT 1.447 S2 22.79
+19:50 GOOD 29.432 REJECT 0.558 S2 10.74
+20:00 GOOD 28.868 REJECT 0.542 S2 11.59
+20:10 GOOD 29.452 REJECT 0.498 S2 11.11
+20:20 GOOD 29.218 REJECT 0.512 S2 11.07
+20:30 GOOD 29.453 REJECT 0.455 S2 10.57
+20:40 GOOD 29.398 REJECT 0.455 S2 10.46
+20:50 GOOD 28.768 REJECT 0.545 S2 10.50

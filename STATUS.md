@@ -4,6 +4,12 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 26 Nov 2026
 
+## 27 Nov 10:34 UTC (clock reading) — **Moon item 5 (CRaTER): proposal rev 2 with GPT for recheck. Docs only; no page build, bulk acquisition, merge or deployment** (Moon spec, CRaTER thread)
+- GPT's rev 1 review filed unchanged (`reviews/2026-11-27-moon-crater-proposal-rev1-gpt-review.md`, REVISE BEFORE BUILD, R1–R3). Chad: rev 2 addressing R1–R3, keeping the GOOD-event chart.
+- Rev 2 (`docs/concepts/MOON-CRATER-PROPOSAL.md`): timing as a hypothesis (no shift); bins by UTC record timestamp; completeness and nominal rules with withholding (D7); labelled extra 11 June bin; bars an approximate Poisson benchmark; claims narrowed.
+- New evidence in `docs/research/moon-crater/`: `bins_preview.py` with output and seven tamper cases; `assess_crater_5.py` (10 June 12:40–13:10 rise, cause not determined). No new acquisition. Checklist rev 25.
+- Next: GPT's recheck, then Chad's D1–D7.
+
 ## 27 Nov 10:18 UTC (clock reading) — **Moon item 5 (CRaTER): assessed; proposal rev 1 with GPT. Docs only; no page build, bulk acquisition, merge or deployment** (Moon spec, CRaTER thread)
 - Chad's go: assess one archived CRaTER product or short dated interval; docs-only proposal for GPT; checkpoint each acquisition.
 - Read in the browser pane: PDS PPI release 67 bundle (Readme, derived-data description, errata, labels, gap and mode tables), the PPI FAQ, the UNH team sites.
