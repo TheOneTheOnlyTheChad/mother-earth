@@ -4,6 +4,13 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 27 Nov 2026
 
+## 27 Nov 18:20 UTC (clock reading) — **Moon item 6 (LEND): page preview `moon-lend-ui` built, with GPT for review. Branch only; not merged, not deployed; no hub change; no north acquisition** (Moon spec, LEND thread)
+- GPT's rev 2 recheck PASS (filed unchanged on the branch). Chad: accept D1–D9; page-only south-polar preview carrying GPT's build notes.
+- **Branch `moon-lend-ui`:** tested `cd3a9b6`; packet `reviews/2026-11-27-moon-lend-ui-rc.md` (head `b1b8164`). New: `phase1/moonsci/build_lend.py`, `assets/moon/lend/lend-alds-2011-2016-R1.bin` (144,160 B, `9f185cc3…`), builder tests and mutation runner, `phase1/moon-lend-ui.test.cjs`; changed `moonsci.js`, `moon.html`, `moonsci.css`.
+- **Validation (frozen worktree, 17:36–18:17 UTC):** builder `--check` OK; builder tests 436/0; mutants 9/9; `moon-lend-ui` 77/0, 16 of 16 breaks; moon-globe 67, moon-lit 138, moon-lro-path 68, moon-light 27, moon-height-ui 110, moon-diviner-ui 178, moon-lroc-ui 78, moon-crater-ui 51, skycraft-ui 77, sky-moon-texture-ui 197, all clean; Animals 301/3 (13e `moon.html` pins, expected for a preview).
+- Disclosed: three first-version tests/breaks were vacuous or misdirected (a radius test inside the reference band; `nocell` hit the temperature check; `late` masked by the abort gate; `leak` timing) — fixed before the final run.
+- Checklist rev 31 (rev 1 summary marked superseded). Next: GPT's preview review; then the release candidate on Chad's go.
+
 ## 27 Nov 16:37 UTC (clock reading) — **Moon item 6 (LEND): GPT's rev 1 review filed; proposal rev 2 with GPT for recheck. Docs and focused evidence only; no new acquisition, build, merge or deployment** (Moon spec, LEND thread)
 - GPT's review (REVISE BEFORE BUILD; feasibility supported) filed unchanged: `reviews/2026-11-27-moon-lend-proposal-rev1-gpt-review.md`. Chad: address R1–R3 in rev 2.
 - Rev 2 `docs/concepts/MOON-LEND-PROPOSAL.md`: archived-field quantity with the contradiction left unresolved (R1); formal error propagated with covariance and checked by Monte Carlo, "real signal" withdrawn, comparisons descriptive (R2); 30 km radius / 60 km diameter throughout, geometry, states, schema and test plan frozen (R3). New evidence `preview_lend_4.py`, `check_lend_4.py` (PASS). McClanahan et al. 2024 read in full for §1–1.3 (workspace fetch; not retained).
