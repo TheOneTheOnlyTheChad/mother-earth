@@ -1,6 +1,6 @@
 # Moon globe and LRO science — spec checklist
 
-Rev 26 · 27 Nov 2026, 11:52 UTC (clock reading; rev 25 10:34, rev 24 10:18, rev 23 09:52, rev 22 09:34, rev 21 09:20, rev 20 06:43, rev 19 04:58, rev 18 03:25, rev 17 27 Nov 02:48, rev 16 26 Nov 21:05, rev 15 18:58, rev 14 17:49, rev 13 16:07, rev 12 15:54, rev 11 15:34, rev 10 15:07, rev 9 14:42, rev 8 13:07, rev 7 11:58, rev 6 10:22, rev 5 09:54, rev 4 09:42, rev 3 09:20, rev 2 08:59, rev 1 08:31 UTC) · written by Claude on Chad's instruction (26 Nov) · **persistent record; update it as each item moves** · docs only.
+Rev 27 · 27 Nov 2026, 14:24 UTC (clock reading; rev 26 11:52, rev 25 10:34, rev 24 10:18, rev 23 09:52, rev 22 09:34, rev 21 09:20, rev 20 06:43, rev 19 04:58, rev 18 03:25, rev 17 27 Nov 02:48, rev 16 26 Nov 21:05, rev 15 18:58, rev 14 17:49, rev 13 16:07, rev 12 15:54, rev 11 15:34, rev 10 15:07, rev 9 14:42, rev 8 13:07, rev 7 11:58, rev 6 10:22, rev 5 09:54, rev 4 09:42, rev 3 09:20, rev 2 08:59, rev 1 08:31 UTC) · written by Claude on Chad's instruction (26 Nov) · **persistent record; update it as each item moves** · docs only.
 
 **What this is.** The record of every item in GPT's original brief, `docs/concepts/MOON-LRO-SCIENCE-BRIEF-GPT-2026-11-25.md`. It also covers the scope Chad added on 26 Nov: every page that shows the Moon. It is **not** the narrowed height proposal (`docs/concepts/MOON-LRO-SCIENCE-PROPOSAL.md` rev 2.1), which covered only the first release.
 
@@ -21,7 +21,7 @@ Rev 26 · 27 Nov 2026, 11:52 UTC (clock reading; rev 25 10:34, rev 24 10:18, rev
 | 2 | LOLA elevation-first layer ("Recommended first feature", requirements 2–4) | **done: released and closed** |
 | 3 | Diviner temperature ("Recommended first feature", second paragraph) | **done: released and closed** (merge `0622e80`) |
 | 4 | LROC regional detailed imagery | **done: released and closed** (merge `8e7d262`; Apollo 11) |
-| 5 | CRaTER radiation | **page preview `moon-crater-ui` with GPT** (branch only) |
+| 5 | CRaTER radiation | **release candidate `6ed18c3` with GPT for release review** (branch only) |
 | 6 | LEND neutron and hydrogen products | to assess |
 | 7 | LAMP far-ultraviolet products | to assess |
 | 8 | Mini-RF radar products | to assess |
@@ -283,7 +283,7 @@ Rev 26 · 27 Nov 2026, 11:52 UTC (clock reading; rev 25 10:34, rev 24 10:18, rev
   - **Next:** GPT's release review; then Chad's own Approve line naming the final commit; merge, served check from the reviewed manifest, live check, records.
 - **Other sites:** one at a time later, each with its own product check and landmark test.
 
-## 5. CRaTER radiation — page preview with GPT (27 Nov 2026)
+## 5. CRaTER radiation — release candidate with GPT (27 Nov 2026)
 
 - **Brief asked:** radiation measured at the spacecraft. Its spatial meaning differs from that of ground-looking instruments. Units, detectors and product interpretation must be assessed.
 - **Chad's go (27 Nov):** assess one manageable archived product or short dated interval; docs-only proposal for GPT; keep spacecraft measurements distinct from lunar-surface conditions; assess pairing before proposing it; checkpoint each acquisition; no build, bulk acquisition, merge or deployment.
@@ -309,6 +309,11 @@ Rev 26 · 27 Nov 2026, 11:52 UTC (clock reading; rev 25 10:34, rev 24 10:18, rev
   - Branch `moon-crater-ui`, tested `d6f9a0f`, packet `reviews/2026-11-27-moon-crater-ui-rc.md` (head `10a05db`).
   - Builder `phase1/moonsci/build_crater.py` (fixed fields, hashes first, coverage and total asserts) with `test_build_crater.py` 28/0; asset `assets/moon/crater/crater-good-2026-06-10-R1.json` 3,908 B (`50ef3c0c…`); page `mooncrater.js`/`.css` in the dated-example drawing; `moon.html` wiring and Sources line.
   - `moon-crater-ui` 49/0 with 11 of 11 breaks; Moon suites, skycraft, tides, timeline green; `timeline-mixed-assets` 16/2 (main baseline); Animals 298/2 (13e, `moon.html` pins, moved at the release candidate).
+- **Update (14:24 UTC, clock reading): release candidate with GPT for release review. Branch only; not merged, not deployed.**
+  - GPT's preview review PASS, filed unchanged (`reviews/2026-11-27-moon-crater-ui-gpt-review.md`). Chad's go for the release candidate.
+  - **Branch `moon-crater-ui`:** candidate `6ed18c3` (payload `4927a02` = `CR_MAIN`; fresh main `67a615c` merged in `b5f46f3`; Animals pins `6ed18c3`); packet `reviews/2026-11-27-moon-crater-release-rc.md` (head `dd7ea16`).
+  - Added: `sources.html#mooncrater` (full benchmark qualification) and shortcut; Details links; REGISTER entry; served manifest `reviews/evidence/2026-11-27-moon-crater-manifest.json` (54 files, `85cca2ad…`); the bound described as a validation bound; `moon-diviner-ui` H narrow maintenance.
+  - Validation on the frozen worktree: builder `--check` and tests 28/0; manifest 54 match; `moon-crater-ui` 51/0 with 11 of 11 breaks; Animals 304/0 with the four tamper breaks caught; Moon, craft, Sun and Sources-reading suites green; exceptions identical on main (timeline-mixed-assets 16/2, kept-ui 18/3, ux-round1 33/1, osmc 40/1); tides-ui T1a by design; night-lights-ui 152/0 alone after one load timeout.
 
 ## 6. LEND neutron and hydrogen products — to assess
 
@@ -423,7 +428,7 @@ Each stays `option` until Chad classifies it as "assess" or "not pursued", with 
 1. **Diviner:** assessment and proposal first, not a build. *(26 Nov: released, merge `0622e80`; item 3 done and closed.)*
 2. Then the remaining items **one at a time**, in the order Chad chooses. *(27 Nov: item 4, LROC Apollo 11, released, merge `8e7d262`.)*
 
-**Remaining open items after 10a (27 Nov):** 5 (page preview `moon-crater-ui` with GPT, 27 Nov), 6, 7, 8 (to assess); 9 (only inside the item it serves); 12a–c (options to classify); 11 (carried). Done: 1, 2, 3, 4, 10a; 10b closed decision; 13 outside scope. Chad names the next item; suggested order (Claude's suggestion only): CRaTER (5), LEND (6), LAMP (7), Mini-RF (8). Pairing (9) and the options (12) are taken up only inside the item they serve or when Chad classifies them.
+**Remaining open items after 10a (27 Nov):** 5 (release candidate `6ed18c3` with GPT, 27 Nov), 6, 7, 8 (to assess); 9 (only inside the item it serves); 12a–c (options to classify); 11 (carried). Done: 1, 2, 3, 4, 10a; 10b closed decision; 13 outside scope. Chad names the next item; suggested order (Claude's suggestion only): CRaTER (5), LEND (6), LAMP (7), Mini-RF (8). Pairing (9) and the options (12) are taken up only inside the item they serve or when Chad classifies them.
 
 ## Change log
 
@@ -453,3 +458,4 @@ Each stays `option` until Chad classifies it as "assess" or "not pursued", with 
 - Rev 24 (27 Nov 2026, 10:18 UTC): §5 CRaTER assessed; proposal rev 1 with GPT. No other item moved.
 - Rev 25 (27 Nov 2026, 10:34 UTC): §5: GPT's rev 1 review filed; proposal rev 2 with GPT for recheck. No other item moved.
 - Rev 26 (27 Nov 2026, 11:52 UTC): §5: GPT's rev 2 recheck (PASS), Chad's D1–D5, D7 and go; page preview `moon-crater-ui` (tested `d6f9a0f`) with GPT. No other item moved.
+- Rev 27 (27 Nov 2026, 14:24 UTC): §5: GPT's preview review (PASS); release candidate `6ed18c3` with GPT for release review. No other item moved.

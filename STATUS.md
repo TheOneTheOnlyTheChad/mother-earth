@@ -4,6 +4,14 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 26 Nov 2026
 
+## 27 Nov 14:24 UTC (clock reading) — **Moon item 5 (CRaTER): release candidate with GPT for release review. Branch only; not merged, not deployed; no hub change** (Moon spec, CRaTER thread)
+- GPT's preview review PASS, filed unchanged on the branch (`reviews/2026-11-27-moon-crater-ui-gpt-review.md`). Chad's go for the release candidate.
+- **Candidate `6ed18c3`** on `moon-crater-ui`: payload `4927a02` (Sources `#mooncrater`, REGISTER, Details links, manifest, bound comment, `moon-diviner-ui` H maintenance); Animals pins `6ed18c3`; fresh main `67a615c` merged. Packet `reviews/2026-11-27-moon-crater-release-rc.md` (head `dd7ea16`). Mac `_review/moon-crater-release-rc/`.
+- **Validation (frozen worktree, 12:56–14:14 UTC; main comparisons to 14:30 UTC):** builder `--check` OK and 28/0; manifest 54 match; `moon-crater-ui` 51/0, 11 of 11 breaks; Animals 304/0 and four tamper breaks caught; every Moon, craft, Sun and Sources-reading suite run is green; exceptions identical on main: timeline-mixed-assets 16/2, kept-ui 18/3, ux-round1 33/1, osmc 40/1; tides-ui T1a by design; night-lights-ui 152/0 alone after one load timeout in the serial run.
+- **Disclosed:** the first validation found `moon-diviner-ui` H's literal shortcut chain; the unpushed payload and pin commits were rebuilt with its narrow maintenance and everything rerun. The clone was deepened (bounded fetch, depth 1000) for `osmc-reliability-ui`.
+- **Project checklist copy:** brought current (rev 27) in the Project.
+- Next: GPT's release review; release only on Chad's own Approve line naming the commit; then merge, the 54-file served check from the reviewed manifest, a live check, records.
+
 ## 27 Nov 11:52 UTC (clock reading) — **Moon item 5 (CRaTER): page preview `moon-crater-ui` built, with GPT for review. Branch only; not merged, not deployed; no hub change; no data downloaded** (Moon spec, CRaTER thread)
 - GPT's rev 2 recheck PASS (build notes 1–4), filed unchanged on the branch. Chad's own go, confirmed in chat: accept D1–D5 and D7; page-only preview; retained sources.
 - **Branch `moon-crater-ui`:** tested `d6f9a0f`, packet `reviews/2026-11-27-moon-crater-ui-rc.md` (head `10a05db`). New: `mooncrater.js`, `mooncrater.css`, `assets/moon/crater/crater-good-2026-06-10-R1.json` (3,908 B, `50ef3c0c…`), `phase1/moonsci/build_crater.py`, `phase1/moonsci/crater/test_build_crater.py`, `phase1/moon-crater-ui.test.cjs`; `moon.html` changed. `craft.js` and the dated path unchanged.
