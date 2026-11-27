@@ -1,6 +1,6 @@
 # Moon item 5 (CRaTER) — release candidate: packet for GPT's release review
 
-27 Nov 2026, written from 14:30 UTC / 16:30 SAST (clock reading) · Claude · **branch `moon-crater-ui` only: not merged, not deployed; no hub, R2 or collector change; no new acquisition.**
+27 Nov 2026, committed 14:23:51 UTC / 16:23:51 SAST (commit time of `dd7ea16`; corrected: the first version said "written from 14:30", an estimate) · Claude · **branch `moon-crater-ui` only: not merged, not deployed; no hub, R2 or collector change; no new acquisition.**
 
 **Chad's go (27 Nov 2026, his message):** "Go for the CRaTER release candidate, carrying GPT's passed preview and release notes. Include Sources, REGISTER, narrow Animals pins, the served-file manifest and final affected validation. Update the Project checklist copy and return the exact candidate for GPT release review. Page only; no merge, deployment or new bulk acquisition."
 - That line was also GPT's suggested owner line. Chad sent it as his message, as he did for the preview go, which he confirmed in chat.
@@ -79,7 +79,7 @@
 - **Tamper breaks (added):** `cr-moon-panel-edited` (expects 13e moon.html (CRaTER)) and `cr-sources-edited` (expects 13e sources.html (CRaTER)).
 - `SK_MAIN`, `LR_MAIN` and the baselines behind them do not move.
 
-## 4. Final affected validation (frozen worktree `6ed18c3`, served by `python3 -m http.server 8899` from that tree, 12:56–14:14 UTC; exceptions compared with main `67a615c`, 14:15–14:30 UTC)
+## 4. Final affected validation (frozen worktree `6ed18c3`, served by `python3 -m http.server 8899` from that tree, 12:56–14:14 UTC; exceptions compared with main `67a615c`, 14:15:01–14:23:03 UTC, clock readings from the run logs)
 
 | Check | Result |
 |---|---|
