@@ -324,7 +324,7 @@ Rev 30 · 27 Nov 2026, 16:37 UTC (clock reading; rev 29 16:21, rev 28 14:50, rev
   - **Records:** REGISTER entry "NASA PDS — LRO CRaTER Level 2 secondary science…" (live); `sources.html#mooncrater`; builder `phase1/moonsci/build_crater.py` (`--check`); asset `assets/moon/crater/crater-good-2026-06-10-R1.json`; tests `phase1/moon-crater-ui.test.cjs` (51; 11 breaks) and `phase1/moonsci/crater/test_build_crater.py` (28); Animals pins `CR_MAIN` `4927a02` / `CR_PARENT` `67a615c` (13e, 13aa, 13ab); evidence `docs/research/moon-crater/`; retained inputs on the Mac `_source-data/moon-lro-science-crater/`.
   - **Not pursued now, with revisit conditions (proposal):** a computed dose (R3: needs its own reading, the flag question resolved and a bulk acquisition); path colouring (the per-minute variation is near counting noise).
 
-## 6. LEND neutron and hydrogen products — partly assessed (proposal rev 1 with GPT)
+## 6. LEND neutron and hydrogen products — partly assessed (proposal rev 2 with GPT for recheck)
 
 - **Brief asked:** neutron measurements and hydrogen-related products. A hydrogen inference is not direct confirmation of water ice, nor a quantity of accessible ice.
 - **Chad's go (27 Nov):** "Continue with Moon item 6: LEND, using the bounded assessment instructions already agreed. Start with archive documentation while folder access is being connected. Return a docs-only feasibility assessment and proposal for GPT review. Keep neutron measurements distinct from inferred hydrogen and accessible water ice. No page build, bulk acquisition, merge or deployment."
