@@ -1,0 +1,21 @@
+== (a) flag columns vs AMPL (20,000 events)
+D1: col@216=1 -> AMPL min 0, col@216=0 -> AMPL max None; col@228 == (AMPL > 3890.25) for every event: True; col@216 == (AMPL > 0): False
+D2: col@216=1 -> AMPL min 7, col@216=0 -> AMPL max 6; col@228 == (AMPL > 3890.25) for every event: True; col@216 == (AMPL > 0): False
+D3: col@216=1 -> AMPL min 0, col@216=0 -> AMPL max None; col@228 == (AMPL > 3890.25) for every event: True; col@216 == (AMPL > 0): False
+D4: col@216=1 -> AMPL min 6, col@216=0 -> AMPL max 5; col@228 == (AMPL > 3890.25) for every event: True; col@216 == (AMPL > 0): False
+D5: col@216=1 -> AMPL min 0, col@216=0 -> AMPL max None; col@228 == (AMPL > 3890.25) for every event: True; col@216 == (AMPL > 0): False
+D6: col@216=1 -> AMPL min 7, col@216=0 -> AMPL max 7; col@228 == (AMPL > 3890.25) for every event: True; col@216 == (AMPL > 0): False
+thin detectors share of events with AMPL > 0: [0.5889, 0.3607, 0.2076]
+
+== (b) position vs the page path
+first record SECONDS.FRACT 802742400.18 | T0 802742400.0
+  as tagged (whole UTC second): median 0.3226 p95 0.3480 max 0.3810 km
+  CRaTER interpolated to page time, tag offset 0.18 s: median 0.0339 p95 0.0572 max 0.3170 km
+  CRaTER interpolated to page time, tag offset 0.19 s: median 0.0250 p95 0.0469 max 0.3170 km
+  CRaTER interpolated to page time, tag offset 0.20 s: median 0.0231 p95 0.0451 max 0.3170 km
+  scan: interpolating with the position at SECONDS+FRACT+eps, best three (median km, eps s): [(0.02309028159765291, 0.02), (0.024969076325194014, 0.01), (0.030343997563133322, 0.03)]
+
+== (c) singles per hour (mean counts per 1 s record)
+10 Jun: hours with D2 singles > 2x D4 singles: []
+11 Jun: hours with D2 singles > 2x D4 singles: [19]
+   hour 19: S2 33.69 S4 10.65 S6 11.12 REJECT 2.45

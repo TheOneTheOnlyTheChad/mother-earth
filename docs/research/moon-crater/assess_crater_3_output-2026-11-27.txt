@@ -1,0 +1,4 @@
+eps 0.0: argmax minute 0 (0.3170 km); first page time before first CRaTER tag: True
+   excluding minute 0: n 1440 median 0.0339 p95 0.0571 max 0.0814 km
+eps 0.02: argmax minute 0 (0.3170 km); first page time before first CRaTER tag: True
+   excluding minute 0: n 1440 median 0.0231 p95 0.0450 max 0.0640 km

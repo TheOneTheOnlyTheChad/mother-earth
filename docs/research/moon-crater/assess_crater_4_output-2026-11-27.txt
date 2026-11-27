@@ -1,0 +1,8 @@
+CRAT_L2_SEC_2026161_V01.TAB: per-minute GOOD sum mean 1786.8 sd 56.9; Poisson sd 42.3; ratio 1.346
+   min 1625 max 2023 | Pearson r with altitude 0.066 | with |lat| -0.009
+   lowest-altitude fifth (mean alt 67.3 km): mean 1785.5/min; highest fifth (113.0 km): 1801.1/min; diff 0.87%
+   per-10-min: sd/Poisson 2.886
+CRAT_L2_SEC_2026162_V01.TAB: per-minute GOOD sum mean 1765.1 sd 49.2; Poisson sd 42.0; ratio 1.172
+   min 1614 max 1928 | Pearson r with altitude -0.043 | with |lat| -0.061
+   lowest-altitude fifth (mean alt 67.5 km): mean 1775.6/min; highest fifth (112.9 km): 1776.0/min; diff 0.02%
+   per-10-min: sd/Poisson 1.991

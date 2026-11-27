@@ -4,6 +4,14 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 26 Nov 2026
 
+## 27 Nov 10:18 UTC (clock reading) — **Moon item 5 (CRaTER): assessed; proposal rev 1 with GPT. Docs only; no page build, bulk acquisition, merge or deployment** (Moon spec, CRaTER thread)
+- Chad's go: assess one archived CRaTER product or short dated interval; docs-only proposal for GPT; checkpoint each acquisition.
+- Read in the browser pane: PDS PPI release 67 bundle (Readme, derived-data description, errata, labels, gap and mode tables), the PPI FAQ, the UNH team sites.
+- Acquired (Mac `_source-data/moon-lro-science-crater/`, checkpoint per file): L2 SEC 2026-161 and -162 (MD5 = labels), L2 PRI 2026-161 records 1–20,000 (two identical range reads), one JSON of 16 documents and labels. 38,695,835 B.
+- Proposal `docs/concepts/MOON-CRATER-PROPOSAL.md` rev 1; evidence `docs/research/moon-crater/`; checklist rev 24 (item 5 only).
+- Findings: `GOOD` events per second inside the instrument (~30 a second); MOON_ME positions match the page's dated path within rounding after a 0.18–0.20 s tag offset; flat day, no altitude relation; no archived 2026 dose; two archive inconsistencies recorded.
+- Recommendation R1 (10-minute event-rate chart for 10 June in the dated-example drawing); R0 legitimate. Next: GPT's review, then Chad's D1–D6.
+
 ## 27 Nov 09:47 UTC (clock reading) — **Moon item 10a thread closed out; handover written** (Moon spec)
 - **Release commit `1280c0d`** (reviewed and approved; frozen tested tree `4c8aecd`), live since 09:31:52 UTC. Records on main from `8d3a0af`. Served check 51/51; live check passed. Hub untouched.
 - **Branches:** `moon-sky-texture-ui` and `moon-sky-texture-docs` deleted (GitHub page; local). The 7 other GitHub branches each hold unique work from other workstreams and were left.

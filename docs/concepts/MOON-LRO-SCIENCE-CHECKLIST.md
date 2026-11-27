@@ -1,6 +1,6 @@
 # Moon globe and LRO science — spec checklist
 
-Rev 23 · 27 Nov 2026, 09:52 UTC (clock reading; rev 22 09:34, rev 21 09:20, rev 20 06:43, rev 19 04:58, rev 18 03:25, rev 17 27 Nov 02:48, rev 16 26 Nov 21:05, rev 15 18:58, rev 14 17:49, rev 13 16:07, rev 12 15:54, rev 11 15:34, rev 10 15:07, rev 9 14:42, rev 8 13:07, rev 7 11:58, rev 6 10:22, rev 5 09:54, rev 4 09:42, rev 3 09:20, rev 2 08:59, rev 1 08:31 UTC) · written by Claude on Chad's instruction (26 Nov) · **persistent record; update it as each item moves** · docs only.
+Rev 24 · 27 Nov 2026, 10:18 UTC (clock reading; rev 23 09:52, rev 22 09:34, rev 21 09:20, rev 20 06:43, rev 19 04:58, rev 18 03:25, rev 17 27 Nov 02:48, rev 16 26 Nov 21:05, rev 15 18:58, rev 14 17:49, rev 13 16:07, rev 12 15:54, rev 11 15:34, rev 10 15:07, rev 9 14:42, rev 8 13:07, rev 7 11:58, rev 6 10:22, rev 5 09:54, rev 4 09:42, rev 3 09:20, rev 2 08:59, rev 1 08:31 UTC) · written by Claude on Chad's instruction (26 Nov) · **persistent record; update it as each item moves** · docs only.
 
 **What this is.** The record of every item in GPT's original brief, `docs/concepts/MOON-LRO-SCIENCE-BRIEF-GPT-2026-11-25.md`. It also covers the scope Chad added on 26 Nov: every page that shows the Moon. It is **not** the narrowed height proposal (`docs/concepts/MOON-LRO-SCIENCE-PROPOSAL.md` rev 2.1), which covered only the first release.
 
@@ -21,7 +21,7 @@ Rev 23 · 27 Nov 2026, 09:52 UTC (clock reading; rev 22 09:34, rev 21 09:20, rev
 | 2 | LOLA elevation-first layer ("Recommended first feature", requirements 2–4) | **done: released and closed** |
 | 3 | Diviner temperature ("Recommended first feature", second paragraph) | **done: released and closed** (merge `0622e80`) |
 | 4 | LROC regional detailed imagery | **done: released and closed** (merge `8e7d262`; Apollo 11) |
-| 5 | CRaTER radiation | to assess |
+| 5 | CRaTER radiation | **assessed; proposal rev 1 with GPT** (docs only) |
 | 6 | LEND neutron and hydrogen products | to assess |
 | 7 | LAMP far-ultraviolet products | to assess |
 | 8 | Mini-RF radar products | to assess |
@@ -283,18 +283,21 @@ Rev 23 · 27 Nov 2026, 09:52 UTC (clock reading; rev 22 09:34, rev 21 09:20, rev
   - **Next:** GPT's release review; then Chad's own Approve line naming the final commit; merge, served check from the reviewed manifest, live check, records.
 - **Other sites:** one at a time later, each with its own product check and landmark test.
 
-## 5. CRaTER radiation — to assess
+## 5. CRaTER radiation — assessed; proposal rev 1 with GPT (27 Nov 2026)
 
 - **Brief asked:** radiation measured at the spacecraft. Its spatial meaning differs from that of ground-looking instruments. Units, detectors and product interpretation must be assessed.
-- **Status:** not assessed.
-- **Evidence:** the brief's instrument table only.
-- **Next bounded assessment:**
-  - Identify the CRaTER products in PDS, for example dose-rate or energy-deposition records, and read one label.
-  - Fetch one bounded sample (a short dated interval).
-  - Record units, detectors, time base and what "where" means for a measurement made at the spacecraft.
-  - Check whether an interval overlaps the dated LRO path (10–11 June 2026), which would allow honest pairing with the spacecraft position (see item 9).
-- **Blockers:** none known.
-- **Decision needed:** whether a spacecraft-environment display (time series, or values along the dated path) fits the Moon tab.
+- **Chad's go (27 Nov):** assess one manageable archived product or short dated interval; docs-only proposal for GPT; keep spacecraft measurements distinct from lunar-surface conditions; assess pairing before proposing it; checkpoint each acquisition; no build, bulk acquisition, merge or deployment.
+- **Status:** assessed. Proposal `docs/concepts/MOON-CRATER-PROPOSAL.md` rev 1, evidence `docs/research/moon-crater/`.
+- **Evidence (summary; details in the proposal):**
+  - Product: PDS PPI bundle `urn:nasa:pds:lro.crater` v2.4, Release 67 (coverage to 2026-06-30). Level 2 secondary science, one record per second, 16,761,600 B a day.
+  - Quantity: `GOOD`, events counted per ~1 s readout inside the instrument (checked against the primary-science event records: 674 of 674 seconds). Not a dose, not a flux, not a surface value. About 30 a second on 10–11 June.
+  - Pairing (item 9): the records carry LRO's MOON_ME position from the definitive ephemeris. It agrees with the page's dated path to a median of 0.023–0.034 km (max 0.064–0.081 km over 1,440 of 1,441 minutes) once a 0.18–0.20 s tag offset is allowed for.
+  - Signal: per-minute variation 1.17–1.35 times counting noise; no relation with altitude. A path colouring would show noise.
+  - No archived dose for 2026 (the team's legacy dose table ends 2012; current team plots carry no stated terms). Two archive inconsistencies are recorded (swapped flag labels in L2 PRI; no L2 housekeeping served for 2026).
+  - Acquisitions: four files, 38,695,835 B, each checkpointed before the next (`docs/research/moon-crater/checkpoints.jsonl`); retained on the Mac.
+- **Recommendation (Claude):** R1, an off-by-default chart of 10-minute event rates for 10 June 2026 in the dated-example drawing, following its time control. R0 ("assessed, not shown") is a legitimate alternative.
+- **Blockers:** none for R1. R3 (a computed dose) needs its own reading, resolution of the flag question and a bulk acquisition.
+- **Decision needed:** Chad's D1–D6 after GPT's review.
 
 ## 6. LEND neutron and hydrogen products — to assess
 
@@ -409,7 +412,7 @@ Each stays `option` until Chad classifies it as "assess" or "not pursued", with 
 1. **Diviner:** assessment and proposal first, not a build. *(26 Nov: released, merge `0622e80`; item 3 done and closed.)*
 2. Then the remaining items **one at a time**, in the order Chad chooses. *(27 Nov: item 4, LROC Apollo 11, released, merge `8e7d262`.)*
 
-**Remaining open items after 10a (27 Nov):** 5, 6, 7, 8 (to assess); 9 (only inside the item it serves); 12a–c (options to classify); 11 (carried). Done: 1, 2, 3, 4, 10a; 10b closed decision; 13 outside scope. Chad names the next item; suggested order (Claude's suggestion only): CRaTER (5), LEND (6), LAMP (7), Mini-RF (8). Pairing (9) and the options (12) are taken up only inside the item they serve or when Chad classifies them.
+**Remaining open items after 10a (27 Nov):** 5 (assessed; proposal rev 1 with GPT, 27 Nov), 6, 7, 8 (to assess); 9 (only inside the item it serves); 12a–c (options to classify); 11 (carried). Done: 1, 2, 3, 4, 10a; 10b closed decision; 13 outside scope. Chad names the next item; suggested order (Claude's suggestion only): CRaTER (5), LEND (6), LAMP (7), Mini-RF (8). Pairing (9) and the options (12) are taken up only inside the item they serve or when Chad classifies them.
 
 ## Change log
 
@@ -436,3 +439,4 @@ Each stays `option` until Chad classifies it as "assess" or "not pursued", with 
 - Rev 21 (27 Nov 2026, 09:20 UTC): §10a: release candidate (tested `4c8aecd`) with GPT for release review. No other item moved.
 - Rev 22 (27 Nov 2026, 09:34 UTC): §10a done and live (main `1280c0d`). No other item moved.
 - Rev 23 (27 Nov 2026, 09:52 UTC): close-out tidy: §10a status line, §11 limits for 10a, remaining-items line. No item moved.
+- Rev 24 (27 Nov 2026, 10:18 UTC): §5 CRaTER assessed; proposal rev 1 with GPT. No other item moved.

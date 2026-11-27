@@ -1,0 +1,107 @@
+== integrity against checkpoints
+1 CRAT_L2_SEC_2026161_V01.TAB sha256 ok
+2 CRAT_L2_SEC_2026162_V01.TAB sha256 ok
+3 CRAT_L2_PRI_2026161_V01_bytes0-4799999.TAB sha256 ok
+4 crater-docs-labels-2026-11-27.json sha256 ok
+
+== L2 SEC 2026-06-10 (CRAT_L2_SEC_2026161_V01.TAB)
+records 86400 | first 2026-06-10T00:00:00 | last 2026-06-10T23:59:59
+time step s: min 1.0 max 1.0 | steps != 1: 0
+UTC day prefix all match: True
+  BIASCNTRL: unique [1.0]
+  BIASCMD: unique [1.0]
+  CALLOW: unique [0.0]
+  CALHIGH: unique [0.0]
+  CALRATE: unique [0.0]
+  P1: unique [1.0]
+  P2: unique [1.0]
+  P3: unique [1.0]
+  P4: unique [1.0]
+  P5: unique [1.0]
+  P6: unique [1.0]
+  DISCTHIN: unique [71.0]
+  DISCTHICK: unique [71.0]
+  MASK1: unique [4294967295.0]
+  MASK2: unique [4294967295.0]
+  LASTCMD: unique [0.0]
+  LASTVALUE: unique [0.0]
+TOTAL == GOOD + REJECT every record: True | mismatches 0
+  S1: mean 1.603 median 1 min 0 p99 5 max 17 (counts per 1 s record)
+  S2: mean 11.732 median 11 min 0 p99 23 max 1099 (counts per 1 s record)
+  S3: mean 1.327 median 1 min 0 p99 5 max 22 (counts per 1 s record)
+  S4: mean 10.622 median 10 min 0 p99 19 max 43 (counts per 1 s record)
+  S5: mean 1.365 median 1 min 0 p99 5 max 10 (counts per 1 s record)
+  S6: mean 11.132 median 11 min 0 p99 20 max 78 (counts per 1 s record)
+  GOOD: mean 29.781 median 30 min 9 p99 43 max 69 (counts per 1 s record)
+  REJECT: mean 0.518 median 0 min 0 p99 3 max 26 (counts per 1 s record)
+  TOTAL: mean 30.298 median 30 min 9 p99 44 max 71 (counts per 1 s record)
+  GOOD hourly mean: min 29.386 max 30.520
+MOONVEC fill (-1,-1,-1) records: 0
+radius km: min 1802.21 max 1852.57 | altitude above 1737.4 km sphere: min 64.81 max 115.17
+latitude deg: min -84.09 max 84.09
+component |value| >= 1000 km share: 0.415 (step 0.1 km, half-step 0.05 km)
+
+== L2 SEC 2026-06-11 (CRAT_L2_SEC_2026162_V01.TAB)
+records 86400 | first 2026-06-11T00:00:00 | last 2026-06-11T23:59:59
+time step s: min 1.0 max 1.0 | steps != 1: 0
+UTC day prefix all match: True
+  BIASCNTRL: unique [1.0]
+  BIASCMD: unique [1.0]
+  CALLOW: unique [0.0]
+  CALHIGH: unique [0.0]
+  CALRATE: unique [0.0]
+  P1: unique [1.0]
+  P2: unique [1.0]
+  P3: unique [1.0]
+  P4: unique [1.0]
+  P5: unique [1.0]
+  P6: unique [1.0]
+  DISCTHIN: unique [71.0]
+  DISCTHICK: unique [71.0]
+  MASK1: unique [4294967295.0]
+  MASK2: unique [4294967295.0]
+  LASTCMD: unique [0.0]
+  LASTVALUE: unique [0.0]
+TOTAL == GOOD + REJECT every record: True | mismatches 0
+  S1: mean 1.387 median 1 min 0 p99 5 max 9 (counts per 1 s record)
+  S2: mean 14.288 median 11 min 0 p99 107 max 1712 (counts per 1 s record)
+  S3: mean 1.320 median 1 min 0 p99 5 max 19 (counts per 1 s record)
+  S4: mean 10.583 median 10 min 1 p99 19 max 44 (counts per 1 s record)
+  S5: mean 1.331 median 1 min 0 p99 5 max 8 (counts per 1 s record)
+  S6: mean 11.108 median 11 min 0 p99 20 max 86 (counts per 1 s record)
+  GOOD: mean 29.419 median 29 min 8 p99 43 max 70 (counts per 1 s record)
+  REJECT: mean 0.701 median 0 min 0 p99 7 max 204 (counts per 1 s record)
+  TOTAL: mean 30.120 median 30 min 9 p99 45 max 259 (counts per 1 s record)
+  GOOD hourly mean: min 29.001 max 30.197
+MOONVEC fill (-1,-1,-1) records: 0
+radius km: min 1803.05 max 1852.15 | altitude above 1737.4 km sphere: min 65.65 max 114.75
+latitude deg: min -84.03 max 84.03
+component |value| >= 1000 km share: 0.420 (step 0.1 km, half-step 0.05 km)
+
+== dated LRO path on the page: craft-moon-me-2026-06-R1 | n 1441 | frame MOON_ME_DE440_ME421 | step 60 s
+CRaTER MOONVEC vs page path at the 1441 minute marks (CRaTER record time = whole UTC second; SECONDS/FRACT carry .18-.20 s):
+  |difference| km: median 0.3226 p95 0.3480 max 0.3810 (argmax minute 1331)
+  CRaTER speed from 1 s differences km/s: median 1.6387 (0.19 s x that = 0.311 km)
+  FRACT unique values 10 June: [18.0]
+
+== L2 PRI slice (first 20,000 records of 10 June)
+records 20000 | UTC "2026-06-10T00:00:00" to "2026-06-10T00:11:14"
+distinct seconds 675 | last second may be partial (slice boundary)
+seconds where PRI record count == SEC GOOD: 674 of 674
+  first mismatches (second, PRI count, SEC GOOD): []
+INDEX restarts at 0 each second: True
+ENERGY vs Gi*AMPL+Oi (V1.0 table): max relative diff per detector [0.0053, 0.0007, 0.0037, 0.0001, 0.0046, 0.0011]
+AMPL==0 entries per detector [8222, 12036, 12786, 12870, 15848, 10875]
+  ENERGY at AMPL==0 equals the offset Oi exactly: [True, True, True, True, True, True]
+ENERGY/LET (implied path, micron): median per detector [148.0, 1000.0, 149.0, 1000.0, 149.0, 1000.0]
+GTLLD flag share =1 per detector [0.0, 0.0004, 0.0, 0.0007, 0.0, 0.0005]
+  D1: AMPL when flag=1 min None | when flag=0 max 391 | AMPL==0 with flag=1: 0
+  D2: AMPL when flag=1 min 3971 | when flag=0 max 3852 | AMPL==0 with flag=1: 0
+  D3: AMPL when flag=1 min None | when flag=0 max 800 | AMPL==0 with flag=1: 0
+  D4: AMPL when flag=1 min 4025 | when flag=0 max 3633 | AMPL==0 with flag=1: 0
+  D5: AMPL when flag=1 min None | when flag=0 max 1641 | AMPL==0 with flag=1: 0
+  D6: AMPL when flag=1 min 3999 | when flag=0 max 3507 | AMPL==0 with flag=1: 0
+MAXSIG flags set per detector [20000, 6824, 20000, 6769, 20000, 6841]
+DQI unique values (value: count) {0.0: 20000}
+summed ENERGY over flagged entries, MeV per detector (slice only): [0.0, 710.6, 0.0, 1237.8, 0.0, 893.4]
+slice spans s: 675
