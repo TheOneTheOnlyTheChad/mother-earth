@@ -323,7 +323,6 @@
       applyMap();
     } catch (e) {
       if (!live() || settled) return;
-      try { ctl.abort(); } catch (_) {}   // the sibling download stops too
       fail(e && e.name === 'AbortError' ? 'aborted' : String(e && e.message || e));
     }
   }
@@ -627,5 +626,6 @@
     path: st.path, last: st.last,
     moonMap: { status: mm.status, why: mm.why, gen: mm.gen, rotDate: mm.rotDate, tex: !!mm.tex, url: !!mm.url, ready: !!mm.ready, uploadMs: mm.uploadMs, prepMs: mm.prepMs,
       emissive: st.meshes ? st.meshes.moon.material.emissive.getHex() : null, mapOn: !!(st.meshes && st.meshes.moon.material.emissiveMap) } });
+  ME.zoomMoonRotation = (rows) => moonRotation(rows, mm.ready && mm.ready.tab);   // test aid: the guarded fit for given rows (null when refused)
   ME.zoomPlaceTags = placeTags; ME.zoomStep = step; ME.zoomGo = goStop; ME.zoomRollover = rollover; ME.zoomFrame = frame;
 })();
