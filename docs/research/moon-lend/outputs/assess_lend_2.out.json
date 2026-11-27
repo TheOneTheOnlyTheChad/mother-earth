@@ -1,0 +1,210 @@
+{
+ "reference_band_80.25_84.75S": {
+  "cells": 7200,
+  "mean": 4.9414,
+  "err": 0.00222
+ },
+ "band_82.5S_30km_discs": {
+  "n": 24,
+  "mean_of_means": 4.9426,
+  "sd": 0.0294,
+  "median_err": 0.0195
+ },
+ "features": {
+  "Cabeus": {
+   "15km": {
+    "cells": 37,
+    "exposure_s": 18462,
+    "mean": 4.9103,
+    "err": 0.0276,
+    "diff_from_ref": -0.0311,
+    "diff_over_err": -1.12,
+    "pct_of_ref": -0.63
+   },
+   "30km": {
+    "cells": 151,
+    "exposure_s": 74853,
+    "mean": 4.8815,
+    "err": 0.0137,
+    "diff_from_ref": -0.0599,
+    "diff_over_err": -4.32,
+    "pct_of_ref": -1.21
+   },
+   "60km": {
+    "cells": 620,
+    "exposure_s": 313814,
+    "mean": 4.9033,
+    "err": 0.0067,
+    "diff_from_ref": -0.0381,
+    "diff_over_err": -5.4,
+    "pct_of_ref": -0.77
+   },
+   "same_lat_control_30km": {
+    "n_discs": 19,
+    "mean": 4.9327,
+    "sd": 0.0173,
+    "median_counting_err": 0.0141,
+    "feature_minus_control": -0.0512,
+    "in_control_sd": -2.96,
+    "pct": -1.04,
+    "n_control_discs_at_or_below_feature": 0
+   }
+  },
+  "Shoemaker": {
+   "15km": {
+    "cells": 96,
+    "exposure_s": 21221,
+    "mean": 4.8489,
+    "err": 0.0261,
+    "diff_from_ref": -0.0925,
+    "diff_over_err": -3.53,
+    "pct_of_ref": -1.87
+   },
+   "30km": {
+    "cells": 391,
+    "exposure_s": 85836,
+    "mean": 4.8624,
+    "err": 0.0129,
+    "diff_from_ref": -0.079,
+    "diff_over_err": -6.03,
+    "pct_of_ref": -1.6
+   },
+   "60km": {
+    "cells": 1383,
+    "exposure_s": 335871,
+    "mean": 4.8786,
+    "err": 0.0065,
+    "diff_from_ref": -0.0628,
+    "diff_over_err": -9.14,
+    "pct_of_ref": -1.27
+   },
+   "same_lat_control_30km": {
+    "n_discs": 10,
+    "mean": 4.9033,
+    "sd": 0.0121,
+    "median_counting_err": 0.0125,
+    "feature_minus_control": -0.0409,
+    "in_control_sd": -3.38,
+    "pct": -0.83,
+    "n_control_discs_at_or_below_feature": 0
+   }
+  },
+  "Haworth": {
+   "15km": {
+    "cells": 77,
+    "exposure_s": 32100,
+    "mean": 4.8734,
+    "err": 0.0211,
+    "diff_from_ref": -0.068,
+    "diff_over_err": -3.2,
+    "pct_of_ref": -1.38
+   },
+   "30km": {
+    "cells": 295,
+    "exposure_s": 125084,
+    "mean": 4.8835,
+    "err": 0.0108,
+    "diff_from_ref": -0.0579,
+    "diff_over_err": -5.25,
+    "pct_of_ref": -1.17
+   },
+   "60km": {
+    "cells": 1115,
+    "exposure_s": 444614,
+    "mean": 4.894,
+    "err": 0.0056,
+    "diff_from_ref": -0.0474,
+    "diff_over_err": -7.87,
+    "pct_of_ref": -0.96
+   },
+   "same_lat_control_30km": {
+    "n_discs": 14,
+    "mean": 4.9119,
+    "sd": 0.0249,
+    "median_counting_err": 0.0111,
+    "feature_minus_control": -0.0284,
+    "in_control_sd": -1.14,
+    "pct": -0.58,
+    "n_control_discs_at_or_below_feature": 2
+   }
+  },
+  "Faustini": {
+   "15km": {
+    "cells": 60,
+    "exposure_s": 28343,
+    "mean": 4.8437,
+    "err": 0.0219,
+    "diff_from_ref": -0.0977,
+    "diff_over_err": -4.44,
+    "pct_of_ref": -1.98
+   },
+   "30km": {
+    "cells": 246,
+    "exposure_s": 99062,
+    "mean": 4.8717,
+    "err": 0.0119,
+    "diff_from_ref": -0.0697,
+    "diff_over_err": -5.76,
+    "pct_of_ref": -1.41
+   },
+   "60km": {
+    "cells": 1061,
+    "exposure_s": 341537,
+    "mean": 4.8932,
+    "err": 0.0064,
+    "diff_from_ref": -0.0482,
+    "diff_over_err": -7.11,
+    "pct_of_ref": -0.98
+   },
+   "same_lat_control_30km": {
+    "n_discs": 16,
+    "mean": 4.9144,
+    "sd": 0.0212,
+    "median_counting_err": 0.0107,
+    "feature_minus_control": -0.0427,
+    "in_control_sd": -2.01,
+    "pct": -0.87,
+    "n_control_discs_at_or_below_feature": 0
+   }
+  },
+  "Amundsen": {
+   "15km": {
+    "cells": 34,
+    "exposure_s": 12550,
+    "mean": 4.9326,
+    "err": 0.0337,
+    "diff_from_ref": -0.0088,
+    "diff_over_err": -0.26,
+    "pct_of_ref": -0.18
+   },
+   "30km": {
+    "cells": 134,
+    "exposure_s": 49082,
+    "mean": 4.9284,
+    "err": 0.017,
+    "diff_from_ref": -0.013,
+    "diff_over_err": -0.76,
+    "pct_of_ref": -0.26
+   },
+   "60km": {
+    "cells": 524,
+    "exposure_s": 188599,
+    "mean": 4.9215,
+    "err": 0.0087,
+    "diff_from_ref": -0.0199,
+    "diff_over_err": -2.22,
+    "pct_of_ref": -0.4
+   },
+   "same_lat_control_30km": {
+    "n_discs": 20,
+    "mean": 4.9267,
+    "sd": 0.0249,
+    "median_counting_err": 0.0154,
+    "feature_minus_control": 0.0017,
+    "in_control_sd": 0.07,
+    "pct": 0.03,
+    "n_control_discs_at_or_below_feature": 8
+   }
+  }
+ }
+}

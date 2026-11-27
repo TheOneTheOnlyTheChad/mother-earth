@@ -4,6 +4,13 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 27 Nov 2026
 
+## 27 Nov 16:21 UTC (clock reading) — **Moon item 6 (LEND): assessed; proposal rev 1 with GPT. Docs only; no page build, bulk acquisition, merge or deployment** (Moon spec, LEND thread)
+- Chad's go: continue with item 6 under the agreed bounded instructions; docs-only feasibility assessment and proposal for GPT; keep neutron measurements distinct from inferred hydrogen and accessible water ice.
+- Read in the browser pane (container and Mac shell refused by the proxy for PDS): the PDS Geosciences LEND bundle (v2.0, DOI 10.17189/p89b-8w72, Release 67), RDR catalog, instrument catalog, RDR SIS, processing document, errata and release notes, ALD labels; Gazetteer crater centres; arXiv abstracts (Eke 2012, Teodoro 2014, Su 2021, McClanahan 2023).
+- Acquired (Mac `_source-data/moon-lro-science-lend/`, checkpoint per file): ALD south pole 2011-12-11 to 2016-09-14 (4,464,000 B, `e6b1c2d5…`), and the 19 documents and labels in one JSON (1,095,765 B). Total 5,559,765 B. One checkpoint correction line (an estimated fetch time).
+- Findings: no hydrogen product in the bundle; ALD last updated 2017; CSETN cell noise dominates at 0.5°; 30 km means near Cabeus, Shoemaker, Faustini 0.8–1.0% below same-latitude controls; two document inconsistencies recorded; the resolution dispute recorded with sources.
+- Proposal `docs/concepts/MOON-LEND-PROPOSAL.md` rev 1 (recommends L1; L0 and L2 legitimate); evidence `docs/research/moon-lend/`; checklist rev 29 (item 6 only). Next: GPT's review, then Chad's D1–D7.
+
 ## 27 Nov 16:02 UTC (clock reading) — **Animals: GPT's scope review of the IUCN reply: R2 CLOSED (no copy required); R1 cleared for display, the public repository and served JSON awaiting one clarification (not refused). Chad's clarification on point 2 SENT. Nothing released.** (page: none; Animals thread)
 - **Record:** `docs/research/animals-source-audit/ENQUIRIES-ANIMALS.md` rev 6. GPT's review kept privately on the Mac.
 - **Later, on the branch:** checklist rev 1.1 corrections GPT lists, once point 2 is answered; Moon first.

@@ -1,0 +1,173 @@
+{
+ "radius_km": 30.0,
+ "withhold_if_pct_err_gt": 0.5,
+ "reference_band_mean": 4.9414,
+ "usable_cells": 13413,
+ "archive_missing_cells": 987,
+ "shown": 12340,
+ "withheld_by_rule": 1073,
+ "cells_per_disc": {
+  "min": 44,
+  "p50": 117,
+  "max": 531
+ },
+ "pct_shown": {
+  "min": -1.862211076486131,
+  "p01": -1.6324142837024533,
+  "p50": -0.36048121974405767,
+  "p99": 1.5163745599669949,
+  "max": 2.1616962050145405
+ },
+ "pct_err_shown": {
+  "p50": 0.35559731636303277,
+  "max": 0.4999055149432566
+ },
+ "lowest_shown": [
+  {
+   "lat": -84.75,
+   "lon": 318.25,
+   "pct": -1.86,
+   "pct_err": 0.32
+  },
+  {
+   "lat": -89.25,
+   "lon": 303.25,
+   "pct": -1.82,
+   "pct_err": 0.48
+  },
+  {
+   "lat": -89.25,
+   "lon": 304.75,
+   "pct": -1.81,
+   "pct_err": 0.49
+  },
+  {
+   "lat": -84.75,
+   "lon": 315.25,
+   "pct": -1.81,
+   "pct_err": 0.32
+  },
+  {
+   "lat": -88.25,
+   "lon": 53.75,
+   "pct": -1.81,
+   "pct_err": 0.3
+  }
+ ],
+ "rings": {
+  "-89.25": {
+   "cells": 489,
+   "shown": 175,
+   "pct_med": -1.049,
+   "pct_err_med": 0.508
+  },
+  "-88.75": {
+   "cells": 684,
+   "shown": 684,
+   "pct_med": -1.24,
+   "pct_err_med": 0.37
+  },
+  "-88.25": {
+   "cells": 720,
+   "shown": 720,
+   "pct_med": -1.077,
+   "pct_err_med": 0.294
+  },
+  "-87.75": {
+   "cells": 720,
+   "shown": 720,
+   "pct_med": -0.925,
+   "pct_err_med": 0.251
+  },
+  "-87.25": {
+   "cells": 720,
+   "shown": 720,
+   "pct_med": -0.783,
+   "pct_err_med": 0.234
+  },
+  "-86.75": {
+   "cells": 720,
+   "shown": 720,
+   "pct_med": -0.568,
+   "pct_err_med": 0.236
+  },
+  "-86.25": {
+   "cells": 720,
+   "shown": 720,
+   "pct_med": -0.396,
+   "pct_err_med": 0.258
+  },
+  "-85.75": {
+   "cells": 720,
+   "shown": 720,
+   "pct_med": -0.261,
+   "pct_err_med": 0.286
+  },
+  "-85.25": {
+   "cells": 720,
+   "shown": 720,
+   "pct_med": -0.229,
+   "pct_err_med": 0.311
+  },
+  "-84.75": {
+   "cells": 720,
+   "shown": 720,
+   "pct_med": -0.355,
+   "pct_err_med": 0.332
+  },
+  "-84.25": {
+   "cells": 720,
+   "shown": 720,
+   "pct_med": -0.325,
+   "pct_err_med": 0.357
+  },
+  "-83.75": {
+   "cells": 720,
+   "shown": 720,
+   "pct_med": -0.223,
+   "pct_err_med": 0.376
+  },
+  "-83.25": {
+   "cells": 720,
+   "shown": 720,
+   "pct_med": -0.197,
+   "pct_err_med": 0.397
+  },
+  "-82.75": {
+   "cells": 720,
+   "shown": 720,
+   "pct_med": -0.199,
+   "pct_err_med": 0.414
+  },
+  "-82.25": {
+   "cells": 720,
+   "shown": 720,
+   "pct_med": -0.042,
+   "pct_err_med": 0.431
+  },
+  "-81.75": {
+   "cells": 720,
+   "shown": 720,
+   "pct_med": 0.169,
+   "pct_err_med": 0.449
+  },
+  "-81.25": {
+   "cells": 720,
+   "shown": 720,
+   "pct_med": 0.28,
+   "pct_err_med": 0.462
+  },
+  "-80.75": {
+   "cells": 720,
+   "shown": 681,
+   "pct_med": 0.274,
+   "pct_err_med": 0.477
+  },
+  "-80.25": {
+   "cells": 720,
+   "shown": 0,
+   "pct_med": 0.188,
+   "pct_err_med": 0.588
+  }
+ }
+}

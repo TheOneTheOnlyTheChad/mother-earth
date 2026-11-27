@@ -1,0 +1,173 @@
+{
+ "radius_km": 15.0,
+ "withhold_if_pct_err_gt": 0.5,
+ "reference_band_mean": 4.9414,
+ "usable_cells": 13413,
+ "archive_missing_cells": 987,
+ "shown": 489,
+ "withheld_by_rule": 12924,
+ "cells_per_disc": {
+  "min": 11,
+  "p50": 21,
+  "max": 155
+ },
+ "pct_shown": {
+  "min": -1.6542412302675613,
+  "p01": -1.5546297984462485,
+  "p50": -0.5314021163150828,
+  "p99": 0.7148736061011833,
+  "max": 0.94031916818067
+ },
+ "pct_err_shown": {
+  "p50": 0.4798465622737748,
+  "max": 0.4998999492967603
+ },
+ "lowest_shown": [
+  {
+   "lat": -86.75,
+   "lon": 341.25,
+   "pct": -1.65,
+   "pct_err": 0.47
+  },
+  {
+   "lat": -86.75,
+   "lon": 338.75,
+   "pct": -1.63,
+   "pct_err": 0.46
+  },
+  {
+   "lat": -86.75,
+   "lon": 339.75,
+   "pct": -1.57,
+   "pct_err": 0.47
+  },
+  {
+   "lat": -86.75,
+   "lon": 336.75,
+   "pct": -1.57,
+   "pct_err": 0.46
+  },
+  {
+   "lat": -86.75,
+   "lon": 336.25,
+   "pct": -1.56,
+   "pct_err": 0.46
+  }
+ ],
+ "rings": {
+  "-89.25": {
+   "cells": 489,
+   "shown": 0,
+   "pct_med": 0.43,
+   "pct_err_med": 1.633
+  },
+  "-88.75": {
+   "cells": 684,
+   "shown": 0,
+   "pct_med": -1.254,
+   "pct_err_med": 0.851
+  },
+  "-88.25": {
+   "cells": 720,
+   "shown": 0,
+   "pct_med": -1.296,
+   "pct_err_med": 0.698
+  },
+  "-87.75": {
+   "cells": 720,
+   "shown": 23,
+   "pct_med": -1.099,
+   "pct_err_med": 0.593
+  },
+  "-87.25": {
+   "cells": 720,
+   "shown": 69,
+   "pct_med": -0.737,
+   "pct_err_med": 0.523
+  },
+  "-86.75": {
+   "cells": 720,
+   "shown": 230,
+   "pct_med": -0.565,
+   "pct_err_med": 0.549
+  },
+  "-86.25": {
+   "cells": 720,
+   "shown": 167,
+   "pct_med": -0.396,
+   "pct_err_med": 0.606
+  },
+  "-85.75": {
+   "cells": 720,
+   "shown": 0,
+   "pct_med": -0.255,
+   "pct_err_med": 0.662
+  },
+  "-85.25": {
+   "cells": 720,
+   "shown": 0,
+   "pct_med": -0.132,
+   "pct_err_med": 0.734
+  },
+  "-84.75": {
+   "cells": 720,
+   "shown": 0,
+   "pct_med": -0.445,
+   "pct_err_med": 0.785
+  },
+  "-84.25": {
+   "cells": 720,
+   "shown": 0,
+   "pct_med": -0.512,
+   "pct_err_med": 0.855
+  },
+  "-83.75": {
+   "cells": 720,
+   "shown": 0,
+   "pct_med": -0.12,
+   "pct_err_med": 0.869
+  },
+  "-83.25": {
+   "cells": 720,
+   "shown": 0,
+   "pct_med": -0.328,
+   "pct_err_med": 0.929
+  },
+  "-82.75": {
+   "cells": 720,
+   "shown": 0,
+   "pct_med": 0.033,
+   "pct_err_med": 0.998
+  },
+  "-82.25": {
+   "cells": 720,
+   "shown": 0,
+   "pct_med": -0.063,
+   "pct_err_med": 1.004
+  },
+  "-81.75": {
+   "cells": 720,
+   "shown": 0,
+   "pct_med": 0.09,
+   "pct_err_med": 1.08
+  },
+  "-81.25": {
+   "cells": 720,
+   "shown": 0,
+   "pct_med": 0.444,
+   "pct_err_med": 1.08
+  },
+  "-80.75": {
+   "cells": 720,
+   "shown": 0,
+   "pct_med": 0.16,
+   "pct_err_med": 1.081
+  },
+  "-80.25": {
+   "cells": 720,
+   "shown": 0,
+   "pct_med": 0.365,
+   "pct_err_med": 1.176
+  }
+ }
+}

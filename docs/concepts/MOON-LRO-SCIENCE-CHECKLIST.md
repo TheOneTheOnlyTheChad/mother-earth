@@ -1,6 +1,6 @@
 # Moon globe and LRO science — spec checklist
 
-Rev 28 · 27 Nov 2026, 14:50 UTC (clock reading; rev 27 14:24, rev 26 11:52, rev 25 10:34, rev 24 10:18, rev 23 09:52, rev 22 09:34, rev 21 09:20, rev 20 06:43, rev 19 04:58, rev 18 03:25, rev 17 27 Nov 02:48, rev 16 26 Nov 21:05, rev 15 18:58, rev 14 17:49, rev 13 16:07, rev 12 15:54, rev 11 15:34, rev 10 15:07, rev 9 14:42, rev 8 13:07, rev 7 11:58, rev 6 10:22, rev 5 09:54, rev 4 09:42, rev 3 09:20, rev 2 08:59, rev 1 08:31 UTC) · written by Claude on Chad's instruction (26 Nov) · **persistent record; update it as each item moves** · docs only.
+Rev 29 · 27 Nov 2026, 16:21 UTC (clock reading; rev 28 14:50, rev 27 14:24, rev 26 11:52, rev 25 10:34, rev 24 10:18, rev 23 09:52, rev 22 09:34, rev 21 09:20, rev 20 06:43, rev 19 04:58, rev 18 03:25, rev 17 27 Nov 02:48, rev 16 26 Nov 21:05, rev 15 18:58, rev 14 17:49, rev 13 16:07, rev 12 15:54, rev 11 15:34, rev 10 15:07, rev 9 14:42, rev 8 13:07, rev 7 11:58, rev 6 10:22, rev 5 09:54, rev 4 09:42, rev 3 09:20, rev 2 08:59, rev 1 08:31 UTC) · written by Claude on Chad's instruction (26 Nov) · **persistent record; update it as each item moves** · docs only.
 
 **What this is.** The record of every item in GPT's original brief, `docs/concepts/MOON-LRO-SCIENCE-BRIEF-GPT-2026-11-25.md`. It also covers the scope Chad added on 26 Nov: every page that shows the Moon. It is **not** the narrowed height proposal (`docs/concepts/MOON-LRO-SCIENCE-PROPOSAL.md` rev 2.1), which covered only the first release.
 
@@ -22,7 +22,7 @@ Rev 28 · 27 Nov 2026, 14:50 UTC (clock reading; rev 27 14:24, rev 26 11:52, rev
 | 3 | Diviner temperature ("Recommended first feature", second paragraph) | **done: released and closed** (merge `0622e80`) |
 | 4 | LROC regional detailed imagery | **done: released and closed** (merge `8e7d262`; Apollo 11) |
 | 5 | CRaTER radiation | **done: released and closed** (merge `ba41c8a`; 10 June 2026 event-count chart) |
-| 6 | LEND neutron and hydrogen products | to assess |
+| 6 | LEND neutron and hydrogen products | **partly assessed**: proposal rev 1 with GPT (`docs/concepts/MOON-LEND-PROPOSAL.md`) |
 | 7 | LAMP far-ultraviolet products | to assess |
 | 8 | Mini-RF radar products | to assess |
 | 9 | Science and trajectory pairing; observation footprints (requirements 5–7) | to assess, only where a selected example benefits |
@@ -324,16 +324,21 @@ Rev 28 · 27 Nov 2026, 14:50 UTC (clock reading; rev 27 14:24, rev 26 11:52, rev
   - **Records:** REGISTER entry "NASA PDS — LRO CRaTER Level 2 secondary science…" (live); `sources.html#mooncrater`; builder `phase1/moonsci/build_crater.py` (`--check`); asset `assets/moon/crater/crater-good-2026-06-10-R1.json`; tests `phase1/moon-crater-ui.test.cjs` (51; 11 breaks) and `phase1/moonsci/crater/test_build_crater.py` (28); Animals pins `CR_MAIN` `4927a02` / `CR_PARENT` `67a615c` (13e, 13aa, 13ab); evidence `docs/research/moon-crater/`; retained inputs on the Mac `_source-data/moon-lro-science-crater/`.
   - **Not pursued now, with revisit conditions (proposal):** a computed dose (R3: needs its own reading, the flag question resolved and a bulk acquisition); path colouring (the per-minute variation is near counting noise).
 
-## 6. LEND neutron and hydrogen products — to assess
+## 6. LEND neutron and hydrogen products — partly assessed (proposal rev 1 with GPT)
 
 - **Brief asked:** neutron measurements and hydrogen-related products. A hydrogen inference is not direct confirmation of water ice, nor a quantity of accessible ice.
-- **Status:** not assessed.
-- **Evidence:** the brief's instrument table only.
-- **Next bounded assessment:**
-  - Identify the LEND products (count-rate maps and any derived hydrogen maps), read their labels and method notes, and fetch one bounded sample.
-  - Record the resolution and the published interpretation limits, including any published scientific debate about the instrument's spatial resolution, cited from sources.
-- **Blockers:** none known.
-- **Decision needed:** whether to show a neutron or hydrogen-related map, and its wording.
+- **Chad's go (27 Nov):** "Continue with Moon item 6: LEND, using the bounded assessment instructions already agreed. Start with archive documentation while folder access is being connected. Return a docs-only feasibility assessment and proposal for GPT review. Keep neutron measurements distinct from inferred hydrogen and accessible water ice. No page build, bulk acquisition, merge or deployment."
+- **Status: partly assessed (16:21 UTC, clock reading).** Proposal `docs/concepts/MOON-LEND-PROPOSAL.md` rev 1; evidence `docs/research/moon-lend/`; retained on the Mac in `_source-data/moon-lro-science-lend/`.
+- **Evidence (summary; details in the proposal):**
+  - Archive: PDS Geosciences Node bundle `urn:nasa:pds:lro_lend` v2.0 (DOI 10.17189/p89b-8w72), Release 67. Collections: raw, reduced, derived (DLD/DLX to 2026-03-14) and **averaged (ALD): six gridded maps** (south pole, north pole, equatorial; 2009-09-15 to 2011-12-11 and 2011-12-11 to 2016-09-14). ALD last updated in Release 29 (2017); not included in any of releases 30–67. **No hydrogen or water product in the bundle.**
+  - Sample: `lend_rdr_alds_20111211.dat` (4,464,000 B, sha256 `e6b1c2d5…0031ef`), plus 19 documents and labels in one JSON (1,095,765 B); checkpoint per file.
+  - Quantity: `CSETN_RATE`, the collimated epithermal count, 0.5° cells, 80–90°S, one 2011–2016 average. Only CSETN and STN1 hold data in this file. 987 cells missing (−1; all of 89.75°S). Per-cell relative error median 3.8%; cell-to-cell differences at 0.5° match counting noise.
+  - Signal: 30 km averages near Cabeus, Shoemaker and Faustini are 0.8–1.0% below same-latitude controls (2.0–3.4 control sd); Haworth −0.6% (−1.1); Amundsen none.
+  - Two document inconsistencies recorded, not resolved: what the stored number is (catalog "unitless" vs values of about 4.9, counts-per-second magnitude), and whether a spacecraft background is subtracted.
+  - Resolution: published and unresolved dispute, from 5–10 km (team documents) and a 30 km footprint (McClanahan et al. 2023) to at least an uncollimated detector's footprint (Eke et al. 2012; Teodoro et al. 2014).
+- **Recommendation (Claude):** L1, an optional polar map of the archived CSETN count rate as percent difference from the same pole's 80–85° band, 30 km display smoothing (our choice, not the instrument's resolution), withholding by counting error; wording keeps neutron measurement, inferred hydrogen and water ice apart. L0 ("assessed, not shown") and L2 (a crater readout) are legitimate. A hydrogen or WEH map (L3) is not proposed.
+- **Blockers:** none for L1 (south pole). North pole needs one more bounded file on Chad's go (D2). A newer map from DLD would be a bulk acquisition.
+- **Decision needed:** Chad's D1–D7 after GPT's review.
 
 ## 7. LAMP far-ultraviolet products — to assess
 
@@ -470,3 +475,4 @@ Each stays `option` until Chad classifies it as "assess" or "not pursued", with 
 - Rev 26 (27 Nov 2026, 11:52 UTC): §5: GPT's rev 2 recheck (PASS), Chad's D1–D5, D7 and go; page preview `moon-crater-ui` (tested `d6f9a0f`) with GPT. No other item moved.
 - Rev 27 (27 Nov 2026, 14:24 UTC): §5: GPT's preview review (PASS); release candidate `6ed18c3` with GPT for release review; §5 status line and the archive-observations wording brought up to date (rev 2). No other item moved.
 - Rev 28 (27 Nov 2026, 14:50 UTC): §5 released and closed (merge `ba41c8a`, 54/54 served, live check); bundle identifier corrected; §11 limits for 5; remaining-items line and order of work updated. No other item moved.
+- Rev 29 (27 Nov 2026, 16:21 UTC): §6 LEND partly assessed on Chad's go; proposal rev 1 with GPT (`docs/concepts/MOON-LEND-PROPOSAL.md`; evidence `docs/research/moon-lend/`). No other item moved.
