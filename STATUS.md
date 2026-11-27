@@ -4,6 +4,10 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 27 Nov 2026
 
+## 27 Nov 16:02 UTC (clock reading) — **Animals: GPT's scope review of the IUCN reply: R2 CLOSED (no copy required); R1 cleared for display, the public repository and served JSON awaiting one clarification (not refused). Chad's clarification on point 2 SENT. Nothing released.** (page: none; Animals thread)
+- **Record:** `docs/research/animals-source-audit/ENQUIRIES-ANIMALS.md` rev 6. GPT's review kept privately on the Mac.
+- **Later, on the branch:** checklist rev 1.1 corrections GPT lists, once point 2 is answered; Moon first.
+
 ## 27 Nov 15:52 UTC (clock reading) — **Animals: IUCN Red List Unit replied. Point 1 PERMITTED (category, global scope, dates and edition on the page, cited and linked); NO COPY required (R2 closed); API use welcome. Point 2 (public repository and served JSON) not answered in terms. Nothing released.** (page: none; Animals thread)
 - **Record:** `docs/research/animals-source-audit/ENQUIRIES-ANIMALS.md` rev 5, section C and "Replies", summary only; the full email kept privately on the Mac.
 - **Branch:** `animals-assessment-rc` still `ab1a223`, untouched.
