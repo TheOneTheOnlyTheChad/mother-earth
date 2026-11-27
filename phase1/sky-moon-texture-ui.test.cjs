@@ -231,7 +231,7 @@ const rotDiff = (R, Q) => { let tr = 0; for (let i = 0; i < 3; i++) for (let k =
     ok(`5 ${name}: the view opened at once (${openMs} ms)`, opened && openMs < 5000, openMs);
     ok(`5 ${name}: grey Moon, failure recorded (${want})`, done && grey(z.moonMap) && String(z.moonMap.why).includes(want), z.moonMap);
     ok(`5 ${name}: failure words`, /could not be loaded/.test(await words(page)), await words(page));
-    if (/slower/.test(name)) { await page.waitForTimeout(3500); const z2 = await Z(page);
+    if (/slower|no Earth/.test(name)) { await page.waitForTimeout(3500); const z2 = await Z(page);
       ok(`5 ${name}: the late answer is discarded (nothing kept, nothing attached)`, grey(z2.moonMap) && !z2.moonMap.ready && !z2.moonMap.url && z2.moonMap.status === 'failed', z2.moonMap);
       const u = await page.evaluate(() => __urls); ok(`5 ${name}: every object URL revoked`, u.made === u.revoked, u); }
     if (name === 'map 404') { await page.waitForTimeout(300); ok('5 map 404: framing and controls unchanged (stops work)', await page.evaluate(() => { ME.zoomGo(2); return ME.zoomState().stop === 'C'; })); }
