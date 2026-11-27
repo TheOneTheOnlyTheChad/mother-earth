@@ -1,0 +1,752 @@
+[
+ {
+  "date": "2026-11-27",
+  "w": 360,
+  "h": 740,
+  "stops": {
+   "A": {
+    "moon_rpx_page": 3.26,
+    "moon_rpx_indep": 3.26,
+    "moon_inFrame": false,
+    "moon_drawable": false,
+    "earth_rpx": 168.74,
+    "canvas": [
+     360,
+     598
+    ],
+    "dpr": 1,
+    "renderer_pixel_ratio": 1,
+    "view_vs_earthline_deg": 2.5
+   },
+   "B": {
+    "moon_rpx_page": 2.19,
+    "moon_rpx_indep": 2.19,
+    "moon_inFrame": true,
+    "moon_drawable": true,
+    "earth_rpx": 5.48,
+    "canvas": [
+     360,
+     598
+    ],
+    "dpr": 1,
+    "renderer_pixel_ratio": 1,
+    "view_vs_earthline_deg": 117.3
+   },
+   "C": {
+    "moon_rpx_page": 0.51,
+    "moon_rpx_indep": 0.51,
+    "moon_inFrame": true,
+    "moon_drawable": true,
+    "earth_rpx": 1.68,
+    "canvas": [
+     360,
+     598
+    ],
+    "dpr": 1,
+    "renderer_pixel_ratio": 1,
+    "view_vs_earthline_deg": 126.8
+   }
+  },
+  "errors": []
+ },
+ {
+  "date": "2026-11-27",
+  "w": 390,
+  "h": 844,
+  "stops": {
+   "A": {
+    "moon_rpx_page": 3.83,
+    "moon_rpx_indep": 3.83,
+    "moon_inFrame": false,
+    "moon_drawable": false,
+    "earth_rpx": 198.08,
+    "canvas": [
+     390,
+     702
+    ],
+    "dpr": 1,
+    "renderer_pixel_ratio": 1,
+    "view_vs_earthline_deg": 2.5
+   },
+   "B": {
+    "moon_rpx_page": 2.57,
+    "moon_rpx_indep": 2.57,
+    "moon_inFrame": true,
+    "moon_drawable": true,
+    "earth_rpx": 6.43,
+    "canvas": [
+     390,
+     702
+    ],
+    "dpr": 1,
+    "renderer_pixel_ratio": 1,
+    "view_vs_earthline_deg": 117.3
+   },
+   "C": {
+    "moon_rpx_page": 0.59,
+    "moon_rpx_indep": 0.59,
+    "moon_inFrame": true,
+    "moon_drawable": true,
+    "earth_rpx": 2,
+    "canvas": [
+     390,
+     702
+    ],
+    "dpr": 1,
+    "renderer_pixel_ratio": 1,
+    "view_vs_earthline_deg": 114.8
+   }
+  },
+  "errors": []
+ },
+ {
+  "date": "2026-11-27",
+  "w": 721,
+  "h": 900,
+  "stops": {
+   "A": {
+    "moon_rpx_page": 2.73,
+    "moon_rpx_indep": 2.73,
+    "moon_inFrame": false,
+    "moon_drawable": false,
+    "earth_rpx": 168.88,
+    "canvas": [
+     697,
+     504
+    ],
+    "dpr": 1,
+    "renderer_pixel_ratio": 1,
+    "view_vs_earthline_deg": 2.1
+   },
+   "B": {
+    "moon_rpx_page": 2.71,
+    "moon_rpx_indep": 2.71,
+    "moon_inFrame": true,
+    "moon_drawable": true,
+    "earth_rpx": 7.18,
+    "canvas": [
+     697,
+     504
+    ],
+    "dpr": 1,
+    "renderer_pixel_ratio": 1,
+    "view_vs_earthline_deg": 85.5
+   },
+   "C": {
+    "moon_rpx_page": 0.55,
+    "moon_rpx_indep": 0.55,
+    "moon_inFrame": true,
+    "moon_drawable": true,
+    "earth_rpx": 2.24,
+    "canvas": [
+     697,
+     504
+    ],
+    "dpr": 1,
+    "renderer_pixel_ratio": 1,
+    "view_vs_earthline_deg": 58.2
+   }
+  },
+  "errors": []
+ },
+ {
+  "date": "2026-11-27",
+  "w": 1280,
+  "h": 900,
+  "stops": {
+   "A": {
+    "moon_rpx_page": 3.7,
+    "moon_rpx_indep": 3.7,
+    "moon_inFrame": false,
+    "moon_drawable": false,
+    "earth_rpx": 229.19,
+    "canvas": [
+     712,
+     684
+    ],
+    "dpr": 1,
+    "renderer_pixel_ratio": 1,
+    "view_vs_earthline_deg": 2.1
+   },
+   "B": {
+    "moon_rpx_page": 3.4,
+    "moon_rpx_indep": 3.4,
+    "moon_inFrame": true,
+    "moon_drawable": true,
+    "earth_rpx": 8.97,
+    "canvas": [
+     712,
+     684
+    ],
+    "dpr": 1,
+    "renderer_pixel_ratio": 1,
+    "view_vs_earthline_deg": 90.4
+   },
+   "C": {
+    "moon_rpx_page": 0.66,
+    "moon_rpx_indep": 0.66,
+    "moon_inFrame": true,
+    "moon_drawable": true,
+    "earth_rpx": 2.59,
+    "canvas": [
+     712,
+     684
+    ],
+    "dpr": 1,
+    "renderer_pixel_ratio": 1,
+    "view_vs_earthline_deg": 63.5
+   }
+  },
+  "errors": []
+ },
+ {
+  "date": "2026-11-27",
+  "w": 1920,
+  "h": 1080,
+  "stops": {
+   "A": {
+    "moon_rpx_page": 4.99,
+    "moon_rpx_indep": 4.99,
+    "moon_inFrame": false,
+    "moon_drawable": false,
+    "earth_rpx": 309.28,
+    "canvas": [
+     1352,
+     923
+    ],
+    "dpr": 1,
+    "renderer_pixel_ratio": 1,
+    "view_vs_earthline_deg": 2.1
+   },
+   "B": {
+    "moon_rpx_page": 5.1,
+    "moon_rpx_indep": 5.1,
+    "moon_inFrame": true,
+    "moon_drawable": true,
+    "earth_rpx": 17.58,
+    "canvas": [
+     1352,
+     923
+    ],
+    "dpr": 1,
+    "renderer_pixel_ratio": 1,
+    "view_vs_earthline_deg": 61.8
+   },
+   "C": {
+    "moon_rpx_page": 1.15,
+    "moon_rpx_indep": 1.15,
+    "moon_inFrame": true,
+    "moon_drawable": true,
+    "earth_rpx": 5.26,
+    "canvas": [
+     1352,
+     923
+    ],
+    "dpr": 1,
+    "renderer_pixel_ratio": 1,
+    "view_vs_earthline_deg": 31.5
+   }
+  },
+  "errors": []
+ },
+ {
+  "date": "2026-12-24",
+  "w": 360,
+  "h": 740,
+  "stops": {
+   "A": {
+    "moon_rpx_page": 3.28,
+    "moon_rpx_indep": 3.28,
+    "moon_inFrame": false,
+    "moon_drawable": false,
+    "earth_rpx": 168.74,
+    "canvas": [
+     360,
+     598
+    ],
+    "dpr": 1,
+    "renderer_pixel_ratio": 1,
+    "view_vs_earthline_deg": 2.9
+   },
+   "B": {
+    "moon_rpx_page": 2.13,
+    "moon_rpx_indep": 2.13,
+    "moon_inFrame": true,
+    "moon_drawable": true,
+    "earth_rpx": 5.29,
+    "canvas": [
+     360,
+     598
+    ],
+    "dpr": 1,
+    "renderer_pixel_ratio": 1,
+    "view_vs_earthline_deg": 121.4
+   },
+   "C": {
+    "moon_rpx_page": 0.47,
+    "moon_rpx_indep": 0.47,
+    "moon_inFrame": true,
+    "moon_drawable": true,
+    "earth_rpx": 1.58,
+    "canvas": [
+     360,
+     598
+    ],
+    "dpr": 1,
+    "renderer_pixel_ratio": 1,
+    "view_vs_earthline_deg": 118.4
+   }
+  },
+  "errors": []
+ },
+ {
+  "date": "2026-12-24",
+  "w": 390,
+  "h": 844,
+  "stops": {
+   "A": {
+    "moon_rpx_page": 3.85,
+    "moon_rpx_indep": 3.85,
+    "moon_inFrame": false,
+    "moon_drawable": false,
+    "earth_rpx": 198.08,
+    "canvas": [
+     390,
+     702
+    ],
+    "dpr": 1,
+    "renderer_pixel_ratio": 1,
+    "view_vs_earthline_deg": 2.9
+   },
+   "B": {
+    "moon_rpx_page": 2.45,
+    "moon_rpx_indep": 2.45,
+    "moon_inFrame": true,
+    "moon_drawable": true,
+    "earth_rpx": 6.75,
+    "canvas": [
+     390,
+     702
+    ],
+    "dpr": 1,
+    "renderer_pixel_ratio": 1,
+    "view_vs_earthline_deg": 104.3
+   },
+   "C": {
+    "moon_rpx_page": 0.57,
+    "moon_rpx_indep": 0.57,
+    "moon_inFrame": true,
+    "moon_drawable": true,
+    "earth_rpx": 2.01,
+    "canvas": [
+     390,
+     702
+    ],
+    "dpr": 1,
+    "renderer_pixel_ratio": 1,
+    "view_vs_earthline_deg": 103.9
+   }
+  },
+  "errors": []
+ },
+ {
+  "date": "2026-12-24",
+  "w": 721,
+  "h": 900,
+  "stops": {
+   "A": {
+    "moon_rpx_page": 2.74,
+    "moon_rpx_indep": 2.74,
+    "moon_inFrame": false,
+    "moon_drawable": false,
+    "earth_rpx": 168.88,
+    "canvas": [
+     697,
+     504
+    ],
+    "dpr": 1,
+    "renderer_pixel_ratio": 1,
+    "view_vs_earthline_deg": 2.4
+   },
+   "B": {
+    "moon_rpx_page": 2.55,
+    "moon_rpx_indep": 2.55,
+    "moon_inFrame": true,
+    "moon_drawable": true,
+    "earth_rpx": 7.62,
+    "canvas": [
+     697,
+     504
+    ],
+    "dpr": 1,
+    "renderer_pixel_ratio": 1,
+    "view_vs_earthline_deg": 77.3
+   },
+   "C": {
+    "moon_rpx_page": 0.56,
+    "moon_rpx_indep": 0.56,
+    "moon_inFrame": true,
+    "moon_drawable": true,
+    "earth_rpx": 2.1,
+    "canvas": [
+     697,
+     504
+    ],
+    "dpr": 1,
+    "renderer_pixel_ratio": 1,
+    "view_vs_earthline_deg": 77.1
+   }
+  },
+  "errors": []
+ },
+ {
+  "date": "2026-12-24",
+  "w": 1280,
+  "h": 900,
+  "stops": {
+   "A": {
+    "moon_rpx_page": 3.72,
+    "moon_rpx_indep": 3.72,
+    "moon_inFrame": false,
+    "moon_drawable": false,
+    "earth_rpx": 229.19,
+    "canvas": [
+     712,
+     684
+    ],
+    "dpr": 1,
+    "renderer_pixel_ratio": 1,
+    "view_vs_earthline_deg": 2.4
+   },
+   "B": {
+    "moon_rpx_page": 2.87,
+    "moon_rpx_indep": 2.87,
+    "moon_inFrame": true,
+    "moon_drawable": true,
+    "earth_rpx": 10.18,
+    "canvas": [
+     712,
+     684
+    ],
+    "dpr": 1,
+    "renderer_pixel_ratio": 1,
+    "view_vs_earthline_deg": 69.1
+   },
+   "C": {
+    "moon_rpx_page": 0.76,
+    "moon_rpx_indep": 0.76,
+    "moon_inFrame": true,
+    "moon_drawable": true,
+    "earth_rpx": 2.78,
+    "canvas": [
+     712,
+     684
+    ],
+    "dpr": 1,
+    "renderer_pixel_ratio": 1,
+    "view_vs_earthline_deg": 86.1
+   }
+  },
+  "errors": []
+ },
+ {
+  "date": "2026-12-24",
+  "w": 1920,
+  "h": 1080,
+  "stops": {
+   "A": {
+    "moon_rpx_page": 5.02,
+    "moon_rpx_indep": 5.02,
+    "moon_inFrame": false,
+    "moon_drawable": false,
+    "earth_rpx": 309.28,
+    "canvas": [
+     1352,
+     923
+    ],
+    "dpr": 1,
+    "renderer_pixel_ratio": 1,
+    "view_vs_earthline_deg": 2.4
+   },
+   "B": {
+    "moon_rpx_page": 5.17,
+    "moon_rpx_indep": 5.17,
+    "moon_inFrame": true,
+    "moon_drawable": true,
+    "earth_rpx": 17.94,
+    "canvas": [
+     1352,
+     923
+    ],
+    "dpr": 1,
+    "renderer_pixel_ratio": 1,
+    "view_vs_earthline_deg": 61.2
+   },
+   "C": {
+    "moon_rpx_page": 1.15,
+    "moon_rpx_indep": 1.15,
+    "moon_inFrame": true,
+    "moon_drawable": true,
+    "earth_rpx": 4.65,
+    "canvas": [
+     1352,
+     923
+    ],
+    "dpr": 1,
+    "renderer_pixel_ratio": 1,
+    "view_vs_earthline_deg": 59.9
+   }
+  },
+  "errors": []
+ },
+ {
+  "date": "2027-01-07",
+  "w": 360,
+  "h": 740,
+  "stops": {
+   "A": {
+    "moon_rpx_page": 2.63,
+    "moon_rpx_indep": 2.63,
+    "moon_inFrame": false,
+    "moon_drawable": false,
+    "earth_rpx": 168.74,
+    "canvas": [
+     360,
+     598
+    ],
+    "dpr": 1,
+    "renderer_pixel_ratio": 1,
+    "view_vs_earthline_deg": 2.5
+   },
+   "B": {
+    "moon_rpx_page": 1.29,
+    "moon_rpx_indep": 1.29,
+    "moon_inFrame": true,
+    "moon_drawable": true,
+    "earth_rpx": 7.01,
+    "canvas": [
+     360,
+     598
+    ],
+    "dpr": 1,
+    "renderer_pixel_ratio": 1,
+    "view_vs_earthline_deg": 35.9
+   },
+   "C": {
+    "moon_rpx_page": 0.52,
+    "moon_rpx_indep": 0.52,
+    "moon_inFrame": true,
+    "moon_drawable": true,
+    "earth_rpx": 2.12,
+    "canvas": [
+     360,
+     598
+    ],
+    "dpr": 1,
+    "renderer_pixel_ratio": 1,
+    "view_vs_earthline_deg": 51.8
+   }
+  },
+  "errors": []
+ },
+ {
+  "date": "2027-01-07",
+  "w": 390,
+  "h": 844,
+  "stops": {
+   "A": {
+    "moon_rpx_page": 3.09,
+    "moon_rpx_indep": 3.09,
+    "moon_inFrame": false,
+    "moon_drawable": false,
+    "earth_rpx": 198.08,
+    "canvas": [
+     390,
+     702
+    ],
+    "dpr": 1,
+    "renderer_pixel_ratio": 1,
+    "view_vs_earthline_deg": 2.5
+   },
+   "B": {
+    "moon_rpx_page": 1.62,
+    "moon_rpx_indep": 1.62,
+    "moon_inFrame": true,
+    "moon_drawable": true,
+    "earth_rpx": 8.7,
+    "canvas": [
+     390,
+     702
+    ],
+    "dpr": 1,
+    "renderer_pixel_ratio": 1,
+    "view_vs_earthline_deg": 38.6
+   },
+   "C": {
+    "moon_rpx_page": 0.66,
+    "moon_rpx_indep": 0.66,
+    "moon_inFrame": true,
+    "moon_drawable": true,
+    "earth_rpx": 2.65,
+    "canvas": [
+     390,
+     702
+    ],
+    "dpr": 1,
+    "renderer_pixel_ratio": 1,
+    "view_vs_earthline_deg": 59.3
+   }
+  },
+  "errors": []
+ },
+ {
+  "date": "2027-01-07",
+  "w": 721,
+  "h": 900,
+  "stops": {
+   "A": {
+    "moon_rpx_page": 2.23,
+    "moon_rpx_indep": 2.23,
+    "moon_inFrame": false,
+    "moon_drawable": false,
+    "earth_rpx": 168.88,
+    "canvas": [
+     697,
+     504
+    ],
+    "dpr": 1,
+    "renderer_pixel_ratio": 1,
+    "view_vs_earthline_deg": 2.1
+   },
+   "B": {
+    "moon_rpx_page": 1.8,
+    "moon_rpx_indep": 1.8,
+    "moon_inFrame": true,
+    "moon_drawable": true,
+    "earth_rpx": 8.34,
+    "canvas": [
+     697,
+     504
+    ],
+    "dpr": 1,
+    "renderer_pixel_ratio": 1,
+    "view_vs_earthline_deg": 51
+   },
+   "C": {
+    "moon_rpx_page": 0.73,
+    "moon_rpx_indep": 0.73,
+    "moon_inFrame": true,
+    "moon_drawable": true,
+    "earth_rpx": 2.63,
+    "canvas": [
+     697,
+     504
+    ],
+    "dpr": 1,
+    "renderer_pixel_ratio": 1,
+    "view_vs_earthline_deg": 85.1
+   }
+  },
+  "errors": []
+ },
+ {
+  "date": "2027-01-07",
+  "w": 1280,
+  "h": 900,
+  "stops": {
+   "A": {
+    "moon_rpx_page": 3.03,
+    "moon_rpx_indep": 3.03,
+    "moon_inFrame": false,
+    "moon_drawable": false,
+    "earth_rpx": 229.19,
+    "canvas": [
+     712,
+     684
+    ],
+    "dpr": 1,
+    "renderer_pixel_ratio": 1,
+    "view_vs_earthline_deg": 2.1
+   },
+   "B": {
+    "moon_rpx_page": 2.24,
+    "moon_rpx_indep": 2.24,
+    "moon_inFrame": true,
+    "moon_drawable": true,
+    "earth_rpx": 10.38,
+    "canvas": [
+     712,
+     684
+    ],
+    "dpr": 1,
+    "renderer_pixel_ratio": 1,
+    "view_vs_earthline_deg": 51.9
+   },
+   "C": {
+    "moon_rpx_page": 0.88,
+    "moon_rpx_indep": 0.88,
+    "moon_inFrame": true,
+    "moon_drawable": true,
+    "earth_rpx": 3.01,
+    "canvas": [
+     712,
+     684
+    ],
+    "dpr": 1,
+    "renderer_pixel_ratio": 1,
+    "view_vs_earthline_deg": 96.2
+   }
+  },
+  "errors": []
+ },
+ {
+  "date": "2027-01-07",
+  "w": 1920,
+  "h": 1080,
+  "stops": {
+   "A": {
+    "moon_rpx_page": 4.09,
+    "moon_rpx_indep": 4.09,
+    "moon_inFrame": false,
+    "moon_drawable": false,
+    "earth_rpx": 309.28,
+    "canvas": [
+     1352,
+     923
+    ],
+    "dpr": 1,
+    "renderer_pixel_ratio": 1,
+    "view_vs_earthline_deg": 2.1
+   },
+   "B": {
+    "moon_rpx_page": 4.18,
+    "moon_rpx_indep": 4.18,
+    "moon_inFrame": true,
+    "moon_drawable": true,
+    "earth_rpx": 16.89,
+    "canvas": [
+     1352,
+     923
+    ],
+    "dpr": 1,
+    "renderer_pixel_ratio": 1,
+    "view_vs_earthline_deg": 54.3
+   },
+   "C": {
+    "moon_rpx_page": 1.73,
+    "moon_rpx_indep": 1.73,
+    "moon_inFrame": true,
+    "moon_drawable": true,
+    "earth_rpx": 5.42,
+    "canvas": [
+     1352,
+     923
+    ],
+    "dpr": 1,
+    "renderer_pixel_ratio": 1,
+    "view_vs_earthline_deg": 105
+   }
+  },
+  "errors": []
+ }
+]

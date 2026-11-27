@@ -1,6 +1,6 @@
 # Moon globe and LRO science — spec checklist
 
-Rev 17 · 27 Nov 2026, 02:48 UTC (clock reading; rev 16 26 Nov 21:05, rev 15 18:58, rev 14 17:49, rev 13 16:07, rev 12 15:54, rev 11 15:34, rev 10 15:07, rev 9 14:42, rev 8 13:07, rev 7 11:58, rev 6 10:22, rev 5 09:54, rev 4 09:42, rev 3 09:20, rev 2 08:59, rev 1 08:31 UTC) · written by Claude on Chad's instruction (26 Nov) · **persistent record; update it as each item moves** · docs only.
+Rev 18 · 27 Nov 2026, 03:25 UTC (clock reading; rev 17 27 Nov 02:48, rev 16 26 Nov 21:05, rev 15 18:58, rev 14 17:49, rev 13 16:07, rev 12 15:54, rev 11 15:34, rev 10 15:07, rev 9 14:42, rev 8 13:07, rev 7 11:58, rev 6 10:22, rev 5 09:54, rev 4 09:42, rev 3 09:20, rev 2 08:59, rev 1 08:31 UTC) · written by Claude on Chad's instruction (26 Nov) · **persistent record; update it as each item moves** · docs only.
 
 **What this is.** The record of every item in GPT's original brief, `docs/concepts/MOON-LRO-SCIENCE-BRIEF-GPT-2026-11-25.md`. It also covers the scope Chad added on 26 Nov: every page that shows the Moon. It is **not** the narrowed height proposal (`docs/concepts/MOON-LRO-SCIENCE-PROPOSAL.md` rev 2.1), which covered only the first release.
 
@@ -26,7 +26,7 @@ Rev 17 · 27 Nov 2026, 02:48 UTC (clock reading; rev 16 26 Nov 21:05, rev 15 18:
 | 7 | LAMP far-ultraviolet products | to assess |
 | 8 | Mini-RF radar products | to assess |
 | 9 | Science and trajectory pairing; observation footprints (requirements 5–7) | to assess, only where a selected example benefits |
-| 10a | Sky zoom-out textured Moon (Chad's wider scope) | to assess and decide (separate round) |
+| 10a | Sky zoom-out textured Moon (Chad's wider scope) | **assessed; proposal rev 1 with GPT** (`docs/concepts/MOON-SKY-TEXTURE-PROPOSAL.md`) |
 | 10b | Tides Moon (Chad's wider scope) | **closed decision: unchanged** |
 | 11 | Verification limits (requirement 8) | open record; carried with every item |
 | 12a | Higher-resolution LOLA grids | option |
@@ -340,7 +340,7 @@ Rev 17 · 27 Nov 2026, 02:48 UTC (clock reading; rev 16 26 Nov 21:05, rev 15 18:
 - **Blockers:** none known.
 - **Decision needed:** per item, if a pairing is proposed.
 
-## 10a. Sky zoom-out textured Moon — to assess and decide (separate round)
+## 10a. Sky zoom-out textured Moon — assessed; proposal rev 1 with GPT
 
 - **Scope:** Chad's 26 Nov widening. Today the Sky zoom-out shows a plain grey sphere (`skyscene.js`, emissive `0x9a9a9a`) at true size and distance.
 - **Status:** parked from the height release for its own round (proposal §7, D4). Not assessed beyond the rev 1 notes.
@@ -349,9 +349,14 @@ Rev 17 · 27 Nov 2026, 02:48 UTC (clock reading; rev 16 26 Nov 21:05, rev 15 18:
   - Libration not shown.
   - Adds 457,942 B.
   - Needs new pixel tests.
-- **Next bounded assessment:** confirm what the current Sky scene does on main, measure the cost, and state what S1 would and would not show. Then propose.
+- **27 Nov 2026 (Chad's go: assess using the existing Moon appearance texture; docs only):** assessed; proposal rev 1 `docs/concepts/MOON-SKY-TEXTURE-PROPOSAL.md`, evidence `docs/research/moon-sky-texture/`. Findings:
+  - **Size:** on unchanged main the Moon's radius at stop B is 1.3–5.2 CSS px (360–1920 px wide, three dates); at stop C 0.5–1.7 px; at stop A it is outside the frame.
+  - **Viewing direction:** at stop B the camera sees it 36–121° from the Earth–Moon line, so the visible disc is often half or more far side.
+  - **Orientation:** the true orientation (libration included) can be derived from the sunlight table already served for "Lit as now" plus the Sky scene file (two-direction fit). Against astronomy-engine's IAU model over all 579 dates: median 0.004°, 95% 0.027°, max 0.29° (near new Moon); three breaks caught. S1 rejected (its roll would be invented).
+  - **Proposed:** T-orient, evenly lit (L1, no phase), loaded only on entry, pinned, never blocking, grey on any failure; +540,272 B on first entry; no new data, no hub change.
+  - "Not pursued" is offered as a legitimate outcome (D1).
 - **Blockers:** none known.
-- **Decision needed (Chad):** whether to texture the Sky Moon at all, and in which form.
+- **Decision needed (Chad, after GPT):** D1–D6 in the proposal §12 (do it at all; orientation; lighting; brightness; code reuse; texture after Back).
 
 ## 10b. Tides Moon — closed decision: unchanged
 
@@ -392,7 +397,7 @@ Each stays `option` until Chad classifies it as "assess" or "not pursued", with 
 1. **Diviner:** assessment and proposal first, not a build. *(26 Nov: released, merge `0622e80`; item 3 done and closed.)*
 2. Then the remaining items **one at a time**, in the order Chad chooses. *(27 Nov: item 4, LROC Apollo 11, released, merge `8e7d262`.)*
 
-**Remaining open items after LROC (27 Nov):** 5, 6, 7, 8, 10a (to assess); 9 (only inside the item it serves); 12a–c (options to classify); 11 (carried). Suggested order (Claude's suggestion, for Chad to decide): the Sky Moon decision (10a), then CRaTER (5), LEND (6), LAMP (7) and Mini-RF (8). Pairing (9) and the options (12) are taken up only inside the item they serve or when Chad classifies them.
+**Remaining open items after LROC (27 Nov):** 10a (assessed 27 Nov; proposal rev 1 with GPT); 5, 6, 7, 8 (to assess); 9 (only inside the item it serves); 12a–c (options to classify); 11 (carried). Suggested order (Claude's suggestion, for Chad to decide): the Sky Moon decision (10a), then CRaTER (5), LEND (6), LAMP (7) and Mini-RF (8). Pairing (9) and the options (12) are taken up only inside the item they serve or when Chad classifies them.
 
 ## Change log
 
@@ -413,3 +418,4 @@ Each stays `option` until Chad classifies it as "assess" or "not pursued", with 
 - Rev 15 (26 Nov 2026, 18:58 UTC): §4: GPT's preview review filed; startup fix and preview rev 3 with GPT. No other item moved.
 - Rev 16 (26 Nov 2026, 21:05 UTC): §4: GPT's rev 3 recheck filed; release candidate with GPT. No other item moved.
 - Rev 17 (27 Nov 2026, 02:48 UTC): §4 released and closed (merge `8e7d262`, 50/50 served, live functional check); order of work updated. No other item moved.
+- Rev 18 (27 Nov 2026, 03:25 UTC): §10a assessed on Chad's go; proposal rev 1 for GPT (`docs/concepts/MOON-SKY-TEXTURE-PROPOSAL.md`; evidence `docs/research/moon-sky-texture/`). No other item moved.

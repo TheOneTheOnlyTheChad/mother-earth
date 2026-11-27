@@ -4,6 +4,14 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 26 Nov 2026
 
+## 27 Nov 03:25 UTC (clock reading) — **Moon item 10a (Sky zoom-out Moon picture): assessed; proposal rev 1 with GPT. Docs only; no build, merge or deployment; no data downloaded** (Moon spec, item 10a thread)
+- Chad's go: assess using the existing Moon appearance texture in the Sky zoom-out view; bounded proposal for GPT (orientation, lighting, attribution, loading, performance); keep the remaining checklist intact.
+- Proposal `docs/concepts/MOON-SKY-TEXTURE-PROPOSAL.md` rev 1; evidence `docs/research/moon-sky-texture/` (scripts and results; images on the Mac only).
+- **Measured on unchanged main:** Moon radius at stop B 1.3–5.2 CSS px (360–1920 px, three dates), stop C 0.5–1.7 px, stop A outside the frame; at stop B the Moon is seen 36–121° from the Earth–Moon line.
+- **Orientation:** two-direction fit from the served sunlight table and the Sky scene file; against astronomy-engine (IAU) over 579 dates median 0.004°, 95% 0.027°, max 0.29°; three breaks caught.
+- Proposed T-orient + evenly lit (no phase), loaded on entry only, pinned, never blocking, grey on failure, +540,272 B on first entry. D1–D6 for Chad after GPT (D1 includes "not pursued").
+- Checklist rev 18 (10a only). Main at start: `018102c`, clean; local served-manifest check 50/50.
+
 ## 27 Nov 03:06 UTC (clock reading) — **Moon LROC workstream closed out; next-thread handover written**
 - Live re-check 03:03:12 UTC: 50 of 50 served files match the reviewed manifest (manifest fetched from GitHub at `40e0f86`, hash `cdd304f5…` confirmed first).
 - Branches: `moon-lroc-ui` deleted (remote and local); 7 other workstreams' branches with unique commits left alone.
