@@ -1,5 +1,6 @@
-/* Moon science layers (moon.html): "What LRO measured: height" (LOLA) and "What LRO measured: brightness temperature" (Diviner).
- * Both optional, off by default, not live. One coordinator (MoonScience) owns what is on the globe; each layer owns its own data.
+/* Moon science layers (moon.html): "What LRO measured: height" (LOLA), "What LRO measured: brightness temperature" (Diviner) and the
+ * south-polar neutron record (LEND). All three optional, off by default, not live. One coordinator (MoonScience) owns what is on the
+ * globe; each layer owns its own data; only one is shown at a time.
  *
  * Height (MOON-LRO-SCIENCE-PROPOSAL rev 2.1; released 26 Nov 2026). Source: LOLA LDEM_4_FLOAT V3.0 (NASA PDS, DOI 10.17189/tnyt-7007):
  * height relative to a 1737.4 km reference sphere on a 0.25 degree grid, laser data 13 Jul 2009 - 29 Nov 2016. Two files, each checked
@@ -18,8 +19,8 @@
  * the checked grid: one fixed ramp, one fixed scale per mode (noon 281-395 K, midnight 70-105 K), no valid data in a dark neutral
  * hatch, withheld in a flat light neutral.
  *
- * Transitions (proposal §5, GPT's note 2). active is none, height, temp-noon or temp-mid. The lighting state is saved ONCE, on entering
- * science mode, and kept across height <-> temperature and noon <-> midnight. While a new map loads and is checked, the shown map stays.
+ * Transitions (proposal §5, GPT's note 2). active is none, height, temp-noon, temp-mid or lend. The lighting state is saved ONCE, on
+ * entering science mode, and kept across any switch between height, temperature (noon <-> midnight) and the neutron record. While a new map loads and is checked, the shown map stays.
  * On success the texture is swapped in one call. On failure or cancel nothing changes (a radio button that asked for the failed mode
  * goes back to the mode shown). Leaving science mode (the active layer's own button) brings the picture back and restores "Lit as now"
  * for the current minute if it was on; the Earth view is not reopened. Every request takes a new token and aborts the previous one;
@@ -254,8 +255,12 @@
     const magic = String.fromCharCode(...u8.subarray(0, 8));
     const want16 = [[8, 1], [10, NHDR], [12, NR], [14, NCOL], [16, NREC], [20, 50], [22, 25], [24, 50], [26, 50], [42, 0]];
     const wantI16 = [[18, -8975], [36, -8475], [38, -8025], [40, -8000]], want32 = [[28, 30000], [32, 1737400], [44, 20111211], [48, 20160914]];
+    // the two float64 reference fields are read once and must be finite before the tolerance test (a NaN fails every comparison, so
+    // "difference > 1e-9" alone would accept it; GPT's preview review)
+    const refMean = dv.getFloat64(52, true), refErr = dv.getFloat64(60, true);
+    const refOk = Number.isFinite(refMean) && Number.isFinite(refErr) && Math.abs(refMean - NREF.mean) <= 1e-9 && Math.abs(refErr - NREF.err) <= 1e-9;
     if (magic !== 'MELENDR1' || want16.some(([o, v]) => dv.getUint16(o, true) !== v) || wantI16.some(([o, v]) => dv.getInt16(o, true) !== v)
-      || want32.some(([o, v]) => dv.getUint32(o, true) !== v) || Math.abs(dv.getFloat64(52, true) - NREF.mean) > 1e-9 || Math.abs(dv.getFloat64(60, true) - NREF.err) > 1e-9
+      || want32.some(([o, v]) => dv.getUint32(o, true) !== v) || !refOk
       || u8.subarray(68, 96).some(b => b !== 0) || [...u8.subarray(96, 128)].map(b => b.toString(16).padStart(2, '0')).join('') !== NSRC)
       throw new Why('the neutron record file header is not the expected one');
     if (await hex(buf.slice(NHDR)) !== [...u8.subarray(128, 160)].map(b => b.toString(16).padStart(2, '0')).join('')) throw new Why('the neutron record file failed its payload check');

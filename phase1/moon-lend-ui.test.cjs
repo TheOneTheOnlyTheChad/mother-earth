@@ -10,11 +10,12 @@
  *  D. network: nothing fetched while off; one file and one picture request on first use; none on re-entry
  *  E. page rejections (crafted files with their pins injected, so the page's own checks reject them): magic, header field, reference
  *     mean, source hash, payload hash, bad state code, shown cell with estimate 0.51, missing cell with a value, shown p beyond 20 %,
- *     withheld cell with p set, short file
+ *     withheld cell with p set, short file; NaN and infinite reference mean and error (GPT's preview review), and a NaN header refused
+ *     while height is shown, leaving that map and texture unchanged
  *  F. legend and wording on the feature (uncalibrated-field caveat, conditional estimate, display choice); pole and centre buttons; keyboard;
  *     360 px layout; LRO overlay untouched; height and temperature still work afterwards
  * Run: node phase1/moon-lend-ui.test.cjs [base-url]   (static server on the repo, default 127.0.0.1:8899)
- * BREAK=row|col|flip|outside|nocell|nopayload|nopin|missval|late|leak|nosave|norestore|noleavecancel|deadline|noerrtext|nocaveat must each fail. */
+ * BREAK=row|col|flip|outside|nocell|nopayload|nopin|missval|late|leak|nosave|norestore|noleavecancel|deadline|noerrtext|nocaveat|nofinite must each fail. */
 const { chromium } = require('playwright'); const fs = require('fs'); const path = require('path'); const crypto = require('crypto');
 const { PNG } = require('/home/claude/spike/node_modules/pngjs');
 const BASE = process.argv[2] || 'http://127.0.0.1:8899'; const BREAK = process.env.BREAK || '';
@@ -58,6 +59,8 @@ const setRec = (b, i, r) => { const o = 160 + 10 * i; b[o] = r.state; b[o + 1] =
       if (BREAK === 'noleavecancel') B('const h = MG(), was = MS.active; cancel();', 'const h = MG(), was = MS.active;');
       const DL = "const tm = setTimeout(() => { if (MS.pend && MS.pend.tok === tok) { cancel(); LAYER[target].failed(new Why('it took too long'), target); } }, TIMEOUT_MS);";
       if (BREAK === 'deadline') { B(DL, 'const tm = setTimeout(() => ctl.abort(), TIMEOUT_MS);'); B("    if (ctl.signal.aborted) { res.drop(); syncRadio(); LAYER[target].failed(new Why('it took too long or was cancelled'), target); paint(); return; }\n", ''); }
+      if (BREAK === 'nofinite') B('const refOk = Number.isFinite(refMean) && Number.isFinite(refErr) && Math.abs(refMean - NREF.mean) <= 1e-9 && Math.abs(refErr - NREF.err) <= 1e-9;',
+        'const refOk = !(Math.abs(refMean - NREF.mean) > 1e-9 || Math.abs(refErr - NREF.err) > 1e-9);');   // the reviewed preview's test, which accepts NaN
       if (BREAK === 'noerrtext') B(' (± is a formal counting-error estimate assuming independent archive errors)', '');
       if (BREAK && !globalThis.__brkLogged && !['nocaveat'].includes(BREAK)) { globalThis.__brkLogged = 1; console.log('BREAK applied (pattern found): ' + BREAK); }
       r.fulfill({ status: 200, contentType: 'application/javascript', body: s }); });
@@ -248,6 +251,11 @@ const setRec = (b, i, r) => { const o = 160 + 10 * i; b[o] = r.state; b[o + 1] =
     ['header radius', craft(b => { b.writeUInt32LE(60000, 28); }), /header/],
     ['reference mean', craft(b => { b.writeDoubleLE(5.0, 52); }), /header/],
     ['source hash', craft(b => { b[100] ^= 1; }), /header/],
+    // non-finite reference fields (GPT's preview review): the outer pin is injected to match each crafted file, so the header validator decides
+    ['reference mean NaN', craft(b => { b.writeDoubleLE(NaN, 52); }), /header is not the expected one/],
+    ['reference error NaN', craft(b => { b.writeDoubleLE(NaN, 60); }), /header is not the expected one/],
+    ['reference mean +Infinity', craft(b => { b.writeDoubleLE(Infinity, 52); }), /header is not the expected one/],
+    ['reference error -Infinity', craft(b => { b.writeDoubleLE(-Infinity, 60); }), /header is not the expected one/],
     ['payload hash', craft(b => { b[NREC(5000) + 2] ^= 1; }, { keepHash: true }), /payload check/],
     ['bad state code', craft(b => { b[NREC(7000)] = 4; }), /cell check/],
     ['shown estimate 0.51', craft(b => { const i = (() => { for (let i = 0; i < 14400; i++) if (b[NREC(i)] === 0) return i; })(); b.writeUInt16LE(51, NREC(i) + 4); }), /cell check/],
@@ -261,6 +269,18 @@ const setRec = (b, i, r) => { const o = 160 + 10 * i; b[o] = r.state; b[o + 1] =
     await press(p, '#mg-lend'); await waitIdle(p);
     const t = await text(p, '#mg-lend-read');
     ok('E rejects ' + name, (await sci(p)).active === null && re.test(t), t);
+    await ctx.close();
+  }
+  {   // a NaN header while another map is shown: refused with the header message; the shown height map and its texture stay unchanged
+    const nanBody = craft(b => { b.writeDoubleLE(NaN, 52); });
+    const { ctx, p } = await mk({ body: nanBody });
+    await press(p, '#mg-height');
+    const hOk = await waitActive(p, 'height');
+    const texBefore = await p.evaluate(() => MoonGlobe.globe().globeImageUrl());
+    await press(p, '#mg-lend'); await waitIdle(p);
+    const t = await text(p, '#mg-lend-read');
+    ok('E NaN header while height is shown: refused, height stays', hOk && (await sci(p)).active === 'height' && /header is not the expected one/.test(t), { st: await sci(p), t });
+    ok('E NaN header: the displayed texture is unchanged', await p.evaluate(() => MoonGlobe.globe().globeImageUrl()) === texBefore);
     await ctx.close();
   }
   { const { ctx, p } = await mk({ body: null }); await ctx.route('**/assets/moon/lend/lend-alds-2011-2016-R1.bin*', r => r.fulfill({ status: 200, body: craft(b => { b[NREC(9)] ^= 0; b[NREC(9) + 8] ^= 1; }, { keepHash: false }) }));
