@@ -4,6 +4,12 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 26 Nov 2026
 
+## 27 Nov 15:55 UTC (clock reading) — **Moon item 5 (CRaTER) thread closed out; handover written** (Moon spec)
+- Live state rechecked: 54/54 served files match `reviews/evidence/2026-11-27-moon-crater-manifest.json` at 15:47:47 UTC (main `af00389`; release merge `ba41c8a` of approved `6ed18c3`).
+- Records: START-HERE (live line, current Moon handover, CRaTER lessons 1–8), release record close-out lines, HANDOVER, this entry. Review run logs kept as `reviews/evidence/2026-11-27-moon-crater-review-logs.tgz` (`a8e92867…`).
+- Cleanup: `moon-crater-ui` deleted (GitHub and local); 7 other workstreams' branches left (unique commits). Retained CRaTER sources verified against the checkpoints. Moon leftovers gathered for the Trash in `_to_delete/moon-programme-to-trash-20261127/` and `~/Downloads/_to_delete-moon-20261127/` (Finder blocked by a full-screen Space; Chad to move them). Container temporaries removed.
+- Handover: `reviews/2026-11-27-moon-crater-handover.md` (Project `claude/HANDOVER-MOON-AFTER-CRATER.md`). Next: Chad names the next Moon item (6 LEND, 7 LAMP, 8 Mini-RF) or classifies 12a–c.
+
 ## 27 Nov 14:50 UTC (clock reading) — **Moon item 5 (CRaTER): RELEASED and CLOSED. Page only; no hub change** (Moon spec, CRaTER thread)
 - GPT's release review PASS, filed unchanged (`reviews/2026-11-27-moon-crater-release-rc-gpt-review.md`). Chad: "Approve: release the CRaTER event-count chart from moon-crater-ui at 6ed18c3 to main, page only; no hub deployment."
 - **Merge `ba41c8a`** of `6ed18c3` into `05dc479` (14:44:27 UTC commit time); tree equals `6ed18c3` plus main's three records files. Packet brought over by a records-only merge of `cffec00`.

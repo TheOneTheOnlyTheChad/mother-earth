@@ -54,6 +54,8 @@
 - **Records:** REGISTER marked live, with the identifier correction; STATUS and HANDOVER updated; the Project checklist copy updated.
 - **Branch:** `moon-crater-ui` is fully contained in main after the records merge, and is deleted after verification.
 - **Kept:** the raw sources and provenance (`_source-data/moon-lro-science-crater/`, `docs/research/moon-crater/`).
-- **Mac:** the review copy is archived.
+- **Mac:** the review copies (`moon-crater-rev1`, `-rev2`, `-ui`, `-release-rc`) were cleared from `_review/`. Their run logs and screenshots are kept in the repo as `reviews/evidence/2026-11-27-moon-crater-review-logs.tgz` (266,615 B, sha256 `a8e92867b0be859d161ddf9fb6725a0c6cfd646c03ee469e9997289eca7af4da`; 83 entries, checked against both folders' SHA256SUMS).
+- **Close-out recheck (15:47:47 UTC):** 54/54 live files still match the reviewed manifest, with main at `af00389` (records only after `ba41c8a`).
+- **Retained sources rechecked at close-out:** the four files in `_source-data/moon-lro-science-crater/` match `docs/research/moon-crater/checkpoints.jsonl` by sha256. The Downloads copies matched them and are staged for the Trash.
 - **Rollback:** `git revert -m 1 ba41c8a`.
 - **Remaining Moon items, one at a time:** 6 LEND, 7 LAMP, 8 Mini-RF; 9 only inside the item it serves; 12a–c options for Chad to classify; 11 carried. Sun and Parker wait for the Moon close-out.
