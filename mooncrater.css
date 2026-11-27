@@ -1,0 +1,24 @@
+/* Moon tab: CRaTER good-event counts, a dated record — MOON-CRATER-PROPOSAL rev 2 §11. Moon tab only. */
+body.craft .crx{max-width:640px;margin:12px auto 6px;font-size:13px;line-height:1.5}
+body.craft .crx[hidden],body.craft .crx [hidden]{display:none}
+body.craft .crx-ctl{max-width:640px;margin:12px auto 0}
+body.craft .crx-ctl button,body.craft .crx #cr-retry{min-height:40px;padding:6px 12px;background:var(--panel);color:inherit;border:1px solid var(--line-strong);border-radius:6px;font:600 14px/1 var(--display);letter-spacing:.04em;cursor:pointer}
+body.craft .crx-ctl button[aria-pressed="true"]{border-color:var(--accent)}
+body.craft .crx h4{margin:4px 0;font-size:14px}
+body.craft .crx h4 .ev{margin-left:6px}
+body.craft .crx p{margin:4px 0}
+body.craft .crx-fig{margin:6px 0 0}
+body.craft .crx svg{display:block;width:100%;height:auto;overflow:visible}
+body.craft .crx .crg{stroke:var(--line);stroke-width:1}
+body.craft .crx .crt{fill:var(--dim);font:11px var(--mono,monospace)}
+body.craft .crx .crv{stroke:var(--fg);stroke-width:2}
+body.craft .crx .crv.on{stroke:var(--accent);stroke-width:3}
+body.craft .crx .crb{stroke:var(--dim);stroke-width:1}
+body.craft .crx .crsel{fill:var(--accent);opacity:.18}
+/* a withheld group: hatched, never drawn as a value */
+body.craft .crx .crw{fill:url(#cr-hatch)}
+body.craft .crx-read{min-height:3em;margin:6px 0}
+body.craft .crx details{margin:6px 0}
+body.craft .crx table{border-collapse:collapse;font-size:12px;font-variant-numeric:tabular-nums}
+body.craft .crx th,body.craft .crx td{padding:2px 8px;border-top:1px solid var(--line);text-align:right}
+body.craft .crx th[scope="row"]{text-align:left;font-weight:400}
