@@ -19,6 +19,9 @@
  *   Resize: when the globe box changes size the stops are re-framed for it, keeping the entry view and the progress. Tags,
  *   rings and lines are drawn only for bodies whose meshes are inside the camera frustum (near and far planes included).
  * Directions come from build_scene.py (IAU 2006 precession + GMST; no nutation; polar motion 0; UT1 = UTC). Not observed.
+ * Moon picture (Moon item 10a, 27 Nov 2026; MOON-SKY-TEXTURE-PROPOSAL rev 1 + GPT's notes): on entry, besides the scene file, two
+ *   optional files of this site (the Moon page's map and the sunlight table, each pinned); the Moon becomes the map, evenly lit, at an
+ *   approximate calculated orientation, when both are ready. Never blocking; grey on any failure. See "the Moon's picture" below.
  */
 (() => {
   const ME = window.ME, $ = id => document.getElementById(id), esc = ME.esc;
@@ -217,6 +220,114 @@
     for (const b of ['moon', 'sun']) { const m = st.meshes[b]; m.position.set(...g[b].pos); m.scale.set(g[b].r, g[b].r, g[b].r); }
   }
 
+  // ---------- the Moon's picture (Moon item 10a; MOON-SKY-TEXTURE-PROPOSAL rev 1 with GPT's review notes; Chad's D1–D6, 27 Nov 2026)
+  // Optional and never blocking: the view opens and frames exactly as before with the plain grey Moon. On entry only, two files
+  // of this site are read, each checked against its pin: the Moon page's map (NASA SVS CGI Moon Kit) and the sunlight table
+  // (moonlight.js reads it). When both are ready, and the current scene date has a sample, the grey Moon becomes the map, still
+  // evenly lit (diffuse black, emissive map, emissive white; no phase), turned to an approximate calculated orientation:
+  // a two-direction fit at the scene's instant. Moon→Earth is matched exactly (scene file ↔ the table's sub-Earth point); the
+  // Moon→Sun direction (scene file, true Sun range ↔ the table's sub-solar point) fixes only the roll about that line.
+  // ONE time limit covers everything up to a texture ready to attach (fetch, bytes, hashes, JSON, decode, preparation).
+  // Any failure, a late answer, Back, a failed scene entry or a date without a sample → the grey Moon; no invented orientation.
+  // On exit the texture is disposed and the decoded picture released (D6); the HTTP cache may still serve the bytes next time.
+  const MAP = { url: 'assets/moon/lroc_color_2k.jpg?v=1', sha: 'f7130a1822681fa7512d7dcfd40db8c10b9ba4f06777910348698260ed7a2170', w: 2048, h: 1024 };
+  const MAP_TIMEOUT_MS = 10000, MIN_CROSS = 0.005;   // smallest |Moon→Earth × Moon→Sun| accepted (the 579 samples: 0.0200 at least)
+  const MAP_WORDS = {
+    ok: "The Moon carries the Moon page's map (NASA Scientific Visualization Studio, CGI Moon Kit): appearance only, evenly lit, not how it was lit at that instant. It is turned to an approximate calculated orientation for that instant. At the Earth-and-Moon stop it is only a few pixels across, so the map shows light and dark areas, not features.",
+    loading: "The Moon's picture is loading; until it is ready the Moon is drawn plain.",
+    failed: "The Moon's picture could not be loaded or placed, so the Moon is drawn plain.",
+  };
+  const mm = { gen: 0, status: 'idle', why: null, ctl: null, timer: null, ready: null, tex: null, url: null, rotDate: null, uploadMs: null, prepMs: null };
+  function mapWords() { const p = $('zoom-moonmap'); if (p) p.textContent = MAP_WORDS[mm.status === 'ok' ? 'ok' : mm.status === 'failed' ? 'failed' : 'loading']; }
+  function plainMoon() {   // the grey Moon exactly as before 10a, and nothing of the picture kept
+    const m = st.meshes && st.meshes.moon; if (!m) return;
+    const mat = m.material; if (mat.emissiveMap) { mat.emissiveMap = null; mat.needsUpdate = true; }
+    mat.emissive && mat.emissive.setHex(0x9a9a9a); m.rotation.set(0, 0, 0); mm.rotDate = null;
+  }
+  function releaseMap() {
+    if (mm.tex) { try { mm.tex.dispose(); } catch (e) {} if (mm.tex.image) mm.tex.image = null; mm.tex = null; }
+    if (mm.ready) { mm.ready.img = null; mm.ready = null; }
+    if (mm.url) { URL.revokeObjectURL(mm.url); mm.url = null; }
+  }
+  function cancelMap(status, why) {
+    mm.gen++; if (mm.ctl) { try { mm.ctl.abort(); } catch (e) {} mm.ctl = null; } clearTimeout(mm.timer); mm.timer = null;
+    plainMoon(); releaseMap(); mm.status = status || 'idle'; mm.why = why || null; mapWords();
+  }
+  // Moon-fixed → scene rotation for a scene row, or null (guards: exact table sample, finite, non-degenerate, proper rotation)
+  function moonRotation(rows, tab) {
+    const ML = window.MoonLight; if (!ML || !tab || !rows) return null;
+    const ms = Date.parse(rows.moon[0] + 'T00:00:00Z'), x = (ms - ML.T.start) / ML.T.step;
+    if (!Number.isInteger(x) || x < 0 || x >= ML.T.n) return null;
+    const vecE = (lat, lng) => { const a = lat * Math.PI / 180, o = lng * Math.PI / 180; return [Math.cos(a) * Math.cos(o), Math.cos(a) * Math.sin(o), Math.sin(a)]; };
+    const moonP = V.mul(vecE(rows.moon[1], rows.moon[2]), rows.moon[3]), sunP = V.mul(vecE(rows.sun[1], rows.sun[2]), rows.sun[3]);
+    const eS = V.norm(V.mul(moonP, -1)), sS = V.norm(V.sub(sunP, moonP)), eM = tab.earth[x], sM = tab.sun[x];
+    const tri = (p, q) => { const c = V.cross(p, q), n = V.len(c); if (!(n >= MIN_CROSS)) return null; const t2 = V.mul(c, 1 / n); return [p, t2, V.cross(p, t2)]; };
+    const A = tri(eS, sS), B = tri(eM, sM); if (!A || !B) return null;
+    const R = [0, 1, 2].map(i => [0, 1, 2].map(j => A[0][i] * B[0][j] + A[1][i] * B[1][j] + A[2][i] * B[2][j]));   // Aᵀ·B: Moon-fixed → Earth-fixed
+    const flat = [].concat(...R); if (!flat.every(Number.isFinite)) return null;
+    for (let i = 0; i < 3; i++) for (let j = 0; j < 3; j++) { const d = R[0][i] * R[0][j] + R[1][i] * R[1][j] + R[2][i] * R[2][j]; if (Math.abs(d - (i === j ? 1 : 0)) > 1e-9) return null; }
+    const det = R[0][0] * (R[1][1] * R[2][2] - R[1][2] * R[2][1]) - R[0][1] * (R[1][0] * R[2][2] - R[1][2] * R[2][0]) + R[0][2] * (R[1][0] * R[2][1] - R[1][1] * R[2][0]);
+    if (Math.abs(det - 1) > 1e-9) return null;
+    return R;
+  }
+  // world (three.js) ← mesh-local: three = Earth-fixed (y, z, x); Earth-fixed = R · Moon-fixed; Moon-fixed (X, Y, Z) is mesh-local
+  // (X, Z, −Y) on three's SphereGeometry with u = (longitude + 180°)/360 (the map has 0° longitude at its centre, north up)
+  function orientMoon(R) {
+    const m = st.meshes.moon, P = [[0, 1, 0], [0, 0, 1], [1, 0, 0]], Lt = [[1, 0, 0], [0, 0, -1], [0, 1, 0]];
+    const mul3 = (X, Y) => X.map(r => [0, 1, 2].map(j => r[0] * Y[0][j] + r[1] * Y[1][j] + r[2] * Y[2][j]));
+    const W = mul3(mul3(P, R), Lt), M4 = new m.matrix.constructor();
+    M4.set(W[0][0], W[0][1], W[0][2], 0, W[1][0], W[1][1], W[1][2], 0, W[2][0], W[2][1], W[2][2], 0, 0, 0, 0, 1);
+    m.setRotationFromMatrix(M4); m.updateMatrixWorld(true);
+  }
+  // put the picture on the Moon for the CURRENT scene row, or fall back to grey; called on commit and in every date update
+  function applyMap() {
+    if (!st.open || !st.meshes || !mm.ready || mm.status === 'failed') return;
+    if (!st.rows) return;                                  // no position for the date: the meshes are hidden by the date rule
+    const R = moonRotation(st.rows, mm.ready.tab);
+    if (!R) return cancelMap('failed', 'orientation');
+    if (!mm.tex) {
+      const t0 = performance.now(), tex = new mm.ready.Tex(mm.ready.img);
+      if (mm.ready.space !== undefined) tex.colorSpace = mm.ready.space;
+      tex.needsUpdate = true; mm.tex = tex;
+      const mat = st.meshes.moon.material; mat.emissiveMap = tex; mat.emissive && mat.emissive.setHex(0xffffff); mat.needsUpdate = true;
+      const r = ME.globe().renderer(); if (r && typeof r.initTexture === 'function') { try { r.initTexture(tex); } catch (e) {} }   // upload now, measured
+      mm.uploadMs = +(performance.now() - t0).toFixed(1);
+      if (mm.url) { URL.revokeObjectURL(mm.url); mm.url = null; }
+    }
+    orientMoon(R); mm.rotDate = st.rows.moon[0]; mm.status = 'ok'; mapWords();
+  }
+  async function loadMap() {
+    const gen = ++mm.gen, ctl = new AbortController(), t0 = performance.now();
+    mm.ctl = ctl; mm.status = 'loading'; mm.why = null; mm.uploadMs = mm.prepMs = null; mapWords();
+    const live = () => gen === mm.gen;
+    let settled = false;
+    const fail = why => { if (settled || !live()) return; settled = true; cancelMap('failed', why); };
+    mm.timer = setTimeout(() => fail('timed out'), MAP_TIMEOUT_MS);
+    const bytes = async (url, sha) => { const r = await fetch(url, { signal: ctl.signal }); if (!r.ok) throw new Error('answered ' + r.status);
+      const b = await r.arrayBuffer(); if (await sha256(b) !== sha) throw new Error('pin'); return b; };
+    try {
+      const ML = window.MoonLight; if (!ML) throw new Error('reader missing');
+      const [img, tb] = await Promise.all([bytes(MAP.url, MAP.sha), bytes(ML.T.url, ML.T.sha)]);
+      if (!live() || settled) return;
+      const tab = ML.read(JSON.parse(new TextDecoder('utf-8', { fatal: true }).decode(tb))); if (typeof tab === 'string') throw new Error('table: ' + tab);
+      const url = URL.createObjectURL(new Blob([img], { type: 'image/jpeg' })); mm.url = url;
+      const pic = new Image(); pic.src = url; await pic.decode();
+      if (!live() || settled) { if (url === mm.url) { URL.revokeObjectURL(url); mm.url = null; } return; }
+      if (pic.naturalWidth !== MAP.w || pic.naturalHeight !== MAP.h) throw new Error('size');
+      // the texture class comes from the Earth picture already on the globe (no three.js global in the bundle); wait inside the limit
+      let Tex = null, space;
+      while (live() && !settled) { const gm = ME.globe().globeMaterial(); if (gm && gm.map) { Tex = gm.map.constructor; space = gm.map.colorSpace; break; } await new Promise(r => setTimeout(r, 100)); }
+      if (!live() || settled) return;
+      settled = true; clearTimeout(mm.timer); mm.timer = null; mm.ctl = null;
+      mm.ready = { img: pic, tab, Tex, space }; mm.prepMs = +(performance.now() - t0).toFixed(1);
+      applyMap();
+    } catch (e) {
+      if (!live() || settled) return;
+      try { ctl.abort(); } catch (_) {}   // the sibling download stops too
+      fail(e && e.name === 'AbortError' ? 'aborted' : String(e && e.message || e));
+    }
+  }
+
   // ---------- layers: hide every layer group of the globe root, and siblings of the globe mesh (day/night), except the
   // atmosphere; restore each saved flag exactly
   function hideLayers() {
@@ -234,13 +345,14 @@
     if (!g) return say('The zoom-out view needs the 3-D globe, which is not available in this browser.', true);
     if (st.open || st.status === 'loading') return;
     st.status = 'loading'; say('loading the computed positions…');
+    loadMap();   // the Moon's picture: optional, in parallel, never waited for
     const why = await load();
     if (why === 'superseded') return;
-    if (why) { st.status = 'unavailable'; return say(`Zoom-out view unavailable — ${why}. Nothing is drawn.`, true); }
+    if (why) { cancelMap(); st.status = 'unavailable'; return say(`Zoom-out view unavailable — ${why}. Nothing is drawn.`, true); }
     const date = utcToday(), rows = rowsFor(date);
-    if (!rows) { st.status = 'ok'; return say(`No computed position for today (${nice(date)}): this view covers ${nice(st.file.coverage.start)} – ${nice(st.file.coverage.end)}. Nothing is drawn.`, true); }
+    if (!rows) { cancelMap(); st.status = 'ok'; return say(`No computed position for today (${nice(date)}): this view covers ${nice(st.file.coverage.start)} – ${nice(st.file.coverage.end)}. Nothing is drawn.`, true); }
     for (let i = 0; i < 50 && !st.meshes; i++) { st.meshes = makeMeshes(); if (!st.meshes) await new Promise(r => setTimeout(r, 100)); }   // the globe mesh appears once globe.gl has finished building (up to 5 s)
-    if (!st.meshes) { st.status = 'unavailable'; return say('Zoom-out view unavailable — the globe scene could not be read. Nothing is drawn.', true); }
+    if (!st.meshes) { cancelMap(); st.status = 'unavailable'; return say('Zoom-out view unavailable — the globe scene could not be read. Nothing is drawn.', true); }
     const cam = g.camera(), c = g.controls();
     const sheet = $('sheet'), wasOpen = sheet && !sheet.classList.contains('collapsed') && getComputedStyle($('sheet-btn')).display !== 'none';
     st.saved = { pos: cam.position.clone(), target: c.target.clone(), near: cam.near, minD: c.minDistance, maxD: c.maxDistance,
@@ -258,14 +370,14 @@
     $('zoom-scale').textContent = TXT.C; writeStrip(true);   // frame against the strip at its largest (stop C wording, Sun line present)
     if (!buildPath()) { exit(); return say('Zoom-out view unavailable — this screen is too small to frame the scene. Nothing is drawn.', true); }
     st.s = 0; st.free = false; st.sunShown = false; place(at(0));
-    attach(); loop(); writeText(); announce();
+    attach(); loop(); writeText(); announce(); applyMap();
     say(`Zoom-out view open — computed positions at 00:00 UTC, ${nice(date)}.`);
     $('zoom-b').focus();
   }
   function exit() {
     if (!st.open) return;
     const g = ME.globe(), cam = g.camera(), c = g.controls(), sv = st.saved;
-    detach(); cancelAnimationFrame(st.raf); st.raf = 0;
+    detach(); cancelAnimationFrame(st.raf); st.raf = 0; cancelMap();   // D6: the picture is disposed on exit
     g.scene().remove(st.meshes.moon); g.scene().remove(st.meshes.sun);
     for (const [o, v] of sv.layers) o.visible = v;
     cam.near = sv.near; cam.updateProjectionMatrix();
@@ -487,9 +599,9 @@
     const d = utcToday(); if (d === st.date) return;
     const rows = rowsFor(d);
     st.date = d; st.rows = rows;
-    if (!rows) { st.meshes.moon.visible = st.meshes.sun.visible = false; cancelAnimationFrame(st.raf); st.raf = 0; $('zoom-svg').innerHTML = '';
+    if (!rows) { cancelMap(); st.meshes.moon.visible = st.meshes.sun.visible = false; cancelAnimationFrame(st.raf); st.raf = 0; $('zoom-svg').innerHTML = '';
       $('zoom-dist').innerHTML = ''; $('zoom-when').textContent = `No computed position for today (${nice(d)}).`; $('zoom-text').innerHTML = `<p>No computed position for today (${esc(nice(d))}).</p>`; links(); return; }
-    st.meshes.moon.visible = true; st.meshes.geo = bodiesFor(rows); positionMeshes(); $('zoom-scale').textContent = TXT.C; writeStrip(true); buildPath(st.path && st.path.k[0]); st.placing = true; setS(st.s); st.placing = false;
+    st.meshes.moon.visible = true; st.meshes.geo = bodiesFor(rows); positionMeshes(); applyMap(); $('zoom-scale').textContent = TXT.C; writeStrip(true); buildPath(st.path && st.path.k[0]); st.placing = true; setS(st.s); st.placing = false;
     writeText(); writeStrip(); if (!st.raf) loop();
   }
 
@@ -512,6 +624,8 @@
   ME.zoomState = () => ({ open: st.open, status: st.status, msg: st.msg, rev: REV, date: st.date, s: st.s, stop: stopName(), free: st.free,
     sunShown: st.sunShown, rows: st.rows, geo: st.meshes && st.meshes.geo ? { moon: st.meshes.geo.moon.pos, sun: st.meshes.geo.sun.pos, R: st.meshes.geo.R } : null,
     meshWorld: st.meshes && st.open ? { moon: st.meshes.moon.position.toArray(), sun: st.meshes.sun.position.toArray() } : null,
-    path: st.path, last: st.last });
+    path: st.path, last: st.last,
+    moonMap: { status: mm.status, why: mm.why, gen: mm.gen, rotDate: mm.rotDate, tex: !!mm.tex, url: !!mm.url, ready: !!mm.ready, uploadMs: mm.uploadMs, prepMs: mm.prepMs,
+      emissive: st.meshes ? st.meshes.moon.material.emissive.getHex() : null, mapOn: !!(st.meshes && st.meshes.moon.material.emissiveMap) } });
   ME.zoomPlaceTags = placeTags; ME.zoomStep = step; ME.zoomGo = goStop; ME.zoomRollover = rollover; ME.zoomFrame = frame;
 })();
