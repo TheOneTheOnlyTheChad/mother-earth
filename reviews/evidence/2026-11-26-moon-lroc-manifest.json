@@ -1,0 +1,257 @@
+{
+ "note": "Served-file manifest for the Moon LROC detailed-site release (moon-lroc-ui). Every path is fetched from the live site after release and must match byte for byte. The Moon temperature, Moon height, Tides release and dedication manifests stay as their own records.",
+ "site": "https://theonetheonlythechad.github.io/mother-earth/",
+ "root_page_files": 37,
+ "files": [
+  {
+   "path": "aircraft.js",
+   "bytes": 30159,
+   "sha256": "83c61716f6a539abb37d6a748373a916ce2ccbe93a9ec106dabfe72086c0aa55"
+  },
+  {
+   "path": "animals-census.js",
+   "bytes": 20343,
+   "sha256": "b0de8bbe7eaa33f36065d9a0fd0110b69a2adf0f64e585fb80596fc284da4326"
+  },
+  {
+   "path": "animals-context.js",
+   "bytes": 17198,
+   "sha256": "a12594c11291890c181b8b46b4e8350785f48833bcc5ded6387a75d99cf455cc"
+  },
+  {
+   "path": "animals-corridor.js",
+   "bytes": 39308,
+   "sha256": "79eca28b8bd7d88cc173f8bcdda938e40736cece1a901dacdaddbf42e1f7c030"
+  },
+  {
+   "path": "animals-globe.js",
+   "bytes": 11307,
+   "sha256": "c196b7387dc759b3bd3e204692ca02b4057cd6b8ecd4789f4f639008935cdc5b"
+  },
+  {
+   "path": "animals-journey.js",
+   "bytes": 43905,
+   "sha256": "e5d54d297c2b1de48a839e69169cb50238c7074b45531dea9fb24048c2765b86"
+  },
+  {
+   "path": "animals.html",
+   "bytes": 23365,
+   "sha256": "450ab6d4ac155bb61fb329fdd769ef610bdabbd47e2b27f38e8f805282585e82"
+  },
+  {
+   "path": "animals.js",
+   "bytes": 7848,
+   "sha256": "72e0e1e1805c6b2fcfe85e088ee15a9a9c65eb1f07b0058c341266bdac02180f"
+  },
+  {
+   "path": "app.js",
+   "bytes": 108397,
+   "sha256": "a48769068c1a3fa1a2440f57e21610bd5d8f8195ce1e516cc79bfaaba9bd0e5a"
+  },
+  {
+   "path": "arts.js",
+   "bytes": 5759,
+   "sha256": "58773cef35e6e947960100cedd59c8bff349a16333a89f3c4ae7abda5595928d"
+  },
+  {
+   "path": "craft.js",
+   "bytes": 20872,
+   "sha256": "ae43ec782acb523e346692616323f68b4ef2f3b20abad3c49844b4cb8785286d"
+  },
+  {
+   "path": "dustrgb.js",
+   "bytes": 15373,
+   "sha256": "bd4ca6f3d569b7a4922d7bc1df16f5b2475fc02688f29d952776b65f06259505"
+  },
+  {
+   "path": "index.html",
+   "bytes": 163010,
+   "sha256": "893ce5a2a32488c86ece69a2cda8e8b76a86937432f8ffad7b6e69eebaec24b9"
+  },
+  {
+   "path": "layers.js",
+   "bytes": 5381,
+   "sha256": "3f67670962285f67f096a147b6ae92f4e739c14fea06bdf3b416c1849ef3afc0"
+  },
+  {
+   "path": "moon.html",
+   "bytes": 19549,
+   "sha256": "1330204b7979f35eddbcbd04d31746d00a9948da7a951f639b5860f94229757c"
+  },
+  {
+   "path": "moonglobe.js",
+   "bytes": 29170,
+   "sha256": "4493e575d36e56381bade9e1b32ca2f01903edb779f74c7618ba89112d84973f"
+  },
+  {
+   "path": "moonlight.js",
+   "bytes": 4393,
+   "sha256": "f01b8e21594dffccad5a0b2d1a43f94ccfd1acbd4b3a4b7f3334cc209dc1a08a"
+  },
+  {
+   "path": "moonlroc.css",
+   "bytes": 2683,
+   "sha256": "5a3686cf3c7cf543d863da3d089a4d9564e905205a9bd27df493585c0004e23c"
+  },
+  {
+   "path": "moonlroc.js",
+   "bytes": 10817,
+   "sha256": "3f43a0198a3d3e2f115fd6462750608a83391cf87ab227a503bf45a00d0fa24b"
+  },
+  {
+   "path": "moonsci.css",
+   "bytes": 2201,
+   "sha256": "03da927d7b3fb364c07c976406e45440072c155f7784f9c427c96af2f35052c6"
+  },
+  {
+   "path": "moonsci.js",
+   "bytes": 26902,
+   "sha256": "59f651996bccf8da3327aa9e9c14909b6e9c154d72478a0da984546c2fe726fd"
+  },
+  {
+   "path": "nightlights.js",
+   "bytes": 37634,
+   "sha256": "a664f28d62845ae9f44800a438789651a4991b2a0a905a4661b9bc152afa677f"
+  },
+  {
+   "path": "oceanheat.js",
+   "bytes": 21324,
+   "sha256": "a45097baed582d7f841e57581821119cc209aeedc4cb5deb2d659815caa55eb3"
+  },
+  {
+   "path": "sky.js",
+   "bytes": 14975,
+   "sha256": "2056da8d8bf544e87852f35f944a8d289ec8251fe25802c53f7f36714609be53"
+  },
+  {
+   "path": "skyscene.js",
+   "bytes": 40599,
+   "sha256": "18e41b2d357d6dfb9c7ea520b04088972c6993f2ece2bd30e149568eacf989e5"
+  },
+  {
+   "path": "soil.js",
+   "bytes": 18947,
+   "sha256": "316191fb6bd8c118a943c1afa30a4cff55a36d7db3421e4f08cb209b6dd31f4d"
+  },
+  {
+   "path": "sources.html",
+   "bytes": 114440,
+   "sha256": "8006960aaffde81bbdf07fc1cf245518b943227ec57888fc44a89efd3a98e42f"
+  },
+  {
+   "path": "style.css",
+   "bytes": 90153,
+   "sha256": "8011c8df8a4a10a9e6148430f5b1a0d551bdc817bf645bb31a741aa69c5760f9"
+  },
+  {
+   "path": "sun.html",
+   "bytes": 8792,
+   "sha256": "200af10996ee7cefc2047fc85228ec49327aa4e3996569cadbf90571269a2f22"
+  },
+  {
+   "path": "sunglobe.js",
+   "bytes": 19051,
+   "sha256": "b25b6c7f48913a66f059e9b0775543a3d84d7eff07b1432d9c386a8ba3f879e2"
+  },
+  {
+   "path": "tides-model.js",
+   "bytes": 7761,
+   "sha256": "90ab5dd00be09c38a1daaca518e02b7f79085aa4bd990c19c47b05d0a06608e5"
+  },
+  {
+   "path": "tides.css",
+   "bytes": 6572,
+   "sha256": "5797d407404732c070a134fe8ac56c667599ee5a1af639dcc118ca82ea05b5d9"
+  },
+  {
+   "path": "tides.html",
+   "bytes": 22831,
+   "sha256": "77dd782956f035791109aaeb9e7b5ff49b158f9a3466b99e9f360bf41882a746"
+  },
+  {
+   "path": "tides.js",
+   "bytes": 32357,
+   "sha256": "d7738aa31c3c4f6607c988e91f9628d8acdaf100eeac58efdfb8a623393ceaca"
+  },
+  {
+   "path": "timeline.html",
+   "bytes": 73355,
+   "sha256": "ddbc3cf08ae6b3d24942fb72487fe995a0408a6874997e8a76c14d0c455ba7b0"
+  },
+  {
+   "path": "timeline.js",
+   "bytes": 76861,
+   "sha256": "10ac42f49edecca40e74db871e3f094969db486e6aaa7f654978b5bbcc45ceec"
+  },
+  {
+   "path": "wind.js",
+   "bytes": 30426,
+   "sha256": "749fd5220f77cb618fb014976ec801743eca5170e32710ca6c2f7ba0dcbca653"
+  },
+  {
+   "path": "assets/tides/SOURCE.json",
+   "bytes": 6538,
+   "sha256": "da4b02725946b26f8b307f2b0ab2974daa5ca3e2a219994229632fabefbe013c"
+  },
+  {
+   "path": "assets/tides/earth-2026-06-22.jpg",
+   "bytes": 574096,
+   "sha256": "5e50da4e1688ad7881e7bb074ae1e507b67948dde4b5010174ed760edc6f095b"
+  },
+  {
+   "path": "assets/tides/sun-2026-11-25.jpg",
+   "bytes": 332048,
+   "sha256": "62857fae83f7d1c6cfc203970e6da9d55c853501ed36a56e90c78e698ed5d5bc"
+  },
+  {
+   "path": "assets/moon/lroc_color_2k.jpg",
+   "bytes": 457942,
+   "sha256": "f7130a1822681fa7512d7dcfd40db8c10b9ba4f06777910348698260ed7a2170"
+  },
+  {
+   "path": "assets/moon/lola/SOURCE.json",
+   "bytes": 3949,
+   "sha256": "ba2bf9ee957b9f11dc42b709f1bebf5ebb7c70db66086025d2275844e0263f50"
+  },
+  {
+   "path": "assets/moon/lola/ldem4-colour-R1.png",
+   "bytes": 802415,
+   "sha256": "e9281ca2a92cec0deb93e3f46837d6a0053056f4f14fd1f3ed945be8d4e63a58"
+  },
+  {
+   "path": "assets/moon/lola/ldem4-m-R1.i16.gz",
+   "bytes": 1776231,
+   "sha256": "af4450019840918da4a62812f4969ad07a0c77bf3f878ef59ca7e8961cc7d43d"
+  },
+  {
+   "path": "assets/moon/diviner/SOURCE.json",
+   "bytes": 7081,
+   "sha256": "f4b0e62e9ca6e89545b803e05cde68669cf498367b8a3362f60a726aefc9698d"
+  },
+  {
+   "path": "assets/moon/diviner/gcp-tbol-nm-R1.bin.gz",
+   "bytes": 720037,
+   "sha256": "1d81cb86738d81797ad92449419d4c46a2e8ffe6233a66863dcf2e05fde611d0"
+  },
+  {
+   "path": "assets/moon/lroc/SOURCE.json",
+   "bytes": 5641,
+   "sha256": "152883b09bbd01f652f8b6aeadc3826752b82d28c63fd60c3dfa61ddf3ed79e0"
+  },
+  {
+   "path": "assets/moon/lroc/a11-area-4m-mask.png",
+   "bytes": 6002,
+   "sha256": "ad59003dbf15f613fb316ae3fe44eddc7aee079987d0cf285ce0db919987f4cd"
+  },
+  {
+   "path": "assets/moon/lroc/a11-area-4m.jpg",
+   "bytes": 359687,
+   "sha256": "930d9ad856e78825f70671c214f94a5b744a21313d49e512cea6d0e4999f8946"
+  },
+  {
+   "path": "assets/moon/lroc/a11-site-0p5m.jpg",
+   "bytes": 223227,
+   "sha256": "e8989c1c93413150e2c026d2e3ebb6587b43b601eff5f447fcb3ac89b9054643"
+  }
+ ]
+}

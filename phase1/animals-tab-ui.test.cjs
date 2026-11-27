@@ -121,6 +121,34 @@ const tempSourcesOk = t => t.split(DV_SRC_SHORTCUT).length === 2 && t.includes('
 const noTempSources = t => t.replace(DV_SRC_SHORTCUT, '').replace(DV_SRC_SEC, '');
 const tempOk = t => DV_ADD.every(re => (t.match(new RegExp(re.source, 'g')) || []).length === 1) && DV_KEYS.every(([k]) => t.split(k).length === 2);
 const noTemp = t => DV_KEYS.reduce((a, [k, o]) => a.replace(k, o), DV_ADD.reduce((a, re) => a.replace(re, ''), t));
+// Moon LROC regional detail (26 Nov 2026, Moon/LRO science thread, item 4; narrow pin maintenance as for Moon temperature): its payload
+// commit LR_MAIN adds to moon.html exactly one stylesheet link (moonlroc.css), one control row holding the detail toggle after the LRO
+// readout (outside #mg-ctl since the release candidate, so it stays usable when the globe fails), one locator line and one panel after it,
+// one scale line, one 'Detailed site (optional)' line in Sources and method, and one script tag (moonlroc.js); moonglobe.js, moonsci.js
+// and style.css are untouched. moon.html (13e) is held to LR_MAIN and, with exactly those six additions set aside, to the Moon temperature
+// baseline DV_MAIN (and through it to everything before). Release candidate: sources.html (13e) is held to LR_MAIN and, with its one
+// Moon detailed-site section and shortcut set aside and the two lighting sentences put back (GPT's carried wording note), to DV_MAIN.
+// 13v checks that LR_MAIN changed exactly the literal LR_FILES since LR_PARENT (fresh main), and 13w that the maintenance after it changed
+// only this suite. DV_MAIN and the baselines behind it do not move.
+const LR_MAIN = process.env.LR_MAIN || '998df30';       // moon-lroc-ui release candidate payload (26 Nov 2026; preview payload c99da22)
+const LR_PARENT = process.env.LR_PARENT || 'd73a639';   // fresh main merged into the branch for the release candidate
+const LR_FILES = ['REGISTER.md', 'assets/moon/lroc/SOURCE.json', 'assets/moon/lroc/a11-area-4m-mask.png', 'assets/moon/lroc/a11-area-4m.jpg', 'assets/moon/lroc/a11-site-0p5m.jpg',
+  'moon.html', 'moonlroc.css', 'moonlroc.js', 'phase1/animals-tab-ui.test.cjs', 'phase1/moon-diviner-ui.test.cjs', 'phase1/moon-lroc-ui.test.cjs', 'phase1/moonsci/build_lroc.py', 'phase1/moonsci/served_manifest.mjs',
+  'reviews/2026-11-26-moon-lroc-ui-rc.md', 'reviews/evidence/2026-11-26-moon-lroc-manifest.json', 'sources.html'];   // literal: the exact changed-path set of LR_PARENT..LR_MAIN
+const LR_ADD = [/\n<link rel="stylesheet" href="moonlroc\.css\?v=202612261700">/,
+  /    <div id="mg-lroc-ctl" class="mgctl">\n      <button type="button" id="mg-lroc" aria-pressed="false">Show a detailed site: Apollo 11 \(LROC\)<\/button>\n    <\/div>\n/,
+  /      <li><b>Detailed site \(optional\):<\/b>[^\n]*<\/li>\n/,
+  /    <p id="mg-lroc-loc" class="mglro" hidden><\/p>\n    <section id="mg-lroc-panel" class="mgl"[\s\S]*?\n    <\/section>\n/, /    <span>“Show a detailed site: Apollo 11 \(LROC\)” [^\n]*<\/span>\n/,
+  /\n<script src="moonlroc\.js\?v=202612261700"><\/script>/];
+const lrocOk = t => LR_ADD.every(re => (t.match(new RegExp(re.source, 'g')) || []).length === 1);
+const noLroc = t => LR_ADD.reduce((a, re) => a.replace(re, ''), t);
+const LR_SRC_SHORTCUT = ' · <a href="#moonlroc">Moon detailed site</a>', LR_SRC_SEC = /  <h2 id="moonlroc">[\s\S]*?\n\n(?=  <h2 id="sunglobe">)/;
+const LR_SRC_KEYS = [['switching height off puts back the lighting you had before: if “Lit as now” was on, it returns for the current minute.', 'switching height off brings sunlight back for the current minute.'],
+  ['switching it off puts back the lighting you had before: if “Lit as now” was on, it returns for the current minute.', 'switching it off brings sunlight back for the current minute.']];
+const lrocSourcesOk = t => t.split(LR_SRC_SHORTCUT).length === 2 && t.includes(' · <a href="#moontemp">Moon temperature</a>' + LR_SRC_SHORTCUT + ' · <a href="#tides">Tides</a>') && (t.match(/<h2 id="moonlroc">/g) || []).length === 1 && LR_SRC_SEC.test(t)
+  && LR_SRC_KEYS.every(([k]) => t.split(k).length === 2) && ['doi:10.1007/s11214-010-9634-2', 'doi:10.1016/j.icarus.2016.05.012', 'NASA/GSFC/Arizona State University', 'not a measured reflectance', 'not the picture’s footprint'].every(x => (t.match(LR_SRC_SEC) || [''])[0].includes(x));
+// the Moon detailed-site section is removed first: the temperature section's pattern runs up to the Sun globe section
+const noLrocSources = t => LR_SRC_KEYS.reduce((a, [k, o]) => a.replace(k, o), t.replace(LR_SRC_SHORTCUT, '').replace(LR_SRC_SEC, ''));
 const noTidesSources = t => t.replace(TIDES_SHORTCUT + ' · <a href="#animals">', ' · <a href="#animals">').replace(TIDES_SEC, '');
 const tidesSourcesOk = t => t.split(TIDES_SHORTCUT).length === 2 && t.includes(TIDES_SHORTCUT + ' · <a href="#animals">Animals</a>') && (t.match(/<h2 id="tides">/g) || []).length === 1 && TIDES_SEC.test(t);
 const PROMISE_SPAN = ['<div class="promise fit"><span>', '</span></div>'], unwrapPromise = t => t.replace(PROMISE_SPAN[0], '<div class="promise">').replace(/(<div class="promise">[^<]*)<\/span><\/div>/, '$1</div>');
@@ -588,6 +616,9 @@ const gate = () => { let go; const p = new Promise(r => { go = r; }); return { p
     // the Moon temperature baseline (DV_MAIN): Git only; without it, its checks fail closed (13e moon.html, 13t, 13u)
     let dvHow = ''; try { git(['cat-file', '-e', DV_MAIN + '^{commit}']); dvHow = 'git'; } catch (_) { }
     const dvFile = f => git(['show', DV_MAIN + ':' + f]);
+    // the Moon LROC baseline (LR_MAIN): Git only; without it, its checks fail closed (13e moon.html, 13v, 13w)
+    let lrHow = ''; try { git(['cat-file', '-e', LR_MAIN + '^{commit}']); lrHow = 'git'; } catch (_) { }
+    const lrFile = f => git(['show', LR_MAIN + ':' + f]);
     const tabL = '    <a href="animals.html" data-view="animals">Animals</a>\n', menuL = '      <li role="none"><a role="menuitem" href="animals.html" data-page="animals">Animals</a></li>\n', hdr = t => (/<header[\s\S]*?<\/header>/.exec(t) || [''])[0];
     // the Animals guarantees on a page, checked on their own: both links once each, and the header equals BASE_MAIN's except those links
     const animalsHead = (b, base) => { const h0 = hdr(base); return { links: b.split(tabL).length === 2 && b.split(menuL).length === 2, header: h0.length > 200 && unwrapPromise(noTides(hdr(b))).replace(tabL, '').replace(menuL, '') === h0 }; };   // 25 Nov 2026: the Tides lines and the promise wrapper set aside too
@@ -625,21 +656,23 @@ const gate = () => { let go; const p = new Promise(r => { go = r; }); return { p
       else { fail++; failed.push('13q'); console.log(`NOT RUN  13q: the Moon height baseline ${MH_MAIN.slice(0, 7)} is not available.`); }
       { const b = served('moon.html'); if (!mhHow) { fail++; failed.push('13e moon.html (height)'); console.log(`NOT RUN  13e moon.html (height): the baseline ${MH_MAIN.slice(0, 7)} is not available.`); }
         else if (!dvHow) { fail++; failed.push('13e moon.html (temperature)'); console.log(`NOT RUN  13e moon.html (temperature): the baseline ${DV_MAIN.slice(0, 7)} is not available.`); }
-        else ok(`13e moon.html is byte-identical to the file at the Moon temperature baseline ${DV_MAIN.slice(0, 7)}, which holds each temperature and height addition exactly once; with the temperature additions set aside it is the Moon height baseline ${MH_MAIN.slice(0, 7)}`,
-          b === dvFile('moon.html') && tempOk(b) && heightOk(b) && noTemp(b) === mhFile('moon.html')); }
-      for (const pg of ['moon.html', 'sun.html']) { const a = mainFile(pg), b = pg === 'moon.html' ? noHeight(noTemp(served(pg))) : served(pg); const sec = /  <h2 id="animals">[\s\S]*?(?=  <h2 id="search">)/, rel = false;      // 24 Nov 2026: sources.html left this loop for the check below (Nature context)
+        else if (!lrHow) { fail++; failed.push('13e moon.html (LROC)'); console.log(`NOT RUN  13e moon.html (LROC): the baseline ${LR_MAIN.slice(0, 7)} is not available.`); }
+        else ok(`13e moon.html is byte-identical to the file at the Moon LROC baseline ${LR_MAIN.slice(0, 7)}, which holds each of its six additions exactly once; with them set aside it is the Moon temperature baseline ${DV_MAIN.slice(0, 7)}, which holds each temperature and height addition exactly once; with the temperature additions set aside it is the Moon height baseline ${MH_MAIN.slice(0, 7)}`,
+          b === lrFile('moon.html') && lrocOk(b) && noLroc(b) === dvFile('moon.html') && tempOk(noLroc(b)) && heightOk(noLroc(b)) && noTemp(noLroc(b)) === mhFile('moon.html')); }
+      for (const pg of ['moon.html', 'sun.html']) { const a = mainFile(pg), b = pg === 'moon.html' ? noHeight(noTemp(noLroc(served(pg)))) : served(pg); const sec = /  <h2 id="animals">[\s\S]*?(?=  <h2 id="search">)/, rel = false;      // 24 Nov 2026: sources.html left this loop for the check below (Nature context)
         ok(`13e ${pg} equals main's except the Animals links and the stylesheet version${pg === 'moon.html' ? ' (and the Moon height additions, set aside)' : ''}${rel ? ', and (release) the one added Animals section with its shortcut in the Sections list, which names all six sources and the omitted Low class and never says private preview' : ''}`, strip(rel ? b.replace(sec, '').replace(' · <a href="#animals">Animals</a>', '') : b) === a.replace(/style\.css\?v=\d+/, 'style.css?v=X') && (!rel || (sec.test(b) && b.split(' · <a href="#animals">Animals</a> · <a href="#search">Search</a>').length === 2 && ['10.5441/001/1.f3550b4f', '10.5281/zenodo.5575189', 'ptt id 98364', '10.5441/001/1.3hp3s250', '10.5061/dryad.vx0k6djp7', '10.5066/P1ETBSYE', 'Low-use class'].every(x => b.includes(x)) && !/private preview/i.test(b)))); }
       if (!mhHow) { fail++; failed.push('13e sources.html (height)'); console.log(`NOT RUN  13e sources.html (height): the baseline ${MH_MAIN.slice(0, 7)} is not available.`); }
       else if (!dvHow) { fail++; failed.push('13e sources.html (temperature)'); console.log(`NOT RUN  13e sources.html (temperature): the baseline ${DV_MAIN.slice(0, 7)} is not available.`); }
-      else { const sb = served('sources.html'); ok(`13e sources.html is byte-identical to the file at the Moon temperature baseline ${DV_MAIN.slice(0, 7)}, which holds one Moon temperature section and its shortcut; with those set aside it is the Moon height baseline ${MH_MAIN.slice(0, 7)}, which holds one Moon height section before the Sun globe section and one shortcut before Tides'`,
-        sb === dvFile('sources.html') && tempSourcesOk(sb) && noTempSources(sb) === mhFile('sources.html') && heightSourcesOk(noTempSources(sb))); }
+      else if (!lrHow) { fail++; failed.push('13e sources.html (LROC)'); console.log(`NOT RUN  13e sources.html (LROC): the baseline ${LR_MAIN.slice(0, 7)} is not available.`); }
+      else { const sb = served('sources.html'), sd = noLrocSources(sb); ok(`13e sources.html is byte-identical to the file at the Moon LROC baseline ${LR_MAIN.slice(0, 7)}, which holds one Moon detailed-site section before the Sun globe section, its shortcut after Moon temperature's, and the two corrected lighting sentences; with those set aside it is the Moon temperature baseline ${DV_MAIN.slice(0, 7)}, which holds one Moon temperature section and its shortcut; with those set aside it is the Moon height baseline ${MH_MAIN.slice(0, 7)}, which holds one Moon height section before the Sun globe section and one shortcut before Tides'`,
+        sb === lrFile('sources.html') && lrocSourcesOk(sb) && sd === dvFile('sources.html') && tempSourcesOk(sd) && noTempSources(sd) === mhFile('sources.html') && heightSourcesOk(noTempSources(sd))); }
       // 13e sources.html (24 Nov 2026, Nature context): byte-identical to NC_MAIN, plus every Animals guarantee the old check made, on its own
       { const b = served('sources.html'), sec = /  <h2 id="animals">[\s\S]*?(?=  <h2 id="search">)/;
         if (!ncHow || !soilHow || !tidesHow) { fail++; failed.push('13e sources.html'); console.log(`NOT RUN  13e sources.html: the baseline ${!soilHow ? SOIL_MAIN.slice(0, 7) : !tidesHow ? TIDES_MAIN.slice(0, 7) : NC_MAIN.slice(0, 7)} is not available.`); }
         else { // 25 Nov 2026 (organic soil): byte-identical to the file at SOIL_MAIN, which already holds the reviewed zebra block (C1a). The
           // block is still checked on its own: present once, on the line after the zebra's source paragraph. Animals guarantees as before.
           const bl = b.split('\n'), at = bl.findIndex(l => l.startsWith('  <p><b>Plains zebra, collar Z3866')), ctxOk = at >= 0 && bl[at + 1] === CTX_SOURCES && b.split(CTX_SOURCES).length === 2;
-          const tsf = tidesFile('sources.html'), whole = noHeightSources(noTempSources(b)) === tsf && tidesSourcesOk(tsf) && noKey(noTidesSources(noTides(tsf))) === noKey(soilFile('sources.html')) && tsf.split(TIDES_TAB).length === 2 && tsf.split(TIDES_MENU).length === 2, g = animalsHead(b, mainFile('sources.html')), section = sec.test(b), shortcut = b.split(' · <a href="#animals">Animals</a> · <a href="#search">Search</a>').length === 2,
+          const tsf = tidesFile('sources.html'), whole = noHeightSources(noTempSources(noLrocSources(b))) === tsf && tidesSourcesOk(tsf) && noKey(noTidesSources(noTides(tsf))) === noKey(soilFile('sources.html')) && tsf.split(TIDES_TAB).length === 2 && tsf.split(TIDES_MENU).length === 2, g = animalsHead(b, mainFile('sources.html')), section = sec.test(b), shortcut = b.split(' · <a href="#animals">Animals</a> · <a href="#search">Search</a>').length === 2,
             ids = ['10.5441/001/1.f3550b4f', '10.5281/zenodo.5575189', 'ptt id 98364', '10.5441/001/1.3hp3s250', '10.5061/dryad.vx0k6djp7', '10.5066/P1ETBSYE', 'Low-use class'].filter(x => !b.includes(x)), noPreview = !/private preview/i.test(b);
           ok(`13e sources.html, with the Moon height section and shortcut set aside, is byte-identical to the file at the Tides baseline ${TIDES_MAIN.slice(0, 7)}, which is the organic-soil baseline ${SOIL_MAIN.slice(0, 7)}'s plus exactly the Tides tab, the Menu item, the stylesheet key, one Tides section before Animals and its one shortcut; the reviewed zebra land-context block is present once, after the zebra's source paragraph; it carries the Animals tab link and menu link once each and main ${BASE_MAIN.slice(0, 7)}'s header except those links; its Animals section, its one shortcut in the Sections list, all six sources and the omitted Low class are present; it never says private preview`, whole && ctxOk && g.links && g.header && section && shortcut && ids.length === 0 && noPreview, { whole, ctxOk, links: g.links, header: g.header, section, shortcut, missing: ids, noPreview }); } }
       // 13j (24 Nov 2026, Nature context): NC_MAIN descends from NC_PARENT and changed no production file but the three above
@@ -703,6 +736,20 @@ const gate = () => { let go; const p = new Promise(r => { go = r; }); return { p
           else { const cur = (() => { try { return git(['diff', '--name-only', DV_MAIN, '--', 'phase1/animals-tab-ui.test.cjs']).trim(); } catch (_) { return 'x'; } })(); info = { uncommitted: cur }; ok13u = cur === 'phase1/animals-tab-ui.test.cjs' && git(['diff', '--name-only', DV_MAIN]).split('\n').filter(Boolean).every(f => f === 'phase1/animals-tab-ui.test.cjs'); } } catch (_) { }
         if (ok13u === null) { fail++; failed.push('13u'); console.log('NOT RUN  13u: the maintenance commit after DV_MAIN could not be read from Git.'); }
         else ok('13u the Animals-suite maintenance after the Moon temperature payload changes only this suite, on top of DV_MAIN (before it is committed: the working tree differs from DV_MAIN in this suite only)', ok13u, info); }
+      // 13v (26 Nov 2026, Moon LROC): LR_MAIN descends from LR_PARENT and its changed paths are EXACTLY the literal LR_FILES
+      { let names = null; try { git(['merge-base', '--is-ancestor', LR_PARENT, LR_MAIN]); names = git(['diff', '--name-only', LR_PARENT, LR_MAIN]).split('\n').filter(Boolean); } catch (_) { }
+        if (!names) { fail++; failed.push('13v'); console.log(`NOT RUN  13v: ${LR_PARENT}..${LR_MAIN} cannot be read from Git (or ${LR_PARENT} is not an ancestor). The scope check was not made.`); }
+        else { const extra = names.filter(f => !LR_FILES.includes(f)), missing = LR_FILES.filter(f => !names.includes(f));
+          ok(`13v ${LR_PARENT}..${LR_MAIN} changes exactly the ${LR_FILES.length} listed files (no shared script, stylesheet, index.html, animals files or the hub; sources.html and REGISTER.md since the release candidate)`, extra.length === 0 && missing.length === 0 &&
+            !names.some(f => /^(app|layers|soil|moonglobe|moonsci|moonlight|craft|animals[a-z-]*)\.js$|worker\.js$|^(index|animals|tides)\.html$|^(style|moonsci)\.css$/.test(f)), { extra, missing }); } }
+      // 13w (26 Nov 2026, Moon LROC): the maintenance that added these pins is the first commit after LR_MAIN, on the path to here, that
+      // touches this suite; its parent is LR_MAIN and it changes this suite and nothing else.
+      { let ok13w = null, info = {}; try { const firsts = git(['log', '--reverse', '--ancestry-path', '--format=%H', LR_MAIN + '..HEAD', '--', 'phase1/animals-tab-ui.test.cjs']).split('\n').filter(Boolean);
+          const m = firsts[0]; const full = git(['rev-parse', LR_MAIN]).trim();
+          if (m) { const parents = git(['log', '-1', '--format=%P', m]).trim().split(' '), files = git(['diff-tree', '--no-commit-id', '--name-only', '-r', m]).split('\n').filter(Boolean); info = { commit: m.slice(0, 7), parents, files }; ok13w = parents.length === 1 && parents[0] === full && files.length === 1 && files[0] === 'phase1/animals-tab-ui.test.cjs'; }
+          else { const cur = (() => { try { return git(['diff', '--name-only', LR_MAIN, '--', 'phase1/animals-tab-ui.test.cjs']).trim(); } catch (_) { return 'x'; } })(); info = { uncommitted: cur }; ok13w = cur === 'phase1/animals-tab-ui.test.cjs' && git(['diff', '--name-only', LR_MAIN]).split('\n').filter(Boolean).every(f => f === 'phase1/animals-tab-ui.test.cjs'); } } catch (_) { }
+        if (ok13w === null) { fail++; failed.push('13w'); console.log('NOT RUN  13w: the maintenance commit after LR_MAIN could not be read from Git.'); }
+        else ok('13w the Animals-suite maintenance after the Moon LROC payload changes only this suite, on top of LR_MAIN (before it is committed: the working tree differs from LR_MAIN in this suite only)', ok13w, info); }
       // ----- the Timeline's own files, against main at TL_MAIN (the Timeline's latest release)
       const TL_DIR = process.env.TL_DIR || ''; let tlHow = '';
       if (TL_DIR && fs.existsSync(path.join(TL_DIR, 'timeline.html'))) tlHow = 'dir'; else { try { git(['cat-file', '-e', TL_MAIN + '^{commit}']); tlHow = 'git'; } catch (_) { } }
