@@ -4,6 +4,13 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 26 Nov 2026
 
+## 27 Nov 04:58 UTC (clock reading) — **Moon item 10a: page preview `moon-sky-texture-ui` built, with GPT for review. Branch only; not merged, not deployed; no hub change; no data downloaded** (Moon spec, item 10a thread)
+- **GPT:** proposal rev 1 PASS with notes 1–6, filed unchanged (`reviews/2026-11-27-moon-sky-texture-proposal-rev1-gpt-review.md`). Chad: "Accept D1–D6 as recommended. Go for a page-only branch preview…".
+- **Branch `moon-sky-texture-ui`:** candidate `c132f46`, from `45cc94d` (the docs branch). Page files `skyscene.js` (`8a7e5e22…`) and `index.html` (`125ebba7…`); `moonlight.js` unchanged. Packet `reviews/2026-11-27-moon-sky-texture-ui-rc.md`.
+- **Suite `sky-moon-texture-ui`:** 96/0 on a frozen worktree; 13 of 13 breaks caught (`late-keep` was missed on the first revision `eaf7e81`; suite extended, everything rerun).
+- **Regressions:** `sky-zoom-ui` 351/0, `sky-ui` 79/0, `skycraft-ui` 77/0, `mobile-pass` 131/0, `desktop-overflow` 286/0, `smoke-fixes` 113/0 (first run a set-up error: wrong server). Animals 294/2: 13b and 13c, the expected pin consequences for the release candidate.
+- **Measured:** orientation vs astronomy-engine 0.003–0.29° (four dates); upload 31–34 ms; rendered brightness at stop B +19–21% over the grey.
+
 ## 27 Nov 03:25 UTC (clock reading) — **Moon item 10a (Sky zoom-out Moon picture): assessed; proposal rev 1 with GPT. Docs only; no build, merge or deployment; no data downloaded** (Moon spec, item 10a thread)
 - Chad's go: assess using the existing Moon appearance texture in the Sky zoom-out view; bounded proposal for GPT (orientation, lighting, attribution, loading, performance); keep the remaining checklist intact.
 - Proposal `docs/concepts/MOON-SKY-TEXTURE-PROPOSAL.md` rev 1; evidence `docs/research/moon-sky-texture/` (scripts and results; images on the Mac only).
