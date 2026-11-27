@@ -105,6 +105,12 @@ let br = null;
       ['not a radiation dose, a particle flux or conditions at a place on the Moon’s surface', 'the causes of its variation have not been determined here', 'approximate counting benchmark', 'do not cover the scatter seen between groups', 'by UTC record time', 'No live-time correction', 'not a live reading', '10.17189/2c1t-ph72'].every(x => wording.includes(x))
       && !/cosmic ray|quiet day|radiation level|safe/i.test(wording), wording.slice(0, 200));
 
+    ok('B8 the panel links to its Sources section', await T.p.evaluate(() => [...document.querySelectorAll('#cr-panel a')].some(a => a.getAttribute('href') === 'sources.html#mooncrater')));
+    const srcHtml = await T.p.evaluate(async () => { const r = await fetch('sources.html', { cache: 'no-store' }); return r.ok ? await r.text() : ''; });
+    const sec = (srcHtml.split('<h2 id="mooncrater">')[1] || '').split('<h2 ')[0];
+    ok('B9 Sources: #mooncrater section with the benchmark qualification (one standard deviation, independent events, exclusions, not 95%), the not-dose wording and the DOI; linked from the contents',
+      ['approximate one-standard-deviation Poisson counting benchmark', 'independent', 'not an error value from the archive and not a total uncertainty', 'not a 95% interval', 'not a radiation dose, not a particle flux, and not conditions at any place on the Moon’s surface', '10.17189/2c1t-ph72', 'nothing on the chart is shifted by it'].every(x => sec.includes(x))
+      && srcHtml.includes('<a href="#mooncrater">Moon event counts</a>'), sec.slice(0, 120));
     // ---------- C
     const sel = async (i, bin, lab) => { await setMinute(T.p, i); await T.p.waitForTimeout(60); const s = await cs(T.p);
       ok(`C minute ${i} selects group ${bin}${lab ? ' (' + lab + ')' : ''}`, s.bin === bin && (!lab || s.readout.includes(lab)), { bin: s.bin, readout: s.readout.slice(0, 90) }); };

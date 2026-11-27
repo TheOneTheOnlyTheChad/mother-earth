@@ -38,7 +38,7 @@
     const g = [];
     for (const r of j.rows) {
       if (!Array.isArray(r)) return null;
-      if (r.length === 2 && isInt(r[0]) && r[1] === 600 && r[0] <= 600 * 1200) {   // ~1,200 events a second is the reporting ceiling
+      if (r.length === 2 && isInt(r[0]) && r[1] === 600 && r[0] <= 600 * 1200) {   // a validation bound chosen for this release (counts here are far below it), not a property of the counter
         g.push({ N: r[0], T: r[1], rate: r[0] / r[1], bench: Math.sqrt(r[0]) / r[1] });
       } else if (r.length === 5 && r[0] === null && r[1] === null && Object.prototype.hasOwnProperty.call(REASONS, r[2]) && isInt(r[3]) && r[3] <= 600 && isInt(r[4]) && r[4] <= r[3]) {
         g.push({ withheld: r[2], records: r[3], nominal: r[4] });
