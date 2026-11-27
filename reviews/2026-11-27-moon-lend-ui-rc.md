@@ -108,6 +108,8 @@
 
 **Not run:** the broad unrelated suites (GPT: no broad sweep needed). Their baseline exceptions on main are unchanged by this branch, which touches no file they read.
 
+*Erratum (27 Nov 2026, release candidate; GPT's preview review): the sentence above claimed more than was shown. Not running a suite does not establish that its exceptions are unchanged, and other suites do read the shared `moon.html`. At the release candidate every listed exception was run on the candidate and on main the same evening and compared line by line (`reviews/2026-11-27-moon-lend-release-rc.md` §5).*
+
 ## 5. Observations
 
 - **Rendering:** near the pole the equirectangular texture's 0.5° columns narrow into thin wedges, so the cap shows radial streaks. That is the map projection, not a feature of the data. The ring at the cap's edge is the edge-withheld state.
