@@ -235,7 +235,10 @@ const rotDiff = (R, Q) => { let tr = 0; for (let i = 0; i < 3; i++) for (let k =
     const gr = await shot(b.page, `crop-B-${vw.width}x${dpr}-grey.png`), pb = (await Z(b.page)).path, callsG = (await b.page.evaluate(() => __info())).calls; await b.ctx.close();
     CROPS.push({ viewport: `${vw.width}x${vw.height}`, dpr, map: tex, grey: gr, draw_calls: { map: calls, grey: callsG } });
     ok(`4a ${vw.width} DPR ${dpr}: the Moon is drawn in both crops`, tex.lit_px > 0 && gr.lit_px > 0, { tex, gr });
-    ok(`4b ${vw.width} DPR ${dpr}: framing identical with and without the picture`, JSON.stringify(pa) === JSON.stringify(pb));
+    // stops B and C and the box they are framed for; stop A is the camera at entry, which depends on when each page was entered
+    // (rev 2: the whole-path comparison failed 3 times in about 45 runs, never with a framing change)
+    const fr = P => JSON.stringify({ W: P.W, H: P.H, pt: P.pt, pb: P.pb, B: P.k[1], C: P.k[2] });
+    ok(`4b ${vw.width} DPR ${dpr}: framing (stops B and C) identical with and without the picture`, fr(pa) === fr(pb), { a: fr(pa), b: fr(pb), A: [pa.k[0], pb.k[0]] });
     ok(`4c ${vw.width} DPR ${dpr}: draw calls per frame unchanged`, calls === callsG, { calls, callsG });
   }
   console.log('crops', JSON.stringify(CROPS));

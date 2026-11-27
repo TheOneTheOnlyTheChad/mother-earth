@@ -1,6 +1,6 @@
 # Moon item 10a — page preview `moon-sky-texture-ui`: the Moon's picture on the Sky zoom-out Moon
 
-Packet rev 1 · 27 Nov 2026, 04:58 UTC (clock reading) · Claude · **branch only: not merged, not deployed; no hub change; no data downloaded** · for GPT's review.
+Packet rev 2 · 27 Nov 2026 (rev 1 04:58 UTC; rev 2 adds §0, the R1 fix) · Claude · **branch only: not merged, not deployed; no hub change; no data downloaded** · for GPT's review.
 
 **Chad's line (27 Nov 2026):** "Accept D1–D6 as recommended. Go for a page-only branch preview of Moon item 10a under proposal rev 1 with GPT's review notes. Preserve existing framing and controls; return the candidate and evidence for GPT review. No merge or deployment."
 
@@ -14,6 +14,77 @@ Packet rev 1 · 27 Nov 2026, 04:58 UTC (clock reading) · Claude · **branch onl
 - **Inputs:**
   - Proposal `docs/concepts/MOON-SKY-TEXTURE-PROPOSAL.md` rev 1.
   - GPT's review, filed unchanged as `reviews/2026-11-27-moon-sky-texture-proposal-rev1-gpt-review.md` (sha256 `9ae199d3…f480`, PASS with notes 1–6).
+
+## 0. Rev 2: R1 fixed (GPT's preview review, `reviews/2026-11-27-moon-sky-texture-ui-gpt-review.md`, sha256 `472479fe…b16`, REVIEW HOLD)
+
+**Chad's line:** "Please fix R1 and return the focused tests for GPT recheck. Cover preparation, upload and orientation failures with proper cleanup, grey fallback and successful retry. Keep the existing decisions unchanged. No broad unrelated test sweep, merge or deployment."
+
+**Candidate now `6ba15ac`** (from `c132f46`; page file `skyscene.js` only, sha256 `192fb036…785c`; suite `e01ca4bd…b8b`). `index.html`, the decisions D1–D6, the wording, the orientation and the brightness are unchanged.
+
+**What changed in `skyscene.js`:**
+1. **Every placement call is contained.** `applyMap` (called from load completion, entry and rollover) wraps orientation, texture construction, configuration, attachment, upload and rotation in one `try`. Any error → `cancelMap('failed', …)`: grey material, no map, no rotation, texture disposed, ready/image references dropped, object URL revoked, failure words. Reasons: `orientation`, `timed out`, or `placement: <message>`. Nothing escapes to the caller, so entry and the rollover timer are unaffected.
+2. **Ownership at construction.** `mm.tex = new Tex(img)` is assigned before any configuration, so a texture that fails in `colorSpace` or later is disposed by the shared path.
+3. **Upload errors are no longer swallowed.** `renderer.initTexture(mm.tex)` is called plainly; a throw fails the picture. (If the renderer has no `initTexture`, upload happens on the next frame as before; that is not a failure.)
+4. **Inputs and placement are separate; one limit runs to a placed picture.** `loadMap` now only gathers inputs (bytes, pins, table, decoded picture, texture class). The early `settled` flag is gone: a failure, Back or a new entry moves the generation on and every later step stops (`live()`). The 10-s timer is cleared only when the picture is placed. `applyMap` refuses to start construction after the deadline and checks again after the synchronous preparation (no claim of pre-empting synchronous JavaScript). `loadMap` begins with `cancelMap()`, so a new load always starts from nothing.
+5. **Comment (GPT's small note):** the header now says "ONE scene request … plus two optional asset requests".
+
+**Focused tests: suite §10** (TEST-ONLY injections: wrappers around the texture class the page takes from the Earth picture, the renderer's upload and the Moon mesh's rotation call; every texture made through the wrapper and every `dispose()` is counted):
+
+| Injected failure | Assets ready after the view opened | Assets ready before it opened (scene held 2.5 s) |
+|---|---|---|
+| Texture constructor | failed, grey, nothing kept; 0 textures made; URL 1/1 revoked; controls work; no page error; retry places | same |
+| `colorSpace` configuration | failed; 1 made, 1 disposed | same |
+| Upload (`initTexture`) | failed (no false success); 1 made, 1 disposed | same |
+| Orientation (rotation call) | failed; 1 made, 1 disposed | same |
+
+- **Rollover:** placement of the next date's orientation fails (called from a timer, as the page calls it). The scene still moves to the new date; the picture fails to grey, disposed, words, no page error; retry places for the new date.
+- **Past the limit:** the picture is held 8.8 s, then upload runs 2.5 s synchronously. Result: `timed out` after it returns; disposed; retry places.
+- **Each case checks:**
+  - failed state and its reason;
+  - grey with no map, ready data, image or URL;
+  - every texture made was disposed, and every object URL revoked;
+  - failure words;
+  - the view stays open and its stops work;
+  - no uncaught page error;
+  - **then a close and re-entry places the picture, and a final Back releases everything.**
+- **Old-code control:** §10 run against the pre-fix `skyscene.js` (`c132f46`, sha256 `8a7e5e22…`) with `OLD=` and `ONLY=10`: **51 passed, 50 failed** (`old-code-control-c132f46.log`). The constructor and colour-space cases stay stuck or keep the URL or texture; the upload cases report false success; the before-open orderings and the rollover throw uncaught page errors. This reproduces GPT's findings.
+- **New breaks (four), on `6ba15ac`:**
+  - `swallow-upload`: the old try/catch around upload restored;
+  - `placement-uncontained`: the catch rethrows;
+  - `late-own`: the texture is owned only after configuration;
+  - `no-sync-deadline`: the check after synchronous preparation removed.
+  - Result: all four caught (table below).
+
+**All 17 breaks on `6ba15ac`:** each log opens with "BREAK … applied (pattern found)", and each count is the log's own summary line (equal to its number of FAIL lines).
+
+| Break (on `6ba15ac`) | Failed assertions | Sections |
+|---|---|---|
+| `no-pin` | 4 | §5 |
+| `no-rotation` | 13 | §2, §7 |
+| `swap-fit` | 13 | §2, §7 |
+| `mirror-lng` | 13 | §2, §7 |
+| `no-rollover-orient` | 6 | §7, §10 |
+| `emissive-grey` | 3 | §1, §3, §4 |
+| `blocking-entry` | 6 | §1, §5, §9 |
+| `invented-orientation` | 1 | §6 |
+| `no-dispose` | 14 | §8, §10 |
+| `no-timeout` | 4 | §5 |
+| `late-keep` | 1 | §5 |
+| `no-colorspace` | 10 | §1, §3, §10 |
+| `cancel-on-scene-fail-off` | 1 | §8 |
+| `swallow-upload` | 8 | §10 |
+| `placement-uncontained` | 23 | §10 |
+| `late-own` | 4 | §10 |
+| `no-sync-deadline` | 5 | §4, §10 |
+
+**Runs on `6ba15ac`** (frozen worktree; logs in `evidence-r1/`):
+- the suite, now 197 checks (§1–§9 unchanged, §10 new): **197 / 0** (upload 26 ms; JS heap after 5 entries and exits +829 kB, script heap only);
+- all 17 breaks: **17 of 17 caught**;
+- `sky-zoom-ui` **351 / 0**, `sky-ui` **79 / 0**, `skycraft-ui` **77 / 0**.
+
+No other suites were rerun (Chad: no broad sweep). The earlier `mobile-pass`, `desktop-overflow`, `smoke-fixes` and Animals results in §3.3 are from `c132f46`. The R1 change does not touch `index.html` or layout.
+
+**Records correction (GPT):** rev 1's `breaks-summary.txt` counted the final "FAILED" line as one more failure. The rev 2 runner counts assertion lines only (`grep -c '^FAIL  '`). The counts in this packet always came from each log's summary line.
 
 ## 1. Candidate
 
