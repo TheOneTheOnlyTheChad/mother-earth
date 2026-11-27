@@ -4,6 +4,12 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 26 Nov 2026
 
+## 27 Nov 03:06 UTC (clock reading) — **Moon LROC workstream closed out; next-thread handover written**
+- Live re-check 03:03:12 UTC: 50 of 50 served files match the reviewed manifest (manifest fetched from GitHub at `40e0f86`, hash `cdd304f5…` confirmed first).
+- Branches: `moon-lroc-ui` deleted (remote and local); 7 other workstreams' branches with unique commits left alone.
+- Mac: synced preserve-first; review folders archived in `_sync-preserved/`; verified-redundant transfer files and Downloads duplicates (LROC and Diviner) staged in `_to_delete` folders for Chad to trash (the Trash was not reachable while a full-screen Space was active).
+- Handover: `reviews/2026-11-27-moon-lroc-handover.md` (Project `claude/HANDOVER-MOON-AFTER-LROC.md`).
+
 ## 27 Nov 02:48 UTC (clock reading) — **Moon item 4 (LROC Apollo 11 detailed site): released and closed. Page only; no hub deployment** (Moon/LRO science, LROC thread)
 - **Merge `8e7d262`** of `moon-lroc-ui` at `40e0f86` (02:41:27 UTC commit time, pushed 02:41:37 UTC), on Chad's own line: "Approve: release Moon LROC detailed site from moon-lroc-ui at 40e0f86 to main, page only; no hub deployment."
 - GPT's release review PASS, filed unchanged (`reviews/2026-11-27-moon-lroc-release-rc-gpt-review.md`).
