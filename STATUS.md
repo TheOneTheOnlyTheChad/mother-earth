@@ -4,6 +4,14 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 26 Nov 2026
 
+## 27 Nov 09:47 UTC (clock reading) — **Moon item 10a thread closed out; handover written** (Moon spec)
+- **Release commit `1280c0d`** (reviewed and approved; frozen tested tree `4c8aecd`), live since 09:31:52 UTC. Records on main from `8d3a0af`. Served check 51/51; live check passed. Hub untouched.
+- **Branches:** `moon-sky-texture-ui` and `moon-sky-texture-docs` deleted (GitHub page; local). The 7 other GitHub branches each hold unique work from other workstreams and were left.
+- **Mac:** synced preserve-first; the 10a review copies moved to `_to_delete/` for Chad to trash. Container temp removed.
+- **Carried exception:** `smoke-fixes` baseline (see the release record).
+- **Handover:** `reviews/2026-11-27-moon-sky-texture-handover.md` (Project `claude/HANDOVER-MOON-AFTER-SKY-TEXTURE.md`); START-HERE pointer and lessons 1–7 added.
+- **Next:** Chad names one of 5 CRaTER, 6 LEND, 7 LAMP, 8 Mini-RF (or classifies 12a–c). Sun/Parker waits.
+
 ## 27 Nov 09:34 UTC (clock reading) — **Moon item 10a RELEASED: the Moon's picture on the Sky zoom-out Moon is live. Page only; no hub deployment** (Moon spec, item 10a thread)
 - GPT's release review PASS, filed unchanged (`reviews/2026-11-27-moon-sky-texture-release-rc-gpt-review.md`). Chad: "Approve: release the Sky zoom-out Moon picture from `moon-sky-texture-ui` at `1280c0d` to main, page only; no hub deployment."
 - **Release:** main fast-forwarded `018102c..1280c0d` at 09:31:52 UTC; the docs branch is contained.

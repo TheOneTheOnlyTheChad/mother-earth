@@ -26,7 +26,7 @@ Rev 22 · 27 Nov 2026, 09:34 UTC (clock reading; rev 21 09:20, rev 20 06:43, rev
 | 7 | LAMP far-ultraviolet products | to assess |
 | 8 | Mini-RF radar products | to assess |
 | 9 | Science and trajectory pairing; observation footprints (requirements 5–7) | to assess, only where a selected example benefits |
-| 10a | Sky zoom-out textured Moon (Chad's wider scope) | **done and live** (main `1280c0d`, 27 Nov 2026; 51/51 served files match the reviewed manifest `15e96c52…`) |
+| 10a | Sky zoom-out textured Moon (Chad's wider scope) | **done and live** (release commit `1280c0d`, 27 Nov 2026; 51/51 served files match the reviewed manifest `15e96c52…`; later main has records only) |
 | 10b | Tides Moon (Chad's wider scope) | **closed decision: unchanged** |
 | 11 | Verification limits (requirement 8) | open record; carried with every item |
 | 12a | Higher-resolution LOLA grids | option |
