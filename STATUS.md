@@ -4,6 +4,14 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 26 Nov 2026
 
+## 27 Nov 02:49 UTC (clock reading) — **Moon item 4 (LROC Apollo 11 detailed site): released and closed. Page only; no hub deployment** (Moon/LRO science, LROC thread)
+- **Merge `8e7d262`** of `moon-lroc-ui` at `40e0f86` (02:41:27 UTC commit time, pushed 02:41:37 UTC), on Chad's own line: "Approve: release Moon LROC detailed site from moon-lroc-ui at 40e0f86 to main, page only; no hub deployment."
+- GPT's release review PASS, filed unchanged (`reviews/2026-11-27-moon-lroc-release-rc-gpt-review.md`).
+- **Served:** all 50 files of the reviewed manifest (`cdd304f5…`) matched live at 02:44:57 UTC; the expected list was built from the reviewed file, not the tree.
+- **Live functional check** 02:45–02:46 UTC: open and turn to the site, ring, both views, pointer (site view), close (focus kept, camera kept).
+- Release record `reviews/2026-11-27-moon-lroc-release.md`; REGISTER live; checklist rev 17 (item 4 done). Rollback `git revert -m 1 8e7d262`.
+- **Next Moon item:** Chad's choice (suggested: 10a, the Sky Moon decision). Sun and Parker wait for the Moon spec close-out.
+
 ## 26 Nov 21:05 UTC (clock reading) — **Moon item 4 (LROC): release candidate with GPT for release review. Branch only; not merged, not deployed; no hub change, no new data fetch** (Moon/LRO science, LROC thread)
 - GPT's rev 3 recheck filed unchanged on main (`d73a639`): R1 PASS; move the toggle out of the hidden globe controls in the RC. Chad's go for the RC.
 - **Branch `moon-lroc-ui`:** head `40e0f86`, validated tree `9436b8e`, payload `998df30`, pins `9436b8e`. Packet `reviews/2026-11-26-moon-lroc-release-rc.md`.
