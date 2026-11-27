@@ -1,5 +1,6 @@
 /* Mother Earth — Sky zoom-out view: Earth → Moon → Sun (SKY-ZOOM-OUT-PROPOSAL rev 2.2; Chad's go, 10 Nov 2026).
- * Off on load: nothing is fetched until "Zoom out to the Moon and Sun" is used. Then ONE request:
+ * Off on load: nothing is fetched until "Zoom out to the Moon and Sun" is used. Then ONE scene request (below), plus two optional
+ *   asset requests for the Moon's picture (see "the Moon's picture"; their failure never stops the view). The scene request:
  *   /catalogue/sky/<this page's scene revision> (hub ≥ 0.6.6). The complete file's sha256 must equal the pin, its shape must
  *   pass schema(), and its pairs_with must equal the Two Clocks card's own pinned revision and sha256 (ME.skyState()).
  *   Any failure → the view does not open and says why. Nothing is drawn.
@@ -237,7 +238,7 @@
     loading: "The Moon's picture is loading; until it is ready the Moon is drawn plain.",
     failed: "The Moon's picture could not be loaded or placed, so the Moon is drawn plain.",
   };
-  const mm = { gen: 0, status: 'idle', why: null, ctl: null, timer: null, ready: null, tex: null, url: null, rotDate: null, uploadMs: null, prepMs: null };
+  const mm = { gen: 0, status: 'idle', why: null, ctl: null, timer: null, deadline: 0, ready: null, tex: null, url: null, rotDate: null, uploadMs: null, prepMs: null };
   function mapWords() { const p = $('zoom-moonmap'); if (p) p.textContent = MAP_WORDS[mm.status === 'ok' ? 'ok' : mm.status === 'failed' ? 'failed' : 'loading']; }
   function plainMoon() {   // the grey Moon exactly as before 10a, and nothing of the picture kept
     const m = st.meshes && st.meshes.moon; if (!m) return;
@@ -280,49 +281,58 @@
     m.setRotationFromMatrix(M4); m.updateMatrixWorld(true);
   }
   // put the picture on the Moon for the CURRENT scene row, or fall back to grey; called on commit and in every date update
+  // put the picture on the Moon for the CURRENT scene row, or fall back to grey. Every caller (load completion, entry, rollover)
+  // goes through here, and every error in preparation, upload or orientation ends in the failed state: grey, nothing kept.
+  const placeWhy = e => { const m = String(e && e.message || e); return m === 'orientation' || m === 'timed out' ? m : 'placement: ' + m; };
   function applyMap() {
     if (!st.open || !st.meshes || !mm.ready || mm.status === 'failed') return;
     if (!st.rows) return;                                  // no position for the date: the meshes are hidden by the date rule
-    const R = moonRotation(st.rows, mm.ready.tab);
-    if (!R) return cancelMap('failed', 'orientation');
-    if (!mm.tex) {
-      const t0 = performance.now(), tex = new mm.ready.Tex(mm.ready.img);
-      if (mm.ready.space !== undefined) tex.colorSpace = mm.ready.space;
-      tex.needsUpdate = true; mm.tex = tex;
-      const mat = st.meshes.moon.material; mat.emissiveMap = tex; mat.emissive && mat.emissive.setHex(0xffffff); mat.needsUpdate = true;
-      const r = ME.globe().renderer(); if (r && typeof r.initTexture === 'function') { try { r.initTexture(tex); } catch (e) {} }   // upload now, measured
-      mm.uploadMs = +(performance.now() - t0).toFixed(1);
-      if (mm.url) { URL.revokeObjectURL(mm.url); mm.url = null; }
-    }
-    orientMoon(R); mm.rotDate = st.rows.moon[0]; mm.status = 'ok'; mapWords();
+    try {
+      const R = moonRotation(st.rows, mm.ready.tab);
+      if (!R) throw new Error('orientation');
+      if (!mm.tex) {
+        if (performance.now() > mm.deadline) throw new Error('timed out');
+        const t0 = performance.now();
+        mm.tex = new mm.ready.Tex(mm.ready.img);           // owned at once: cancelMap disposes it on any later failure
+        if (mm.ready.space !== undefined) mm.tex.colorSpace = mm.ready.space;
+        mm.tex.needsUpdate = true;
+        const mat = st.meshes.moon.material; mat.emissiveMap = mm.tex; mat.emissive && mat.emissive.setHex(0xffffff); mat.needsUpdate = true;
+        const r = ME.globe().renderer(); if (r && typeof r.initTexture === 'function') r.initTexture(mm.tex);   // upload now, measured; an error fails the picture
+        mm.uploadMs = +(performance.now() - t0).toFixed(1);
+        if (performance.now() > mm.deadline) throw new Error('timed out');   // synchronous preparation that ran past the limit
+        clearTimeout(mm.timer); mm.timer = null;
+        if (mm.url) { URL.revokeObjectURL(mm.url); mm.url = null; }
+      }
+      orientMoon(R); mm.rotDate = st.rows.moon[0]; mm.status = 'ok'; mapWords();
+    } catch (e) { cancelMap('failed', placeWhy(e)); }
   }
+  // inputs only (bytes, pins, table, decoded picture, texture class); placement is applyMap's. ONE limit, from the first request
+  // to a placed picture; a failure, Back or a new entry moves the generation on, so every later step of this load stops.
   async function loadMap() {
+    cancelMap();
     const gen = ++mm.gen, ctl = new AbortController(), t0 = performance.now();
-    mm.ctl = ctl; mm.status = 'loading'; mm.why = null; mm.uploadMs = mm.prepMs = null; mapWords();
+    mm.ctl = ctl; mm.status = 'loading'; mm.why = null; mm.uploadMs = mm.prepMs = null; mm.deadline = t0 + MAP_TIMEOUT_MS; mapWords();
     const live = () => gen === mm.gen;
-    let settled = false;
-    const fail = why => { if (settled || !live()) return; settled = true; cancelMap('failed', why); };
-    mm.timer = setTimeout(() => fail('timed out'), MAP_TIMEOUT_MS);
+    const fail = why => { if (live()) cancelMap('failed', why); };
+    mm.timer = setTimeout(() => { if (live() && mm.status !== 'ok') fail('timed out'); }, MAP_TIMEOUT_MS);
     const bytes = async (url, sha) => { const r = await fetch(url, { signal: ctl.signal }); if (!r.ok) throw new Error('answered ' + r.status);
       const b = await r.arrayBuffer(); if (await sha256(b) !== sha) throw new Error('pin'); return b; };
     try {
       const ML = window.MoonLight; if (!ML) throw new Error('reader missing');
       const [img, tb] = await Promise.all([bytes(MAP.url, MAP.sha), bytes(ML.T.url, ML.T.sha)]);
-      if (!live() || settled) return;
+      if (!live()) return;
       const tab = ML.read(JSON.parse(new TextDecoder('utf-8', { fatal: true }).decode(tb))); if (typeof tab === 'string') throw new Error('table: ' + tab);
-      const url = URL.createObjectURL(new Blob([img], { type: 'image/jpeg' })); mm.url = url;
-      const pic = new Image(); pic.src = url; await pic.decode();
-      if (!live() || settled) { if (url === mm.url) { URL.revokeObjectURL(url); mm.url = null; } return; }
+      mm.url = URL.createObjectURL(new Blob([img], { type: 'image/jpeg' }));   // owned: cancelMap revokes it
+      const pic = new Image(); pic.src = mm.url; await pic.decode();
+      if (!live()) return;
       if (pic.naturalWidth !== MAP.w || pic.naturalHeight !== MAP.h) throw new Error('size');
       // the texture class comes from the Earth picture already on the globe (no three.js global in the bundle); wait inside the limit
       let Tex = null, space;
-      while (live() && !settled) { const gm = ME.globe().globeMaterial(); if (gm && gm.map) { Tex = gm.map.constructor; space = gm.map.colorSpace; break; } await new Promise(r => setTimeout(r, 100)); }
-      if (!live() || settled) return;
-      settled = true; clearTimeout(mm.timer); mm.timer = null; mm.ctl = null;
-      mm.ready = { img: pic, tab, Tex, space }; mm.prepMs = +(performance.now() - t0).toFixed(1);
-      applyMap();
+      while (live()) { const gm = ME.globe().globeMaterial(); if (gm && gm.map) { Tex = gm.map.constructor; space = gm.map.colorSpace; break; } await new Promise(r => setTimeout(r, 100)); }
+      if (!live()) return;
+      mm.ctl = null; mm.ready = { img: pic, tab, Tex, space }; mm.prepMs = +(performance.now() - t0).toFixed(1);
+      applyMap();   // places now if the view is open; otherwise entry places it (still inside the limit)
     } catch (e) {
-      if (!live() || settled) return;
       fail(e && e.name === 'AbortError' ? 'aborted' : String(e && e.message || e));
     }
   }

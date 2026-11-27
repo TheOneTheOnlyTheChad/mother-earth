@@ -23,20 +23,29 @@ const MLB = fs.readFileSync(path.join(REPO, 'assets/moon/moon-light-2026-06-R1.j
 const sha = b => crypto.createHash('sha256').update(b).digest('hex');
 const OUT = process.env.OUT || '/tmp/sky-moon-texture-out'; fs.mkdirSync(OUT, { recursive: true });
 
-let JS = fs.readFileSync(path.join(REPO, 'skyscene.js'), 'utf8');
+// OLD=<file>: run against another skyscene.js (the old-code control for R1: the candidate before the fix)
+let JS = fs.readFileSync(process.env.OLD || path.join(REPO, 'skyscene.js'), 'utf8');
+if (process.env.OLD) console.log('OLD skyscene.js: ' + process.env.OLD + ' sha256 ' + require('crypto').createHash('sha256').update(JS).digest('hex'));
+const ONLY = process.env.ONLY ? process.env.ONLY.split(',') : null, want = k => !ONLY || ONLY.includes(k);
 const BREAKS = {
   'no-pin': ["const b = await r.arrayBuffer(); if (await sha256(b) !== sha) throw new Error('pin'); return b; };", "const b = await r.arrayBuffer(); return b; };"],
   'no-rotation': ["const W = mul3(mul3(P, R), Lt), M4", "const W = mul3(P, Lt), M4"],
   'swap-fit': ["const A = tri(eS, sS), B = tri(eM, sM);", "const A = tri(sS, eS), B = tri(eM, sM);"],
   'mirror-lng': ["return [Math.cos(a) * Math.cos(o), Math.cos(a) * Math.sin(o), Math.sin(a)]; };\n    const moonP", "return [Math.cos(a) * Math.cos(o), -Math.cos(a) * Math.sin(o), Math.sin(a)]; };\n    const moonP"],
   'no-rollover-orient': ["positionMeshes(); applyMap(); $('zoom-scale')", "positionMeshes(); $('zoom-scale')"],
-  'emissive-grey': ["mat.emissiveMap = tex; mat.emissive && mat.emissive.setHex(0xffffff);", "mat.emissiveMap = tex; mat.emissive && mat.emissive.setHex(0x9a9a9a);"],
+  'emissive-grey': ["mat.emissiveMap = mm.tex; mat.emissive && mat.emissive.setHex(0xffffff);", "mat.emissiveMap = mm.tex; mat.emissive && mat.emissive.setHex(0x9a9a9a);"],
   'blocking-entry': ["    loadMap();   // the Moon's picture: optional, in parallel, never waited for", "    await loadMap();"],
-  'invented-orientation': ["if (!R) return cancelMap('failed', 'orientation');", "if (!R) { if (!mm.tex) { const tex = new mm.ready.Tex(mm.ready.img); tex.needsUpdate = true; mm.tex = tex; const mat = st.meshes.moon.material; mat.emissiveMap = tex; mat.emissive.setHex(0xffffff); mat.needsUpdate = true; } mm.status = 'ok'; return; }"],
+  'invented-orientation': ["if (!R) throw new Error('orientation');", "if (!R) { if (!mm.tex) { mm.tex = new mm.ready.Tex(mm.ready.img); mm.tex.needsUpdate = true; const mat = st.meshes.moon.material; mat.emissiveMap = mm.tex; mat.emissive.setHex(0xffffff); mat.needsUpdate = true; } mm.status = 'ok'; return; }"],
   'no-dispose': ["st.raf = 0; cancelMap();   // D6: the picture is disposed on exit", "st.raf = 0;"],
-  'no-timeout': ["    mm.timer = setTimeout(() => fail('timed out'), MAP_TIMEOUT_MS);\n", ""],
-  'late-keep': ["      if (!live() || settled) return;\n      settled = true; clearTimeout(mm.timer);", "      settled = true; clearTimeout(mm.timer);"],
-  'no-colorspace': ["      if (mm.ready.space !== undefined) tex.colorSpace = mm.ready.space;\n", ""],
+  'no-timeout': ["    mm.timer = setTimeout(() => { if (live() && mm.status !== 'ok') fail('timed out'); }, MAP_TIMEOUT_MS);\n", ""],
+  'late-keep': ["      if (!live()) return;\n      mm.ctl = null; mm.ready =", "      mm.ctl = null; mm.ready ="],
+  'no-colorspace': ["        if (mm.ready.space !== undefined) mm.tex.colorSpace = mm.ready.space;\n", ""],
+  // R1 (GPT preview review, 27 Nov 2026): placement errors contained, the texture owned at once, upload errors not swallowed,
+  // synchronous preparation past the limit refused
+  'swallow-upload': ["if (r && typeof r.initTexture === 'function') r.initTexture(mm.tex);", "if (r && typeof r.initTexture === 'function') { try { r.initTexture(mm.tex); } catch (e) {} }"],
+  'placement-uncontained': ["    } catch (e) { cancelMap('failed', placeWhy(e)); }\n  }", "    } catch (e) { throw e; }\n  }"],
+  'late-own': ["        mm.tex = new mm.ready.Tex(mm.ready.img);           // owned at once: cancelMap disposes it on any later failure\n        if (mm.ready.space !== undefined) mm.tex.colorSpace = mm.ready.space;", "        const tex0 = new mm.ready.Tex(mm.ready.img);\n        if (mm.ready.space !== undefined) tex0.colorSpace = mm.ready.space; mm.tex = tex0;"],
+  'no-sync-deadline': ["        if (performance.now() > mm.deadline) throw new Error('timed out');   // synchronous preparation that ran past the limit\n", ""],
   'cancel-on-scene-fail-off': ["    if (why) { cancelMap(); st.status = 'unavailable';", "    if (why) { st.status = 'unavailable';"],
 };
 const B = process.env.BREAK;
@@ -90,7 +99,8 @@ const rotDiff = (R, Q) => { let tr = 0; for (let i = 0; i < 3; i++) for (let k =
     await ctx.route(BASE + '/assets/moon/moon-light-2026-06-R1.json*', asset('table', MLB, 'application/json'));
     await ctx.route(HUB + '/**', r => { const p = new URL(r.request().url()).pathname;
       if (p === '/catalogue/sky/sky-2026-11-R1') return r.fulfill({ status: 200, contentType: 'application/json', body: R1 });
-      if (p === '/catalogue/sky/sky-scene-2026-11-R1') { req.scene++; return r.fulfill({ status: 200, contentType: 'application/json', body: o.scene || SC }); }
+      if (p === '/catalogue/sky/sky-scene-2026-11-R1') { req.scene++; const go = () => r.fulfill({ status: 200, contentType: 'application/json', body: o.scene || SC }).catch(() => {});
+        return o.sceneDelay ? new Promise(res => setTimeout(() => res(go()), o.sceneDelay)) : go(); }
       r.fulfill({ status: 404, contentType: 'application/json', body: '{}' }); });
     const page = await ctx.newPage(); const perr = []; page.on('pageerror', e => perr.push(String(e).slice(0, 300)));
     page.on('requestfailed', rq => { if (/lroc_color|moon-light/.test(rq.url())) req.aborted.push(rq.url().split('/').pop() + ' ' + (rq.failure() || {}).errorText); });
@@ -105,7 +115,22 @@ const rotDiff = (R, Q) => { let tr = 0; for (let i = 0; i < 3; i++) for (let k =
       window.__moon = () => { let m = null; ME.globe().scene().traverse(o => { if (o.__skyScene === 'moon') m = o; }); return m; };
       window.__mf = (lat, lng) => { const m = __moon(), a = lat * Math.PI / 180, o = lng * Math.PI / 180, X = Math.cos(a) * Math.cos(o), Y = Math.cos(a) * Math.sin(o), Z = Math.sin(a);
         return m.position.clone().set(X, Z, -Y).applyQuaternion(m.quaternion).toArray(); };
-      window.__info = () => { const r = ME.globe().renderer(); return { textures: r.info.memory.textures, calls: r.info.render.calls }; };` });
+      window.__info = () => { const r = ME.globe().renderer(); return { textures: r.info.memory.textures, calls: r.info.render.calls }; };
+      // R1 failure injection (TEST-ONLY): wraps the texture class the page takes from the Earth picture, the renderer's upload and
+      // the Moon mesh's rotation call; every texture made through the wrapper is counted, and its dispose() too
+      window.__inj = { ctor: false, cs: false, up: false, orient: false, upBusy: 0 }; window.__texLog = { made: 0, disposed: 0 };
+      window.__arm = () => { const gm = ME.globe().globeMaterial(); if (!gm.map || gm.map.__armed) return !!(gm.map && gm.map.__armed);
+        const Real = Object.getPrototypeOf(gm.map).constructor;
+        function T(img) { if (__inj.ctor) throw new Error('injected constructor'); const t = new Real(img); __texLog.made++;
+          const d = t.dispose.bind(t); t.dispose = () => { __texLog.disposed++; d(); };
+          if (__inj.cs) Object.defineProperty(t, 'colorSpace', { configurable: true, get() { return ''; }, set() { throw new Error('injected colourSpace'); } });
+          return t; }
+        Object.defineProperty(gm.map, 'constructor', { value: T, configurable: true }); gm.map.__armed = true;
+        const r = ME.globe().renderer(), it = r.initTexture.bind(r);
+        r.initTexture = t => { if (__inj.up) throw new Error('injected upload'); if (__inj.upBusy) { const e = performance.now() + __inj.upBusy; while (performance.now() < e) {} } return it(t); };
+        let p = ME.globe().scene(); while (p && !Object.prototype.hasOwnProperty.call(p, 'setRotationFromMatrix')) p = Object.getPrototypeOf(p);
+        const sr = p.setRotationFromMatrix; p.setRotationFromMatrix = function (m) { if (__inj.orient && this.__skyScene === 'moon') throw new Error('injected orientation'); return sr.call(this, m); };
+        return true; };` });
     await page.waitForFunction(() => window.ME && ME.globe && ME.globe() && ME.zoomState && ME.skyState, null, { timeout: 30000 });
     return { ctx, page, perr, req, date };
   };
@@ -140,7 +165,7 @@ const rotDiff = (R, Q) => { let tr = 0; for (let i = 0; i < 3; i++) for (let k =
     let s = [0, 0, 0]; for (let i = 0; i < 81; i++) for (let k = 0; k < 3; k++) s[k] += d[4 * i + k]; return s.map(v => v / 81); }, [lat, lng]);
 
   // ---------- 1. loads: none before entry; one of each on entry; the view opens with the grey Moon first, then the picture
-  {
+  if (want('1')) {
     const { ctx, page, req, perr } = await run({ map: { delay: 1500 } });
     await page.waitForTimeout(600); await cardOn(page);
     ok('1a no map or table request on load or on switching the card on', req.map === 0 && req.table === 0, req);
@@ -164,7 +189,7 @@ const rotDiff = (R, Q) => { let tr = 0; for (let i = 0; i < 3; i++) for (let k =
 
   // ---------- 2. orientation by mathematics and against an independent reference, four dates (one near new Moon)
   const ORIENT = [];
-  for (const date of ['2026-11-27', '2026-12-24', '2027-02-21', '2027-07-10']) {
+  if (want('2')) for (const date of ['2026-11-27', '2026-12-24', '2027-02-21', '2027-07-10']) {
     const { ctx, page, perr } = await run({ date });
     await cardOn(page); await openZoom(page); const got = await waitMap(page, 'ok');
     const r = await page.evaluate(() => ({ mf: { e0: null }, moon: __moon().position.toArray(), X: __mf(0, 0), Y: __mf(0, 90), Zz: __mf(90, 0) }));
@@ -185,7 +210,7 @@ const rotDiff = (R, Q) => { let tr = 0; for (let i = 0; i < 3; i++) for (let k =
 
   // ---------- 3. on the picture (TEST-ONLY close views): named landmarks where their coordinates say, with mirrored controls;
   //            and the colour: the rendered centre against the map's own pixels at that point
-  {
+  if (want('3')) {
     const { ctx, page, perr } = await run({});
     await cardOn(page); await openZoom(page); await waitMap(page, 'ok');
     await page.evaluate(() => ME.zoomGo(1));
@@ -203,7 +228,7 @@ const rotDiff = (R, Q) => { let tr = 0; for (let i = 0; i < 3; i++) for (let k =
 
   // ---------- 4. real crops at stop B (DPR 1 and 2), textured and grey; framing unchanged by the picture
   const CROPS = [];
-  for (const [vw, dpr] of [[{ width: 1280, height: 900 }, 1], [{ width: 390, height: 844 }, 2]]) {
+  if (want('4')) for (const [vw, dpr] of [[{ width: 1280, height: 900 }, 1], [{ width: 390, height: 844 }, 2]]) {
     const a = await run({ viewport: vw, dpr }); await cardOn(a.page); await openZoom(a.page); await waitMap(a.page, 'ok'); await a.page.evaluate(() => ME.zoomGo(1));
     const tex = await shot(a.page, `crop-B-${vw.width}x${dpr}-map.png`), pa = (await Z(a.page)).path, calls = (await a.page.evaluate(() => __info())).calls; await a.ctx.close();
     const b = await run({ viewport: vw, dpr, map: { status: 404, body: '' } }); await cardOn(b.page); await openZoom(b.page); await waitMap(b.page, 'failed'); await b.page.evaluate(() => ME.zoomGo(1));
@@ -216,7 +241,7 @@ const rotDiff = (R, Q) => { let tr = 0; for (let i = 0; i < 3; i++) for (let k =
   console.log('crops', JSON.stringify(CROPS));
 
   // ---------- 5. failures: grey Moon, failure words, the view still opens; siblings stopped; nothing kept
-  for (const [name, o, want] of [
+  if (want('5')) for (const [name, o, want] of [
     ['map 404', { map: { status: 404, body: '' } }, 'answered 404'],
     ['map wrong bytes (pin)', { map: { body: Buffer.concat([MAPB, Buffer.from([0])]) } }, 'pin'],
     ['table wrong bytes (pin)', { table: { body: Buffer.concat([MLB, Buffer.from(' ')]) } }, 'pin'],
@@ -238,7 +263,7 @@ const rotDiff = (R, Q) => { let tr = 0; for (let i = 0; i < 3; i++) for (let k =
     ok(`5 ${name}: no page errors`, perr.length === 0, perr);
     await ctx.close();
   }
-  {   // the sibling is stopped when one fails: map fails at once, the table is held back 4 s
+  if (want('5')) {   // the sibling is stopped when one fails: map fails at once, the table is held back 4 s
     const { ctx, page, req } = await run({ map: { status: 404, body: '' }, table: { delay: 4000 } });
     await cardOn(page); await openZoom(page); await waitMap(page, 'failed'); await page.waitForTimeout(500);
     ok('5 sibling download stopped when the other fails', req.aborted.some(a => /moon-light/.test(a)), req.aborted);
@@ -246,7 +271,7 @@ const rotDiff = (R, Q) => { let tr = 0; for (let i = 0; i < 3; i++) for (let k =
   }
 
   // ---------- 6. degenerate geometry (crafted scene: the Sun straight behind the Moon) → grey, no invented orientation
-  {
+  if (want('6')) {
     const sc = JSON.parse(SC), m = sc.bodies.moon.rows.find(r => r[0] === '2026-11-27'), s = sc.bodies.sun.rows.find(r => r[0] === '2026-11-27');
     s[1] = m[1]; s[2] = m[2]; const scene = JSON.stringify(sc);
     const { ctx, page, perr } = await run({ scene });
@@ -259,7 +284,7 @@ const rotDiff = (R, Q) => { let tr = 0; for (let i = 0; i < 3; i++) for (let k =
   }
 
   // ---------- 7. rollover while open: orientation moves with the positions in one update
-  {
+  if (want('7')) {
     const { ctx, page, perr } = await run({});
     await cardOn(page); await openZoom(page); await waitMap(page, 'ok');
     await page.clock.setSystemTime(new Date('2026-11-28T00:00:30Z'));
@@ -272,7 +297,7 @@ const rotDiff = (R, Q) => { let tr = 0; for (let i = 0; i < 3; i++) for (let k =
   }
 
   // ---------- 8. Back, races and cleanup: disposal (D6), repeated entry, scene failure, no-position entry
-  {
+  if (want('8')) {
     const { ctx, page, perr } = await run({});
     await cardOn(page);
     const cdp = await ctx.newCDPSession(page), heap = async () => { await cdp.send('HeapProfiler.collectGarbage'); return (await cdp.send('Runtime.getHeapUsage')).usedSize; };
@@ -291,7 +316,7 @@ const rotDiff = (R, Q) => { let tr = 0; for (let i = 0; i < 3; i++) for (let k =
     ok('8d no page errors', perr.length === 0, perr);
     await ctx.close();
   }
-  {   // Back while loading, then a late answer; re-entry gets its own load
+  if (want('8')) {   // Back while loading, then a late answer; re-entry gets its own load
     const { ctx, page, req } = await run({ map: { delay: 3000 } });
     await cardOn(page); await openZoom(page); await page.waitForTimeout(500); await page.click('#zoom-back');
     await page.waitForTimeout(3500); const z = await Z(page);
@@ -301,14 +326,14 @@ const rotDiff = (R, Q) => { let tr = 0; for (let i = 0; i < 3; i++) for (let k =
     ok('8g object URLs balanced after the race', u.made === u.revoked, u);
     await ctx.close();
   }
-  {   // scene failure: the optional load is cancelled
+  if (want('8')) {   // scene failure: the optional load is cancelled
     const { ctx, page } = await run({ scene: SC + ' ', scenePin: false });   // one extra byte: the scene pin refuses it
     await page.evaluate(() => {}); await cardOn(page); await openZoom(page, false); await page.waitForTimeout(2500);
     const z = await Z(page), u = await page.evaluate(() => __urls);
     ok('8h scene file refused: view not open, optional load cancelled, nothing kept', !z.open && z.moonMap.status === 'idle' && !z.moonMap.ready && !z.moonMap.url && u.made === u.revoked, { z: z.moonMap, msg: z.msg, u });
     await ctx.close();
   }
-  {   // a date without a sample: the existing "No computed position" state, the optional load cancelled
+  if (want('8')) {   // a date without a sample: the existing "No computed position" state, the optional load cancelled
     const { ctx, page } = await run({ date: '2028-02-01' });
     await cardOn(page).catch(() => {}); await openZoom(page, false); await page.waitForTimeout(2500);
     const z = await Z(page), u = await page.evaluate(() => __urls);
@@ -317,7 +342,7 @@ const rotDiff = (R, Q) => { let tr = 0; for (let i = 0; i < 3; i++) for (let k =
   }
 
   // ---------- 9. blocking check: a slow picture never delays the view
-  {
+  if (want('9')) {
     const { ctx, page } = await run({ map: { delay: 6000 } });
     await cardOn(page); const t0 = Date.now(); await page.click('#tgl-zoom');
     const opened = await page.waitForFunction(() => ME.zoomState().open && ME.zoomState().path, null, { timeout: 4000 }).then(() => true, () => false);
@@ -325,7 +350,65 @@ const rotDiff = (R, Q) => { let tr = 0; for (let i = 0; i < 3; i++) for (let k =
     await ctx.close();
   }
 
-  fs.writeFileSync(path.join(OUT, 'results.json'), JSON.stringify({ orientation: ORIENT, crops: CROPS, astronomy_engine: AEinfo, break: B || null, pass, fail, failed }, null, 1));
+  // ---------- 10. R1 (GPT preview review): preparation, upload and orientation errors end in the failed state — grey, nothing kept,
+  //            owned textures disposed, no uncaught error, controls usable — for both completion orderings and on rollover; a later
+  //            close and re-entry succeeds. TEST-ONLY injections through the wrappers armed by __arm().
+  const R1OUT = [];
+  const r1Check = async (label, page, perr, wantWhy) => {
+    const done = await waitMap(page, 'failed', 14000), z = await Z(page), tl = await page.evaluate(() => __texLog), u = await page.evaluate(() => __urls);
+    R1OUT.push({ label, status: z.moonMap.status, why: z.moonMap.why, tex: tl, urls: u });
+    ok(`10 ${label}: failed state, reason "${wantWhy}"`, done && String(z.moonMap.why).startsWith(wantWhy), z.moonMap);
+    ok(`10 ${label}: grey Moon, nothing kept (no map, ready data, image or URL)`, grey(z.moonMap) && !z.moonMap.ready && !z.moonMap.url && !z.moonMap.tex, z.moonMap);
+    ok(`10 ${label}: every texture made was disposed`, tl.made === tl.disposed, tl);
+    ok(`10 ${label}: every object URL revoked`, u.made === u.revoked, u);
+    ok(`10 ${label}: failure words`, /could not be loaded or placed/.test(await words(page)), await words(page));
+    ok(`10 ${label}: view still open and its controls work`, z.open && await page.evaluate(() => { ME.zoomGo(2); const c = ME.zoomState().stop === 'C'; ME.zoomGo(1); return c && ME.zoomState().stop === 'B'; }));
+    ok(`10 ${label}: no uncaught page error`, perr.length === 0, perr);
+  };
+  const retry = async (label, page, perr) => {
+    await page.evaluate(() => { for (const k of ['ctor', 'cs', 'up', 'orient']) __inj[k] = false; __inj.upBusy = 0; });
+    await page.click('#zoom-back'); await page.waitForTimeout(300); await openZoom(page); const got = await waitMap(page, 'ok', 15000), z = await Z(page);
+    ok(`10 ${label}: after close and re-entry the picture is placed`, got && z.moonMap.mapOn && z.moonMap.rotDate === z.date, z.moonMap);
+    await page.click('#zoom-back'); await page.waitForTimeout(300); const z2 = await Z(page), tl = await page.evaluate(() => __texLog), u = await page.evaluate(() => __urls);
+    ok(`10 ${label}: after the retry and Back, everything released`, grey(z2.moonMap) && !z2.moonMap.ready && tl.made === tl.disposed && u.made === u.revoked, { mm: z2.moonMap, tl, u });
+    ok(`10 ${label}: no uncaught page error after the retry`, perr.length === 0, perr);
+  };
+  if (want('10')) for (const [kind, why] of [['ctor', 'placement: injected constructor'], ['cs', 'placement: injected colourSpace'], ['up', 'placement: injected upload'], ['orient', 'placement: injected orientation']]) {
+    for (const order of ['after-open', 'before-open']) {
+      const o = order === 'after-open' ? { map: { delay: 1500 } } : { sceneDelay: 2500 };
+      const { ctx, page, perr } = await run(o);
+      await cardOn(page); await page.waitForFunction(() => __arm(), null, { timeout: 15000 });
+      await page.evaluate(k => { __inj[k] = true; }, kind);
+      await openZoom(page);
+      const label = `${kind} error, assets ready ${order === 'after-open' ? 'after' : 'before'} the view opened`;
+      await r1Check(label, page, perr, why);
+      await retry(label, page, perr);
+      await ctx.close();
+    }
+  }
+  if (want('10')) {   // rollover: placement of the next date's orientation fails
+    const { ctx, page, perr } = await run({});
+    await cardOn(page); await page.waitForFunction(() => __arm(), null, { timeout: 15000 });
+    await openZoom(page); await waitMap(page, 'ok');
+    await page.evaluate(() => { __inj.orient = true; }); await page.clock.setSystemTime(new Date('2026-11-28T00:00:30Z'));
+    await page.evaluate(() => { setTimeout(() => ME.zoomRollover(), 0); });   // as the page's own timer calls it: an escaping error is an uncaught page error
+    await page.waitForTimeout(300); const z0 = await Z(page); ok('10 rollover: the scene still moves to the new date', z0.date === '2026-11-28', z0.date);
+    await r1Check('orientation error on rollover', page, perr, 'placement: injected orientation');
+    await retry('orientation error on rollover', page, perr);
+    await ctx.close();
+  }
+  if (want('10')) {   // synchronous preparation that runs past the whole-load limit: refused after it returns
+    const { ctx, page, perr } = await run({ map: { delay: 8800 } });
+    await cardOn(page); await page.waitForFunction(() => __arm(), null, { timeout: 15000 });
+    await page.evaluate(() => { __inj.upBusy = 2500; });
+    await openZoom(page);
+    await r1Check('upload running past the limit', page, perr, 'timed out');
+    await retry('upload running past the limit', page, perr);
+    await ctx.close();
+  }
+  if (R1OUT.length) console.log('r1', JSON.stringify(R1OUT));
+
+  fs.writeFileSync(path.join(OUT, 'results.json'), JSON.stringify({ r1: R1OUT, orientation: ORIENT, crops: CROPS, astronomy_engine: AEinfo, break: B || null, pass, fail, failed }, null, 1));
   await browser.close(); clearTimeout(wd);
   console.log(`\n${fail ? 'FAILED' : 'PASSED'}  ${pass} passed, ${fail} failed${B ? `  (BREAK ${B})` : ''}`);
   process.exit(fail ? 1 : 0);
