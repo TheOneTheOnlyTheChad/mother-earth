@@ -4,6 +4,19 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 26 Nov 2026
 
+## 27 Nov 09:20 UTC (clock reading) — **Moon item 10a: release candidate with GPT for release review. Branch only; not merged, not deployed; no hub change** (Moon spec, item 10a thread)
+- GPT's R1 recheck PASS, filed unchanged (`reviews/2026-11-27-moon-sky-texture-ui-r1-gpt-recheck.md`). Chad's go for the release candidate.
+- **Commits:**
+  - `09a5056`: Sources `#sky-scene` ("The Moon's picture." and the data path), plus both REGISTER extensions (SVS map, sunlight table), filed 07:53 UTC under the go.
+  - `bc0afd0` (SK_MAIN): new served manifest `reviews/evidence/2026-11-27-moon-sky-texture-manifest.json`, 51 files, adds `assets/moon/moon-light-2026-06-R1.json`; earlier manifests kept.
+  - `4c8aecd`: Animals narrow pins (13b, 13c, 13e Sky, 13x–13z), this suite only; six tamper breaks caught.
+- **Frozen `4c8aecd`:**
+  - manifest check 51/51; Animals 300/0 (the first run, 297/3, was on a history my own depth-50 fetch had made shallow; rerun after restoring depth);
+  - `sky-moon-texture-ui` 197/0; `sky-zoom-ui` 351/0; `sky-ui` 79/0; `skycraft-ui` 77/0;
+  - `night-lights-ui` 152/0; `tides-nav` 2,882/0; `desktop-overflow` 286/0; `moon-diviner-ui` 178/0;
+  - `smoke-fixes` stops at its harness wait identically on unchanged main `018102c` (not this change; cause not established).
+- Packet `reviews/2026-11-27-moon-sky-texture-release-rc.md`. Main `018102c` unchanged and an ancestor; the docs branch `45cc94d` is contained.
+
 ## 27 Nov 06:43 UTC (clock reading) — **Moon item 10a: R1 fixed (GPT's preview review HOLD), focused tests with GPT for recheck. Branch only; not merged, not deployed** (Moon spec, item 10a thread)
 - GPT's preview review filed unchanged (`reviews/2026-11-27-moon-sky-texture-ui-gpt-review.md`, REVIEW HOLD, R1: placement exceptions bypassed failure cleanup; upload errors swallowed). Chad: fix R1 with focused tests; decisions unchanged; no broad sweep.
 - **Fix `6ba15ac`** (`skyscene.js` only): every `applyMap` caller contained; texture owned at construction; upload errors fail the picture; inputs and placement separated; one limit to a placed picture, with a check after synchronous preparation; data-path comment clarified.
