@@ -4,6 +4,12 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 26 Nov 2026
 
+## 27 Nov 11:52 UTC (clock reading) — **Moon item 5 (CRaTER): page preview `moon-crater-ui` built, with GPT for review. Branch only; not merged, not deployed; no hub change; no data downloaded** (Moon spec, CRaTER thread)
+- GPT's rev 2 recheck PASS (build notes 1–4), filed unchanged on the branch. Chad's own go, confirmed in chat: accept D1–D5 and D7; page-only preview; retained sources.
+- **Branch `moon-crater-ui`:** tested `d6f9a0f`, packet `reviews/2026-11-27-moon-crater-ui-rc.md` (head `10a05db`). New: `mooncrater.js`, `mooncrater.css`, `assets/moon/crater/crater-good-2026-06-10-R1.json` (3,908 B, `50ef3c0c…`), `phase1/moonsci/build_crater.py`, `phase1/moonsci/crater/test_build_crater.py`, `phase1/moon-crater-ui.test.cjs`; `moon.html` changed. `craft.js` and the dated path unchanged.
+- **Validation on the frozen worktree (11:15–11:49 UTC):** builder `--check` OK; builder tests 28/0; `moon-crater-ui` 49/0, 11 of 11 breaks with patterns found; moon-globe 67, moon-lit 138, moon-lro-path 68, moon-diviner-ui 178, moon-lroc-ui 78, moon-height-ui 110, skycraft-ui 77, tides-ui 60, timeline-ui 594, tides-nav 2,882, all clean; timeline-mixed-assets 16/2 (main baseline); animals-tab-ui 298/2 (13e, `moon.html` pins: expected, moved at the release candidate).
+- Next: GPT's preview review; then the release candidate (Sources, REGISTER, pins, manifest) on Chad's go; release only on his own Approve line.
+
 ## 27 Nov 10:34 UTC (clock reading) — **Moon item 5 (CRaTER): proposal rev 2 with GPT for recheck. Docs only; no page build, bulk acquisition, merge or deployment** (Moon spec, CRaTER thread)
 - GPT's rev 1 review filed unchanged (`reviews/2026-11-27-moon-crater-proposal-rev1-gpt-review.md`, REVISE BEFORE BUILD, R1–R3). Chad: rev 2 addressing R1–R3, keeping the GOOD-event chart.
 - Rev 2 (`docs/concepts/MOON-CRATER-PROPOSAL.md`): timing as a hypothesis (no shift); bins by UTC record timestamp; completeness and nominal rules with withholding (D7); labelled extra 11 June bin; bars an approximate Poisson benchmark; claims narrowed.
