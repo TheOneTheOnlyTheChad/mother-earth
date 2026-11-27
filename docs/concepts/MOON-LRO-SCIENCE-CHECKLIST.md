@@ -287,13 +287,13 @@ Rev 27 · 27 Nov 2026, 14:24 UTC (clock reading; rev 26 11:52, rev 25 10:34, rev
 
 - **Brief asked:** radiation measured at the spacecraft. Its spatial meaning differs from that of ground-looking instruments. Units, detectors and product interpretation must be assessed.
 - **Chad's go (27 Nov):** assess one manageable archived product or short dated interval; docs-only proposal for GPT; keep spacecraft measurements distinct from lunar-surface conditions; assess pairing before proposing it; checkpoint each acquisition; no build, bulk acquisition, merge or deployment.
-- **Status:** assessed. Proposal `docs/concepts/MOON-CRATER-PROPOSAL.md` rev 1, evidence `docs/research/moon-crater/`.
+- **Status:** release candidate `6ed18c3` with GPT for release review (see the updates below). Proposal `docs/concepts/MOON-CRATER-PROPOSAL.md` rev 2, evidence `docs/research/moon-crater/`.
 - **Evidence (summary; details in the proposal):**
   - Product: PDS PPI bundle `urn:nasa:pds:lro.crater` v2.4, Release 67 (coverage to 2026-06-30). Level 2 secondary science, one record per second, 16,761,600 B a day.
   - Quantity: `GOOD`, events counted per ~1 s readout inside the instrument (checked against the primary-science event records: 674 of 674 seconds). Not a dose, not a flux, not a surface value. About 30 a second on 10–11 June.
   - Pairing (item 9): the records carry LRO's MOON_ME position from the definitive ephemeris. It agrees with the page's dated path to a median of 0.023–0.034 km (max 0.064–0.081 km over 1,440 of 1,441 minutes) once a 0.18–0.20 s tag offset is allowed for.
   - Signal: per-minute variation 1.17–1.35 times counting noise; no relation with altitude. A path colouring would show noise.
-  - No archived dose for 2026 (the team's legacy dose table ends 2012; current team plots carry no stated terms). Two archive inconsistencies are recorded (swapped flag labels in L2 PRI; no L2 housekeeping served for 2026).
+  - No archived dose for 2026 (the team's legacy dose table ends 2012; current team plots carry no stated terms). Two archive observations are recorded (a suspected flag label/column inconsistency in L2 PRI, not confirmed; no L2 housekeeping found where listed for 2026).
   - Acquisitions: four files, 38,695,835 B, each checkpointed before the next (`docs/research/moon-crater/checkpoints.jsonl`); retained on the Mac.
 - **Recommendation (Claude):** R1, an off-by-default chart of 10-minute event rates for 10 June 2026 in the dated-example drawing, following its time control. R0 ("assessed, not shown") is a legitimate alternative.
 - **Blockers:** none for R1. R3 (a computed dose) needs its own reading, resolution of the flag question and a bulk acquisition.
@@ -458,4 +458,4 @@ Each stays `option` until Chad classifies it as "assess" or "not pursued", with 
 - Rev 24 (27 Nov 2026, 10:18 UTC): §5 CRaTER assessed; proposal rev 1 with GPT. No other item moved.
 - Rev 25 (27 Nov 2026, 10:34 UTC): §5: GPT's rev 1 review filed; proposal rev 2 with GPT for recheck. No other item moved.
 - Rev 26 (27 Nov 2026, 11:52 UTC): §5: GPT's rev 2 recheck (PASS), Chad's D1–D5, D7 and go; page preview `moon-crater-ui` (tested `d6f9a0f`) with GPT. No other item moved.
-- Rev 27 (27 Nov 2026, 14:24 UTC): §5: GPT's preview review (PASS); release candidate `6ed18c3` with GPT for release review. No other item moved.
+- Rev 27 (27 Nov 2026, 14:24 UTC): §5: GPT's preview review (PASS); release candidate `6ed18c3` with GPT for release review; §5 status line and the archive-observations wording brought up to date (rev 2). No other item moved.
