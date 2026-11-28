@@ -4,6 +4,14 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 28 Nov 2026
 
+## 28 Nov 06:55 UTC (clock reading) — **Moon item 7 (LAMP): GPT's rev 2 recheck PASS filed; Chad accepted D1–D8 and gave the go for the bounded D6 finer-registration check. D6 acquisition paused: downloads are not reaching the Mac** (Moon spec, LAMP thread)
+- GPT's recheck filed unchanged: `reviews/2026-11-28-moon-lamp-proposal-rev2-gpt-recheck.md` (`19f370d5…17b40d`, equal to the Mac copy). PASS for D1–D8 and D6, with notes 1–5: the top bin holds 56 cells after rounding (label it "0.080 or higher after rounding"); P1 with range and flag checks; the header and `n_q ≤ n_in` rules; rendered resampling honesty; precision wording.
+- Chad: "Accept D1–D8 as recommended, with GPT's recheck notes. Go for the bounded D6 finer-registration assessment… No page build, bulk acquisition, merge, deployment or hub change."
+- D6 preparation:
+  - LOLA's own `dsmap_polar.cat` (revised 2021–22) gives `Y = (J − N/2 − 0.5)·scale·NS` with NS = −1 in the south, i.e. reading B. The LAMP volume's 2011 copy lacks NS. Its printed south inverse appears sign-inconsistent in x, so the landmark check decides that rather than the text.
+  - The label confirms `LDEM_75S_240M` V2.0 (3812², int16 × 0.5 m, offset 1905.5, 240 m, ME/DE421, 2009-07-13 to 2017-02-02). The PDS4 xml carries no checksum.
+  - The 7-file documents package was read twice (browser pane, then Chad's Chrome) with identical inner sha256, but neither download reached `~/Downloads`, and the container and Mac shell are proxy-blocked from PDS. Nothing is retained yet; checkpoint 5 is not written. Likely cause: a pending native save or permission dialog on the Mac. Waiting for Chad.
+
 ## 28 Nov 06:33 UTC (clock reading) — **Moon item 7 (LAMP): GPT's rev 1 review filed (REVISE BEFORE BUILD); proposal rev 2 with GPT for recheck. Docs and focused evidence only; no new acquisition, build, merge, deployment or hub change** (Moon spec, LAMP thread)
 - GPT's review filed unchanged: `reviews/2026-11-28-moon-lamp-proposal-rev1-gpt-review.md` (`c19ca4c8…f88d24f`, equal to the Mac copy). Chad: "address R1–R4 in proposal rev 2, with focused evidence. No new acquisition…"
 - **R1:** the SIS footnote explains 125.57 nm (missed in rev 1 because the plain-text export dropped footnotes; HTML export used). Quantity named as Mother Earth's average of illumination-model-dependent estimates. Gladstone et al. (2012) §1–2 read directly; the implementation for this file is left unverified.
