@@ -311,8 +311,13 @@
   /** The cell containing a point, or -1 north of 80 S (outside this product). */
   const nIndex = (lat, lng) => { if (!(lat < -80)) return -1; const r = Math.min(NR - 1, Math.max(0, Math.floor((lat + 90) * 2))); const c = Math.floor((((lng % 360) + 360) % 360) * 2) % NCOL; return r * NCOL + c; };
   const nCentre = i => { const r = Math.floor(i / NCOL), c = i % NCOL; return deg(-89.75 + 0.5 * r, 'N', 'S') + ', ' + deg(norm(0.25 + 0.5 * c), 'E', 'W'); };
-  const pct = v => (v > 0 ? '+' : v < 0 ? '−' : '') + (Math.abs(v) / 100).toFixed(1) + '%';
-  const pp = v => (v / 100).toFixed(1) + ' pp';
+  // Readout rounding (28 Nov 2026, GPT and Chad): the file stores integer hundredths; the readout shows tenths, rounded half away from zero
+  // in integer arithmetic (as the builder rounds), then written as a string. (v / 100).toFixed(1) rounded binary values just below a tie
+  // downwards (a stored 35 read 0.3). The sign shown is the stored value's, as released; data, colours and withholding are unchanged.
+  const tenths = v => (Math.floor((Math.abs(v) + 5) / 10));                   // |v| in tenths, half away from zero
+  const one = t => Math.floor(t / 10) + '.' + (t % 10);                       // tenths -> "a.b"
+  const pct = v => (v > 0 ? '+' : v < 0 ? '−' : '') + one(tenths(v)) + '%';
+  const pp = v => one(tenths(v)) + ' pp';
   function nText(i, where) {
     if (i < 0) return `${where}: outside this product’s coverage. LEND’s averaged south-polar product covers 80–90°S; north of 80°S the usual picture is shown.`;
     const g = N.grid, st = g.state[i], cell = `0.5° cell centred ${nCentre(i)}`;
@@ -430,5 +435,5 @@
     text: (m, i) => T.grid ? tText(m, i, 'here') : null, index: tIndex, texX, grid: () => T.grid };
   window.MoonLend = { state: () => ({ cached: { grid: !!N.grid, tex: !!N.tex }, revoked: N.revoked, decodeMs: N.decodeMs, drawMs: N.drawMs }),
     cell: (lat, lng) => { if (!N.grid) return null; const i = nIndex(lat, lng); return i < 0 ? { i } : { i, state: N.grid.state[i], p: N.grid.p[i], e: N.grid.e[i], n: N.grid.n[i], near: N.grid.near[i], exp: N.grid.exp[i] }; },
-    text: i => N.grid ? nText(i, 'here') : null, index: nIndex, texY: nTexY, rgb: nRgb, grid: () => N.grid };
+    text: i => N.grid ? nText(i, 'here') : null, index: nIndex, texY: nTexY, rgb: nRgb, grid: () => N.grid, fmt: { pct, pp } };
 })();
