@@ -15,7 +15,7 @@
  *  F. legend and wording on the feature (uncalibrated-field caveat, conditional estimate, display choice); pole and centre buttons; keyboard;
  *     360 px layout; LRO overlay untouched; height and temperature still work afterwards
  * Run: node phase1/moon-lend-ui.test.cjs [base-url]   (static server on the repo, default 127.0.0.1:8899)
- * BREAK=row|col|flip|outside|nocell|nopayload|nopin|missval|late|leak|nosave|norestore|noleavecancel|deadline|noerrtext|nocaveat|nofinite must each fail. */
+ * BREAK=row|col|flip|outside|nocell|nopayload|nopin|missval|late|leak|nosave|norestore|noleavecancel|deadline|noerrtext|nocaveat|nofinite|tofixed|nohalfaway must each fail. */
 const { chromium } = require('playwright'); const fs = require('fs'); const path = require('path'); const crypto = require('crypto');
 const { PNG } = require('/home/claude/spike/node_modules/pngjs');
 const BASE = process.argv[2] || 'http://127.0.0.1:8899'; const BREAK = process.env.BREAK || '';
@@ -61,6 +61,9 @@ const setRec = (b, i, r) => { const o = 160 + 10 * i; b[o] = r.state; b[o + 1] =
       if (BREAK === 'deadline') { B(DL, 'const tm = setTimeout(() => ctl.abort(), TIMEOUT_MS);'); B("    if (ctl.signal.aborted) { res.drop(); syncRadio(); LAYER[target].failed(new Why('it took too long or was cancelled'), target); paint(); return; }\n", ''); }
       if (BREAK === 'nofinite') B('const refOk = Number.isFinite(refMean) && Number.isFinite(refErr) && Math.abs(refMean - NREF.mean) <= 1e-9 && Math.abs(refErr - NREF.err) <= 1e-9;',
         'const refOk = !(Math.abs(refMean - NREF.mean) > 1e-9 || Math.abs(refErr - NREF.err) > 1e-9);');   // the reviewed preview's test, which accepts NaN
+      if (BREAK === 'tofixed') B("const pct = v => (v > 0 ? '+' : v < 0 ? '−' : '') + one(tenths(v)) + '%';\n  const pp = v => one(tenths(v)) + ' pp';",
+        "const pct = v => (v > 0 ? '+' : v < 0 ? '−' : '') + (Math.abs(v) / 100).toFixed(1) + '%';\n  const pp = v => (v / 100).toFixed(1) + ' pp';");   // the released formatter
+      if (BREAK === 'nohalfaway') B('const tenths = v => (Math.floor((Math.abs(v) + 5) / 10));', 'const tenths = v => (Math.floor((Math.abs(v) + 4) / 10));');   // ties down
       if (BREAK === 'noerrtext') B(' (± is a formal counting-error estimate assuming independent archive errors)', '');
       if (BREAK && !globalThis.__brkLogged && !['nocaveat'].includes(BREAK)) { globalThis.__brkLogged = 1; console.log('BREAK applied (pattern found): ' + BREAK); }
       r.fulfill({ status: 200, contentType: 'application/javascript', body: s }); });
@@ -128,6 +131,32 @@ const setRec = (b, i, r) => { const o = 160 + 10 * i; b[o] = r.state; b[o + 1] =
     const cab = await p.evaluate(() => MoonLend.cell(-85.33, 317.87));
     ok('A Cabeus cell index and value', cab.i === nIdx(-85.33, 317.87) && cab.p === rec(FILE, cab.i).p, cab);
     ok('A index north of 80 S is outside', await p.evaluate(() => MoonLend.index(-79.9, 10)) === -1 && await p.evaluate(() => MoonLend.index(-80.01, 10)) === nIdx(-80.01, 10));
+    // R readout rounding (28 Nov 2026, GPT and Chad): stored integer hundredths shown as tenths, half away from zero, for both the
+    //   percentage and the error estimate. Oracle here is independent of the page's: quotient and remainder, round up on remainder >= 5.
+    const orc = v => { const a = Math.abs(v); let q = Math.trunc(a / 10); if (a % 10 >= 5) q += 1; return String(Math.trunc(q / 10)) + '.' + String(q % 10); };
+    const oPct = v => (v > 0 ? '+' : v < 0 ? '−' : '') + orc(v) + '%', oPp = v => orc(v) + ' pp';
+    {
+      const tieP = [[0, '0.0%'], [4, '+0.0%'], [-4, '−0.0%'], [5, '+0.1%'], [-5, '−0.1%'], [6, '+0.1%'], [-6, '−0.1%'], [14, '+0.1%'], [-14, '−0.1%'], [15, '+0.2%'], [-15, '−0.2%'],
+        [16, '+0.2%'], [34, '+0.3%'], [35, '+0.4%'], [-35, '−0.4%'], [36, '+0.4%'], [84, '+0.8%'], [-84, '−0.8%'], [85, '+0.9%'], [-85, '−0.9%'], [95, '+1.0%'], [-95, '−1.0%'], [249, '+2.5%'], [-245, '−2.5%'], [1005, '+10.1%']];
+      const tieE = [[0, '0.0 pp'], [4, '0.0 pp'], [5, '0.1 pp'], [14, '0.1 pp'], [15, '0.2 pp'], [34, '0.3 pp'], [35, '0.4 pp'], [36, '0.4 pp'], [44, '0.4 pp'], [45, '0.5 pp'], [50, '0.5 pp'], [95, '1.0 pp'], [105, '1.1 pp']];
+      const got = await p.evaluate(([a, b]) => ({ p: a.map(([v]) => MoonLend.fmt.pct(v)), e: b.map(([v]) => MoonLend.fmt.pp(v)) }), [tieP, tieE]);
+      const badP = tieP.filter(([v, w], k) => got.p[k] !== w), badE = tieE.filter(([v, w], k) => got.e[k] !== w);
+      ok('R percentage: positive and negative ties round half away from zero; zero and neighbours as expected', badP.length === 0, { badP, got: got.p });
+      ok('R error estimate: ties round half away from zero; zero and neighbours as expected', badE.length === 0, { badE, got: got.e });
+      ok('R the test oracle agrees with every expected literal', tieP.every(([v, w]) => oPct(v) === w) && tieE.every(([v, w]) => oPp(v) === w));
+      const shown = []; for (let i = 0; i < 14400; i++) if (dec.state[i] === 0) shown.push(i);
+      const txt = await p.evaluate(is => is.map(i => MoonLend.text(i)), shown);
+      let mis = [], oldE = 0, oldP = 0, stepBad = 0;
+      shown.forEach((i, k) => { const r = rec(FILE, i), m = /^here: ([+−]?\d+\.\d)% ± (\d+\.\d) pp /.exec(txt[k]);
+        if (!m || m[1] + '%' !== oPct(r.p) || m[2] + ' pp' !== oPp(r.e)) mis.push({ i, p: r.p, e: r.e, t: (txt[k] || '').slice(0, 40) });
+        const oe = (r.e / 100).toFixed(1), op = (Math.abs(r.p) / 100).toFixed(1);
+        if (oe + ' pp' !== oPp(r.e)) { oldE++; if (Math.round(Math.abs(parseFloat(oPp(r.e)) - parseFloat(oe)) * 10) !== 1) stepBad++; }
+        if (op !== orc(r.p)) { oldP++; if (Math.round(Math.abs(parseFloat(orc(r.p)) - parseFloat(op)) * 10) !== 1) stepBad++; } });
+      ok('R every one of the 11,656 shown cells reads its stored percentage and estimate rounded half away from zero', shown.length === 11656 && mis.length === 0, { n: shown.length, mis: mis.slice(0, 5), nMis: mis.length });
+      ok('R scope of the change: 530 estimates and 456 percentages differ from the released toFixed text, each by exactly 0.1', oldE === 530 && oldP === 456 && stepBad === 0, { oldE, oldP, stepBad });
+      const nonShown = [first(1), first(2), first(3), -1];
+      ok('R missing, withheld and outside readouts still carry no percentage or estimate', (await p.evaluate(is => is.map(i => MoonLend.text(i)), nonShown)).every(t => !/\d\.\d%|\d\.\d pp/.test(t)));
+    }
     // B texture registration
     const pick = [first(0), first(1), first(2), first(3)].concat([nIdx(-85.25, 0.25), nIdx(-85.25, 359.75), nIdx(-82.25, 180.25)]);
     const pts = pick.map(i => { const r = Math.floor(i / 720), c = i % 720; return [(4 * c + 1440) % 2880 + 1, 1440 - 4 * (r + 1) + 1]; });
