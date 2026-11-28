@@ -1,6 +1,6 @@
 # Moon globe and LRO science — spec checklist
 
-Rev 35 · 28 Nov 2026, 04:37 UTC (clock reading; rev 34 04:09, rev 33 01:50, rev 32 27 Nov 21:02, rev 31 18:20, rev 30 16:37, rev 29 16:21, rev 28 14:50, rev 27 14:24, rev 26 11:52, rev 25 10:34, rev 24 10:18, rev 23 09:52, rev 22 09:34, rev 21 09:20, rev 20 06:43, rev 19 04:58, rev 18 03:25, rev 17 27 Nov 02:48, rev 16 26 Nov 21:05, rev 15 18:58, rev 14 17:49, rev 13 16:07, rev 12 15:54, rev 11 15:34, rev 10 15:07, rev 9 14:42, rev 8 13:07, rev 7 11:58, rev 6 10:22, rev 5 09:54, rev 4 09:42, rev 3 09:20, rev 2 08:59, rev 1 08:31 UTC) · written by Claude on Chad's instruction (26 Nov) · **persistent record; update it as each item moves** · docs only.
+Rev 36 · 28 Nov 2026, 05:21 UTC (clock reading; rev 35 04:37, rev 34 04:09, rev 33 01:50, rev 32 27 Nov 21:02, rev 31 18:20, rev 30 16:37, rev 29 16:21, rev 28 14:50, rev 27 14:24, rev 26 11:52, rev 25 10:34, rev 24 10:18, rev 23 09:52, rev 22 09:34, rev 21 09:20, rev 20 06:43, rev 19 04:58, rev 18 03:25, rev 17 27 Nov 02:48, rev 16 26 Nov 21:05, rev 15 18:58, rev 14 17:49, rev 13 16:07, rev 12 15:54, rev 11 15:34, rev 10 15:07, rev 9 14:42, rev 8 13:07, rev 7 11:58, rev 6 10:22, rev 5 09:54, rev 4 09:42, rev 3 09:20, rev 2 08:59, rev 1 08:31 UTC) · written by Claude on Chad's instruction (26 Nov) · **persistent record; update it as each item moves** · docs only.
 
 **What this is.** The record of every item in GPT's original brief, `docs/concepts/MOON-LRO-SCIENCE-BRIEF-GPT-2026-11-25.md`. It also covers the scope Chad added on 26 Nov: every page that shows the Moon. It is **not** the narrowed height proposal (`docs/concepts/MOON-LRO-SCIENCE-PROPOSAL.md` rev 2.1), which covered only the first release.
 
@@ -481,6 +481,8 @@ Each stays `option` until Chad classifies it as "assess" or "not pursued", with 
 1. **Diviner:** assessment and proposal first, not a build. *(26 Nov: released, merge `0622e80`; item 3 done and closed.)*
 2. Then the remaining items **one at a time**, in the order Chad chooses. *(27 Nov: item 4, LROC Apollo 11, released, merge `8e7d262`; item 5, CRaTER, released, merge `ba41c8a`. 28 Nov: item 6, LEND, released, merge `25993bf`.)*
 
+**Current handover:** `reviews/2026-11-28-moon-lend-handover.md` (Project `claude/HANDOVER-MOON-AFTER-LEND.md`).
+
 **Remaining open items after 6 (28 Nov):** 7, 8 (to assess); 9 (only inside the item it serves); 12a–c (options to classify); 11 (carried). Done: 1, 2, 3, 4, 5, 6, 10a; 10b closed decision; 13 outside scope. Chad names the next item; suggested order (Claude's suggestion only): LAMP (7), Mini-RF (8). The LEND readout-rounding follow-up is released and closed (merge `4b646ea`). Pairing (9) and the options (12) are taken up only inside the item they serve or when Chad classifies them.
 
 ## Change log
@@ -520,3 +522,4 @@ Each stays `option` until Chad classifies it as "assess" or "not pursued", with 
 - Rev 33 (28 Nov 2026, 01:50 UTC): §6 released and closed (merge `25993bf`, 55/55 served, live check); readout-rounding follow-up recorded; §11 limits for 6; remaining-items line and order of work updated. No other item moved.
 - Rev 34 (28 Nov 2026, 04:09 UTC): §6: readout-rounding follow-up candidate `f0c7625` with GPT for review. No other item moved.
 - Rev 35 (28 Nov 2026, 04:37 UTC): §6: readout-rounding fix released (merge `4b646ea`, 55/55 served, live check); follow-up closed. No other item moved.
+- Rev 36 (28 Nov 2026, 05:21 UTC): thread close-out: 55/55 served again at 05:12:32 UTC; handover `reviews/2026-11-28-moon-lend-handover.md`; branches `moon-lend-ui` and `moon-lend-rounding` deleted; Mac leftovers staged for the Trash. No item moved.

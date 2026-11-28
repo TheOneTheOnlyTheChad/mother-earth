@@ -4,6 +4,12 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 28 Nov 2026
 
+## 28 Nov 05:21 UTC (clock reading) — **Moon item 6 (LEND) thread closed out; handover written** (Moon spec)
+- **Live:** LEND release merge `25993bf` (reviewed `5ed9d70`) and rounding fix merge `4b646ea` (reviewed `f0c7625`); 55/55 served against the reviewed rounding manifest (`943d243b…`) again at 05:12:32 UTC, expected list read from the manifest file at `4b646ea`.
+- **Records:** START-HERE (live line, handover pointer, LEND lessons 1–9), REGISTER (rounding line in the LEND entry), checklist rev 36, HANDOVER top block; handover `reviews/2026-11-28-moon-lend-handover.md` (Project `claude/HANDOVER-MOON-AFTER-LEND.md`).
+- **Cleanup:** branches `moon-lend-ui` and `moon-lend-rounding` deleted (both contained in main); 7 other workstreams' branches left (each with unique commits). Mac LEND review copies and transfer tars staged in `_to_delete/moon-programme-to-trash-20261128/` (14 MB); the Downloads LEND copies, hash-matched to the retained originals, are in `~/Downloads/_to_delete-moon-20261127/`. Finder's "Move to Bin" was blocked by a full-screen Space, so Chad moves those folders to the Trash. Container scratch removed.
+- **Next:** a new thread reads in and reports oriented; Chad names the next Moon item (LAMP 7 or Mini-RF 8) or classifies 12a–c. Nothing started.
+
 ## 28 Nov 04:37 UTC (clock reading) — **LEND readout-rounding fix released, page only; no hub or data change** (Moon item 6 follow-up; closed)
 - GPT's review PASS on `f0c7625` (signed zero kept as written; filed unchanged). Chad: "Approve: release the LEND readout-rounding fix from `moon-lend-rounding` at `f0c7625` to main, page only; no hub or data change."
 - Merge `4b646ea` (04:33:34 UTC); records-only merge `ab08c32` of the packet. Served: 55/55 against the reviewed manifest (`943d243b…`) at 04:35:48 UTC. Live 04:35–04:36 UTC: cell 1604 reads −0.8% ± 0.4 pp; a −0.85 tie reads −0.9%; layer switch, single request and lighting restore unchanged.
