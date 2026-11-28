@@ -4,6 +4,13 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 28 Nov 2026
 
+## 28 Nov 06:33 UTC (clock reading) — **Moon item 7 (LAMP): GPT's rev 1 review filed (REVISE BEFORE BUILD); proposal rev 2 with GPT for recheck. Docs and focused evidence only; no new acquisition, build, merge, deployment or hub change** (Moon spec, LAMP thread)
+- GPT's review filed unchanged: `reviews/2026-11-28-moon-lamp-proposal-rev1-gpt-review.md` (`c19ca4c8…f88d24f`, equal to the Mac copy). Chad: "address R1–R4 in proposal rev 2, with focused evidence. No new acquisition…"
+- **R1:** the SIS footnote explains 125.57 nm (missed in rev 1 because the plain-text export dropped footnotes; HTML export used). Quantity named as Mother Earth's average of illumination-model-dependent estimates. Gladstone et al. (2012) §1–2 read directly; the implementation for this file is left unverified.
+- **R2:** `check_lamp_frame.py` rev 2 (codes 4 and 6, two baselines): B +2,049.6 / +2,023.7 m, first by about 1,250 m; 1,574 distinct LOLA cells; equations and cardinals. Finer check specified: LOLA `LDEM_75S_240M` (29,062,688 B, label read only) with tiles, two features, shift controls and pass/offset/inconclusive outcomes (D6).
+- **R3/R4:** `assess_lamp_2.py`: padding to 2504 keeps the 818 inside-cap pixels (26 usable) that the crop drops; pole at cell index 312.125; no-source wedges about 1,005 km²; states S0 311,803 / S1 1,779 / S2 366 / S3 935; uint16 thousandths readout exact against Decimal for every shown cell, 233,132 B gzip; the 8-bit route loses 24,979 readouts; outliers: 27 native above 1 (max 119.84), 55 means at or above 0.08 (max 31.07), P1 retain-and-disclose recommended, P2 mask costed (D8). LEND texture corrected to 2880 × 1440.
+- Proposal rev 2 `docs/concepts/MOON-LAMP-PROPOSAL.md`; checklist rev 38. Next: GPT's recheck, then Chad's D1–D8. Nothing built.
+
 ## 28 Nov 05:58 UTC (clock reading) — **Moon item 7 (LAMP): assessed; proposal rev 1 with GPT. Docs and a bounded sample only; no page build, bulk acquisition, merge, deployment or hub change** (Moon spec, LAMP thread)
 - New thread read in at 05:27 UTC: main `79a3ac5`, clean; `served_manifest.mjs --check` 55 files; repo attached with push; Mac folders connected; browser pane signed in to GitHub and Cloudflare. Chad's go for item 7 as above.
 - **Product:** LRO-L-LAMP-5-GDR-V1.0 (PDS Imaging Node, LROLAM_2001, 2011; the only map volume). Sample: south-polar cumulative Lyman-α albedo, its quality map and its signal-to-noise map; 240 m per pixel, polar stereographic, 80–90°S, night side, Sept 2009 – Sept 2010.

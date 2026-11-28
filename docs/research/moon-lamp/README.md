@@ -12,7 +12,23 @@ Docs only. Nothing here is served or drawn. Proposal: `docs/concepts/MOON-LAMP-P
   - payload sizes for downsampled 8-bit grids.
 
   Output: `outputs/assess_lamp_1.out.json`.
-- `check_lamp_frame.py`: an independent orientation test. It compares the "possible sunlit peak" flags with the repository's released LOLA height grid (`assets/moon/lola/ldem4-m-R1.i16.gz`) under eight readings of the file. It exits 1 unless reading B ranks first by at least 500 m. Output: `outputs/check_lamp_frame.out.json` (reading B first; margin 1,244.8 m).
+- `check_lamp_frame.py` (rev 2, 28 Nov 2026): a coarse orientation diagnostic.
+  - It places the documented sunlit-peak codes 4 and 6 (value 5 excluded) on the repository's released LOLA grid (`assets/moon/lola/ldem4-m-R1.i16.gz`) under eight readings of the file, against two baselines (same-row good pixels; the whole LOLA row).
+  - It reports the number of distinct LOLA cells involved (1,574) and the cardinal longitudes of reading B.
+  - It exits 1 unless reading B ranks first on both baselines by at least 500 m.
+  - Output: `outputs/check_lamp_frame.out.json`: B first by 1,255.7 m and 1,248.2 m.
+  - It does not test translation or 240 m registration.
+- `assess_lamp_2.py` (rev 2): R3/R4 evidence. It covers:
+  - what a 2500 crop drops versus the padded 2504 grid, and the cell-centre origin (pole at fractional index 312.125);
+  - the no-source wedges;
+  - the S0–S3 cell states;
+  - the uint16 thousandths plane checked against `Decimal` ROUND_HALF_UP for every shown cell, and the measured sizes;
+  - the rev 1 8-bit route's readout loss;
+  - the outlier counts, their SNR and distance to peak flags, and what a plausibility mask would change;
+  - the globe texture geometry.
+
+  Output: `outputs/assess_lamp_2.out.json`.
+- Note: `assess_lamp_1.py`'s payload section measures the rev 1 8-bit route, which rev 2 withdraws. Its other results stand.
 
 **Documents JSON.** `lamp-docs-labels-2026-11-28.json` keeps each fetched file's exact bytes as base64, next to its URL, HTTP status, server last-modified time and sha256. There is no text decoding, so the LEND rev 1 latin-1/Windows-1252 question does not arise. Text views of the two Word documents (`DPSIS.DOC`, `ARCHSIS.DOC`) were made in the cloud workspace with LibreOffice for reading. They are not retained and not quoted beyond short phrases.
 
@@ -21,6 +37,7 @@ Run (each script checks the retained files' sha256 first; both need numpy):
 ```
 python3 -I assess_lamp_1.py <dir>
 python3 -I check_lamp_frame.py <dir> <repo root>
+python3 -I assess_lamp_2.py <dir>
 ```
 
 where `<dir>` holds:

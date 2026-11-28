@@ -1,0 +1,93 @@
+{
+ "crop_2500_drops": {
+  "last_row_and_col_pixels_inside_80S": 818,
+  "of_which_qualifying": 26
+ },
+ "grid": {
+  "padded_size": 2504,
+  "cells": 626,
+  "block": 4,
+  "cell_m": 960.0,
+  "cell_centre_x_m(c)": "(4*c + 1.5 - 1250) * 240, c = 0..625 (0-based); y_stored(r) the same with r",
+  "pole_fractional_cell_index": 312.125,
+  "pole_offset_from_nearest_cell_centre_m": [
+   120.0,
+   120.0
+  ],
+  "padded_pixels_are_no_source": true
+ },
+ "no_source_wedges": {
+  "r_80S_m": 304005.6,
+  "square_half_width_m": 300120.0,
+  "exists": true,
+  "max_depth_m_at_cardinal_longitudes": 3885.6,
+  "wedge_area_km2_total": 1005.3
+ },
+ "states_960m": {
+  "considered (>=1 inside-cap source pixel)": 314883,
+  "shown (>=8 of 16 qualify)": 311803,
+  "edge (<8 inside-cap source pixels)": 935,
+  "no usable value (>=8 inside, 0 qualify)": 366,
+  "too few usable (>=8 inside, 1-7 qualify)": 1779,
+  "shown_with_16_of_16": 300895
+ },
+ "numeric_uint16_thousandths": {
+  "max_value": 31.06915556532996,
+  "max_thousandths": 31069,
+  "fits_uint16_below_65535": true,
+  "all_shown_cells_equal_Decimal_half_up_of_float64_mean": true,
+  "valid_zero_cells": 0
+ },
+ "numeric_format_sizes": {
+  "uint16_value_plane_bytes": 783752,
+  "plus_two_uint8_planes_bytes": 1567504,
+  "gzip9_all_three_planes": 233132,
+  "gzip9_value_plane_only": 213934
+ },
+ "rev1_8bit_route": {
+  "shown_unclipped_cells": 311748,
+  "three_decimal_readout_differs": 24979,
+  "max_abs_quantisation_error": 0.000157,
+  "cells_at_or_above_0.08_sharing_top_code": 55
+ },
+ "native_quality0_finite_inside_80S": {
+  "above_0.08": 6306,
+  "above_0.2": 39,
+  "above_1": 27,
+  "max": 119.8424301147461
+ },
+ "native_above_0.2_context": {
+  "n": 39,
+  "within_1km_of_code4or6": 4,
+  "within_3km": 4,
+  "median_km": 6.82,
+  "snr_min_median_max": [
+   3.1,
+   4.62,
+   15.54
+  ]
+ },
+ "means_960m": {
+  "above_0.08": 55,
+  "at_or_above_0.08": 55,
+  "above_1": 5,
+  "max": 31.0692,
+  "cells_with_a_native_value_above_1": 9
+ },
+ "if_mask_native_above_1": {
+  "cells_changing_state": 0,
+  "shown_cells_changing_value": 9,
+  "remaining_means_above_0.08": 46,
+  "remaining_max": 0.1689
+ },
+ "globe_texture": {
+  "size": [
+   2880,
+   1440
+  ],
+  "px_per_deg": 8.0,
+  "rows_80_90S": 80,
+  "km_per_row": 3.79,
+  "km_per_column_at_85S": 0.33
+ }
+}

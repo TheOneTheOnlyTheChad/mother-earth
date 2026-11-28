@@ -1,15 +1,73 @@
 {
- "flagged_peak_pixels_80_88S": 8313,
- "mean_height_above_same_row_quality0_m": {
-  "A as printed: lon=atan2(X,Y), first record at lon 180": -74.0,
-  "A mirrored E-W: lon=atan2(-X,Y)": -653.9,
-  "B: lon=atan2(X,-Y), first record at lon 0 (lines top to bottom)": 2088.8,
-  "B mirrored E-W (= A rotated 180)": 216.8,
-  "rotate +90": -518.1,
-  "rotate -90": 844.0,
-  "transpose": 421.4,
-  "anti-transpose": -358.5
+ "flagged_peak_pixels_codes_4_6_80_88S": 8153,
+ "readings": {
+  "A as printed: LON=atan2(X,Y)": {
+   "above_same_row_quality0_m": -68.0,
+   "above_full_lola_row_m": -68.8,
+   "distinct_lola_cells": 1575
+  },
+  "A mirrored E-W: LON=atan2(-X,Y)": {
+   "above_same_row_quality0_m": -621.9,
+   "above_full_lola_row_m": -613.3,
+   "distinct_lola_cells": 1574
+  },
+  "B adopted: LON=atan2(X,-Y)": {
+   "above_same_row_quality0_m": 2049.6,
+   "above_full_lola_row_m": 2023.7,
+   "distinct_lola_cells": 1574
+  },
+  "B mirrored E-W (= A rotated 180)": {
+   "above_same_row_quality0_m": 158.5,
+   "above_full_lola_row_m": 159.2,
+   "distinct_lola_cells": 1575
+  },
+  "A rotated +90": {
+   "above_same_row_quality0_m": -469.3,
+   "above_full_lola_row_m": -461.3,
+   "distinct_lola_cells": 1575
+  },
+  "A rotated -90": {
+   "above_same_row_quality0_m": 793.9,
+   "above_full_lola_row_m": 775.5,
+   "distinct_lola_cells": 1575
+  },
+  "transpose: LON=atan2(Y,X)": {
+   "above_same_row_quality0_m": 487.6,
+   "above_full_lola_row_m": 478.4,
+   "distinct_lola_cells": 1574
+  },
+  "anti-transpose: LON=atan2(-Y,-X)": {
+   "above_same_row_quality0_m": -384.4,
+   "above_full_lola_row_m": -382.2,
+   "distinct_lola_cells": 1574
+  }
  },
- "best": "B: lon=atan2(X,-Y), first record at lon 0 (lines top to bottom)",
- "margin_to_second_m": 1244.8
+ "rank_above_same_row_quality0_m": [
+  "B adopted: LON=atan2(X,-Y)",
+  "A rotated -90",
+  "transpose: LON=atan2(Y,X)",
+  "B mirrored E-W (= A rotated 180)",
+  "A as printed: LON=atan2(X,Y)",
+  "anti-transpose: LON=atan2(-Y,-X)",
+  "A rotated +90",
+  "A mirrored E-W: LON=atan2(-X,Y)"
+ ],
+ "margin_above_same_row_quality0_m": 1255.7,
+ "rank_above_full_lola_row_m": [
+  "B adopted: LON=atan2(X,-Y)",
+  "A rotated -90",
+  "transpose: LON=atan2(Y,X)",
+  "B mirrored E-W (= A rotated 180)",
+  "A as printed: LON=atan2(X,Y)",
+  "anti-transpose: LON=atan2(-Y,-X)",
+  "A rotated +90",
+  "A mirrored E-W: LON=atan2(-X,Y)"
+ ],
+ "margin_above_full_lola_row_m": 1248.2,
+ "reading_B_cardinals (I,J 1-based)": {
+  "(1251,1) first record centre": 0.0,
+  "(2501,1251) last sample": 90.0,
+  "(1251,2501) last record": 180.0,
+  "(1,1251) first sample": 270.0
+ }
 }
