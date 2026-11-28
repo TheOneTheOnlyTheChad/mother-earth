@@ -1,5 +1,6 @@
-/* Moon science layers (moon.html): "What LRO measured: height" (LOLA) and "What LRO measured: brightness temperature" (Diviner).
- * Both optional, off by default, not live. One coordinator (MoonScience) owns what is on the globe; each layer owns its own data.
+/* Moon science layers (moon.html): "What LRO measured: height" (LOLA), "What LRO measured: brightness temperature" (Diviner) and the
+ * south-polar neutron record (LEND). All three optional, off by default, not live. One coordinator (MoonScience) owns what is on the
+ * globe; each layer owns its own data; only one is shown at a time.
  *
  * Height (MOON-LRO-SCIENCE-PROPOSAL rev 2.1; released 26 Nov 2026). Source: LOLA LDEM_4_FLOAT V3.0 (NASA PDS, DOI 10.17189/tnyt-7007):
  * height relative to a 1737.4 km reference sphere on a 0.25 degree grid, laser data 13 Jul 2009 - 29 Nov 2016. Two files, each checked
@@ -18,19 +19,30 @@
  * the checked grid: one fixed ramp, one fixed scale per mode (noon 281-395 K, midnight 70-105 K), no valid data in a dark neutral
  * hatch, withheld in a flat light neutral.
  *
- * Transitions (proposal §5, GPT's note 2). active is none, height, temp-noon or temp-mid. The lighting state is saved ONCE, on entering
- * science mode, and kept across height <-> temperature and noon <-> midnight. While a new map loads and is checked, the shown map stays.
+ * Transitions (proposal §5, GPT's note 2). active is none, height, temp-noon, temp-mid or lend. The lighting state is saved ONCE, on
+ * entering science mode, and kept across any switch between height, temperature (noon <-> midnight) and the neutron record. While a new map loads and is checked, the shown map stays.
  * On success the texture is swapped in one call. On failure or cancel nothing changes (a radio button that asked for the failed mode
  * goes back to the mode shown). Leaving science mode (the active layer's own button) brings the picture back and restores "Lit as now"
  * for the current minute if it was on; the Earth view is not reopened. Every request takes a new token and aborts the previous one;
  * only the latest may commit. Leaving also cancels anything pending, so a late answer cannot reopen science mode. Anything a failed,
  * cancelled or late attempt made (object URLs, decoded arrays) is released. The 15 s deadline ends the request itself (its message is
  * shown at once); a stage still running then (PNG drawing, picture decode) finishes into nothing. The LRO overlay is never touched. */
+/* South-polar neutron record (MOON-LEND-PROPOSAL rev 2 §8.1, Chad's D1-D9, GPT's rev 2 recheck build notes). Source: LEND averaged
+ * science product lend_rdr_alds_20111211 (NASA PDS, bundle DOI 10.17189/p89b-8w72), field CSETN_RATE on 0.5 degree cells 80-90 S,
+ * averaged by the team 2011-12-11 to 2016-09-14. One file (phase1/moonsci/build_lend.py), MELENDR1: a 160-byte header and 14,400
+ * ten-byte records (row 0 = 89.75 S, column 0 = 0.25 E). Each record holds OUR state (0 shown, 1 not in the archive, 2 withheld: formal
+ * estimate above 0.5 pp, 3 withheld: the 60 km disc runs past the product's 80 S edge), p = percent difference of the 30 km-radius
+ * inverse-variance-weighted mean from the 80.25-84.75 S band (x100), the first-order formal counting-error estimate (x100; conditional on
+ * independent archive errors), the usable cells in the disc, a near-missing flag and the native cell's exposure. The archive disagrees
+ * about the field's normalisation and background, so nothing is shown as a unit, a flux or a hydrogen amount. The whole file is checked
+ * before anything is shown: pin, length, every header field, the payload hash, every record. The texture is the usual appearance
+ * picture (pinned, checked) with the cap's cells painted over it, so the region north of 80 S looks as it always does. */
 (() => {
   'use strict';
   const $ = id => document.getElementById(id);
   const hbtn = $('mg-height'), hcbtn = $('mg-height-centre'), hleg = $('mg-height-leg'), hrd = $('mg-height-read');
   const tbtn = $('mg-temp'), tcbtn = $('mg-temp-centre'), tleg = $('mg-temp-leg'), trd = $('mg-temp-read'), tmode = $('mg-temp-mode');
+  const nbtn = $('mg-lend'), npbtn = $('mg-lend-pole'), ncbtn = $('mg-lend-centre'), nleg = $('mg-lend-leg'), nrd = $('mg-lend-read');
   if (!hbtn || !hleg || !hrd) return;
   const TIMEOUT_MS = 15000;
   const hex = async buf => [...new Uint8Array(await crypto.subtle.digest('SHA-256', buf))].map(b => b.toString(16).padStart(2, '0')).join('');
@@ -224,8 +236,118 @@
     tleg.querySelector('[data-t="clip"]').textContent = `Colours stop at the scale’s ends: ${md.clipLo}% of the shown grid cells with a value are below ${md.lo} K and ${md.clipHi}% are above ${md.hi} K (shares of 0.5° grid cells, not of surface area). The readout gives their value.`;
   }
 
+  // ============================== south-polar neutron record (LEND) ==============================
+  const NF = { url: 'assets/moon/lend/lend-alds-2011-2016-R1.bin?v=1', bytes: 144160, sha: '9f185cc38cb8f378220b30f212deec8daf1e639071dcfe0304cb743038d26cdf' };
+  const AP = { url: 'assets/moon/lroc_color_2k.jpg?v=1', bytes: 457942, sha: 'f7130a1822681fa7512d7dcfd40db8c10b9ba4f06777910348698260ed7a2170' };
+  const NR = 20, NCOL = 720, NN = NR * NCOL, NHDR = 160, NREC = 10;
+  const NSRC = 'e6b1c2d54e3e00d649a1229b08507dd10c859039ae2df8e34cdf1480bb0031ef';
+  const NREF = { mean: 4.9413873895, err: 0.0022184209 };   // reference band mean and its formal error, as built (checked to 1e-9)
+  // one fixed diverging ramp (ColorBrewer PuOr), -2.5 % .. +2.5 %; brown below the band, purple above. No meaning beyond the number.
+  const NRAMP = ['#7f3b08', '#b35806', '#e08214', '#fdb863', '#fee0b6', '#f7f7f7', '#d8daeb', '#b2abd2', '#8073ac', '#542788', '#2d004b'].map(h => [1, 3, 5].map(i => parseInt(h.slice(i, i + 2), 16)));
+  const NLO = -250, NHI = 250;   // centi-percent
+  const MISS_A = [46, 46, 46], MISS_B = [107, 107, 107], WH_A = [154, 154, 154], WH_B = [230, 230, 230];
+  const N = { grid: null, tex: null, revoked: 0, decodeMs: null, drawMs: null };
+  async function loadLend(signal) {
+    const t0 = performance.now();
+    const buf = await get(NF.url, signal);
+    if (buf.byteLength !== NF.bytes || await hex(buf) !== NF.sha) throw new Why('the neutron record file failed its integrity check');
+    const dv = new DataView(buf), u8 = new Uint8Array(buf);
+    const magic = String.fromCharCode(...u8.subarray(0, 8));
+    const want16 = [[8, 1], [10, NHDR], [12, NR], [14, NCOL], [16, NREC], [20, 50], [22, 25], [24, 50], [26, 50], [42, 0]];
+    const wantI16 = [[18, -8975], [36, -8475], [38, -8025], [40, -8000]], want32 = [[28, 30000], [32, 1737400], [44, 20111211], [48, 20160914]];
+    // the two float64 reference fields are read once and must be finite before the tolerance test (a NaN fails every comparison, so
+    // "difference > 1e-9" alone would accept it; GPT's preview review)
+    const refMean = dv.getFloat64(52, true), refErr = dv.getFloat64(60, true);
+    const refOk = Number.isFinite(refMean) && Number.isFinite(refErr) && Math.abs(refMean - NREF.mean) <= 1e-9 && Math.abs(refErr - NREF.err) <= 1e-9;
+    if (magic !== 'MELENDR1' || want16.some(([o, v]) => dv.getUint16(o, true) !== v) || wantI16.some(([o, v]) => dv.getInt16(o, true) !== v)
+      || want32.some(([o, v]) => dv.getUint32(o, true) !== v) || !refOk
+      || u8.subarray(68, 96).some(b => b !== 0) || [...u8.subarray(96, 128)].map(b => b.toString(16).padStart(2, '0')).join('') !== NSRC)
+      throw new Why('the neutron record file header is not the expected one');
+    if (await hex(buf.slice(NHDR)) !== [...u8.subarray(128, 160)].map(b => b.toString(16).padStart(2, '0')).join('')) throw new Why('the neutron record file failed its payload check');
+    const g = { state: new Uint8Array(NN), near: new Uint8Array(NN), p: new Int16Array(NN), e: new Uint16Array(NN), n: new Uint16Array(NN), exp: new Uint16Array(NN) };
+    for (let i = 0; i < NN; i++) {
+      const o = NHDR + NREC * i, st = u8[o], nr = u8[o + 1], p = dv.getInt16(o + 2, true), e = dv.getUint16(o + 4, true), n = dv.getUint16(o + 6, true), x = dv.getUint16(o + 8, true);
+      const okCell = st === 0 ? p >= -2000 && p <= 2000 && e >= 1 && e <= 50 && n >= 1 && x >= 1 && nr <= 1
+        : st === 1 ? p === 0 && e === 0 && n === 0 && x === 0 && nr === 0
+        : (st === 2 || st === 3) ? p === 0 && e === 0 && n >= 1 && x >= 1 && nr <= 1
+        : false;
+      if (!okCell) throw new Why(`the neutron record file failed its cell check (row ${Math.floor(i / NCOL)}, column ${i % NCOL})`);
+      g.state[i] = st; g.near[i] = nr; g.p[i] = p; g.e[i] = e; g.n[i] = n; g.exp[i] = x;
+    }
+    N.decodeMs = Math.round(performance.now() - t0);
+    return g;
+  }
+  async function loadAppearance(signal) {
+    const buf = await get(AP.url, signal);
+    if (buf.byteLength !== AP.bytes || await hex(buf) !== AP.sha) throw new Why('the Moon picture failed its integrity check');
+    const url = URL.createObjectURL(new Blob([buf], { type: 'image/jpeg' })), img = new Image(); img.src = url;
+    try { await img.decode(); } catch (e) { URL.revokeObjectURL(url); throw new Why('the Moon picture could not be decoded'); }
+    URL.revokeObjectURL(url);
+    if (img.naturalWidth !== 2048 || img.naturalHeight !== 1024) throw new Why('the Moon picture is not the expected size');
+    return img;
+  }
+  const nRgb = p => { const t = (Math.min(NHI, Math.max(NLO, p)) - NLO) / (NHI - NLO) * (NRAMP.length - 1), k = Math.min(NRAMP.length - 2, Math.floor(t)), f = t - k;
+    return NRAMP[k].map((c, j) => Math.round(c + (NRAMP[k + 1][j] - c) * f)); };
+  /** Cell row r (centred 89.75 S - ... 80.25 S, row 0 at the pole) occupies texture rows y = 1436 - 4 r .. +3 (texture row 0 = 90 N). */
+  const nTexY = r => TH - PX * (r + 1);
+  async function drawLend(g, img) {
+    const t0 = performance.now();
+    const cv = document.createElement('canvas'); cv.width = TW; cv.height = TH;
+    const cx = cv.getContext('2d'); cx.drawImage(img, 0, 0, TW, TH);
+    const y0 = nTexY(NR - 1), im = cx.getImageData(0, y0, TW, NR * PX), d = im.data;
+    for (let r = 0; r < NR; r++) for (let c = 0; c < NCOL; c++) {
+      const i = r * NCOL + c, st = g.state[i], x0 = texX(c), yy = nTexY(r) - y0, rgb0 = st === 0 ? nRgb(g.p[i]) : null;
+      for (let dy = 0; dy < PX; dy++) for (let dx = 0; dx < PX; dx++) {
+        const X = x0 + dx, Y = yy + dy, k = 4 * (Y * TW + X), h = ((X + Y) & 3) === 0, h2 = ((X - Y) & 3) === 0;
+        const rgb = rgb0 || (st === 1 ? (h ? MISS_B : MISS_A) : (h2 ? WH_A : WH_B));
+        d[k] = rgb[0]; d[k + 1] = rgb[1]; d[k + 2] = rgb[2]; d[k + 3] = 255; } }
+    cx.putImageData(im, 0, y0);
+    const blob = await new Promise(res => cv.toBlob(res, 'image/png'));
+    cv.width = cv.height = 0;
+    if (!blob) throw new Why('the neutron record map could not be drawn');
+    N.drawMs = Math.round(performance.now() - t0);
+    return URL.createObjectURL(blob);
+  }
+  /** The cell containing a point, or -1 north of 80 S (outside this product). */
+  const nIndex = (lat, lng) => { if (!(lat < -80)) return -1; const r = Math.min(NR - 1, Math.max(0, Math.floor((lat + 90) * 2))); const c = Math.floor((((lng % 360) + 360) % 360) * 2) % NCOL; return r * NCOL + c; };
+  const nCentre = i => { const r = Math.floor(i / NCOL), c = i % NCOL; return deg(-89.75 + 0.5 * r, 'N', 'S') + ', ' + deg(norm(0.25 + 0.5 * c), 'E', 'W'); };
+  const pct = v => (v > 0 ? '+' : v < 0 ? '−' : '') + (Math.abs(v) / 100).toFixed(1) + '%';
+  const pp = v => (v / 100).toFixed(1) + ' pp';
+  function nText(i, where) {
+    if (i < 0) return `${where}: outside this product’s coverage. LEND’s averaged south-polar product covers 80–90°S; north of 80°S the usual picture is shown.`;
+    const g = N.grid, st = g.state[i], cell = `0.5° cell centred ${nCentre(i)}`;
+    const exp = `exposure of this cell in the archive: ${g.exp[i].toLocaleString('en-GB')} s (accumulated 2011–2016)`;
+    const sup = `${g.n[i]} archived cells in the 60 km-wide disc` + (g.near[i] ? ', near the archive’s missing cells around the pole' : '');
+    if (st === 1) return `${where}: not in the archive. LEND’s archive holds no value for this ${cell}; nothing is filled in from neighbouring cells.`;
+    if (st === 3) return `${where}: withheld by our display rule. The 60 km-wide disc around this ${cell} runs past the product’s 80°S edge, so it would average one side only · ${sup} · ${exp}.`;
+    if (st === 2) return `${where}: withheld by our display rule. The formal counting-error estimate for this ${cell} is above 0.5 percentage points · ${sup} · ${exp}.`;
+    return `${where}: ${pct(g.p[i])} ± ${pp(g.e[i])} relative difference in the archived CSETN_RATE field from the 80–85°S band, 60 km-wide disc (± is a formal counting-error estimate assuming independent archive errors) · ${sup} · ${cell} · ${exp}.`;
+  }
+  const lend = {
+    name: 'neutron record',
+    async prepare(target, ctl) {
+      const made = [];
+      let g = N.grid;
+      if (!g) g = await loadLend(ctl.signal);
+      if (ctl.signal.aborted) throw new Why('it took too long or was cancelled');
+      let url = N.tex;
+      if (!url) { const img = await loadAppearance(ctl.signal); if (ctl.signal.aborted) throw new Why('it took too long or was cancelled'); url = await drawLend(g, img); made.push(url); }
+      const drop = () => { for (const u of made) { URL.revokeObjectURL(u); N.revoked++; } };
+      return { url, drop, keep: () => { N.grid = g; N.tex = url; } };
+    },
+    shown() { say(nrd, 'Sunlight is not drawn on the neutron record map, so “Lit as now” is off while it is shown. Use “Turn to the south pole” to bring the region into view; click it, or use “Read neutron record at centre”, to read a value.'); },
+    hidden() { say(nrd, ''); },
+    failed(e) { say(nrd, 'Neutron record map could not be loaded: ' + (e instanceof Why ? e.message : 'an unexpected error') + '. ' + (MS.active ? 'The map shown is unchanged.' : 'The globe is unchanged.')); },
+    readAt(lat, lng, how) {
+      if (MS.active !== 'lend' || !N.grid) return;
+      const i = nIndex(lat, lng), where = deg(lat, 'N', 'S') + ', ' + deg(norm(lng), 'E', 'W') + ` (${how})`;
+      rdSet(nrd, nText(i, where), i < 0 ? { state: 'outside', lat: String(lat), lng: String(lng) }
+        : { state: String(N.grid.state[i]), p: String(N.grid.p[i]), e: String(N.grid.e[i]), n: String(N.grid.n[i]), cell: String(i), lat: String(lat), lng: String(lng) });
+    },
+  };
+
   // ============================== the coordinator ==============================
-  const LAYER = { height, 'temp-noon': temp, 'temp-mid': temp };
+  const LAYER = { height, 'temp-noon': temp, 'temp-mid': temp, lend };
   const MS = { active: null, saved: null, entry: null, pend: null, tok: 0, commits: 0 };
   /** Ask for a map. Pressing a layer's button while that map is shown leaves science mode; pressing it while it is loading cancels. */
   async function request(target) {
@@ -261,7 +383,7 @@
     const wasEarth = MS.saved && MS.saved.earth, entry = MS.entry;
     MS.active = null; MS.saved = null; MS.entry = null; paint();
     for (const L of new Set(Object.values(LAYER))) L.hidden();
-    if (wasEarth) say(LAYER[was] === height ? hrd : trd, `Earth view was closed while ${entry === 'height' ? 'height' : 'the temperature map'} was shown; “As seen from Earth now” can reopen it.`);
+    if (wasEarth) say(LAYER[was] === height ? hrd : LAYER[was] === lend ? nrd : trd, `Earth view was closed while ${entry === 'height' ? 'height' : entry === 'lend' ? 'the neutron record map' : 'the temperature map'} was shown; “As seen from Earth now” can reopen it.`);
   }
   const isTemp = t => t === 'temp-noon' || t === 'temp-mid';
   const radioMode = () => { const r = tmode && tmode.querySelector('input:checked'); return r && r.value === 'midnight' ? 'temp-mid' : 'temp-noon'; };
@@ -280,6 +402,10 @@
       tleg.hidden = !isTemp(a); if (tcbtn) tcbtn.hidden = !isTemp(a);
       for (const r of tmode.querySelectorAll('input')) r.disabled = !isTemp(a);
       tmode.setAttribute('aria-busy', String(isTemp(a) && isTemp(pend))); }
+    if (nbtn) { const nLoad = pend === 'lend';
+      nbtn.setAttribute('aria-pressed', String(a === 'lend' || nLoad)); nbtn.setAttribute('aria-busy', String(nLoad));
+      nbtn.textContent = nLoad ? 'Neutron record: loading…' : a === 'lend' ? 'Hide south-polar neutron record (LEND)' : 'Show south-polar neutron record (LEND)';
+      nleg.hidden = a !== 'lend'; if (npbtn) npbtn.hidden = a !== 'lend'; if (ncbtn) ncbtn.hidden = a !== 'lend'; }
     const g = $('mg-globe'); g.dataset.height = hLoad ? 'loading' : a === 'height' ? 'on' : 'off';
     g.dataset.science = a || 'none'; g.dataset.pending = pend || '';
   }
@@ -287,6 +413,9 @@
   if (tbtn) tbtn.addEventListener('click', () => { if (isTemp(MS.active)) leave(); else if (MS.pend && isTemp(MS.pend.target)) cancel(); else request(radioMode()); });
   if (tmode) tmode.addEventListener('change', () => { if (!isTemp(MS.active)) return; const t = radioMode();
     if (t === MS.active) { if (MS.pend) cancel(); return; } request(t); });
+  if (nbtn) nbtn.addEventListener('click', () => { if (MS.active === 'lend') leave(); else if (MS.pend && MS.pend.target === 'lend') cancel(); else request('lend'); });
+  if (npbtn) npbtn.addEventListener('click', () => { const v = window.MoonGlobe && window.MoonGlobe.view(); if (v && window.MoonGlobe.point) window.MoonGlobe.point(-85, v.lng); });
+  if (ncbtn) ncbtn.addEventListener('click', () => { const h = MG(), v = h && h.centre(); if (v) lend.readAt(v.lat, v.lng, 'centre of view'); });
   if (hcbtn) hcbtn.addEventListener('click', () => { const h = MG(), v = h && h.centre(); if (v) height.readAt(v.lat, v.lng, 'centre of view'); });
   if (tcbtn) tcbtn.addEventListener('click', () => { const h = MG(), v = h && h.centre(); if (v) temp.readAt(v.lat, v.lng, 'centre of view'); });
   const hookUp = setInterval(() => { const h = MG(); if (h) { clearInterval(hookUp); h.onClick((lat, lng) => { if (MS.active) LAYER[MS.active].readAt(lat, lng, 'clicked'); }); } }, 200);
@@ -299,4 +428,7 @@
   window.MoonTemp = { state: () => ({ cached: { grid: !!T.grid, noon: !!T.tex.noon, mid: !!T.tex.mid }, revoked: T.revoked, decodeMs: T.decodeMs, drawMs: T.drawMs }),
     cell: (lat, lng, m) => { if (!T.grid) return null; const i = tIndex(lat, lng); return { i, value: T.grid.value[m][i], n: T.grid.n[m][i], range: T.grid.range[m][i] }; },
     text: (m, i) => T.grid ? tText(m, i, 'here') : null, index: tIndex, texX, grid: () => T.grid };
+  window.MoonLend = { state: () => ({ cached: { grid: !!N.grid, tex: !!N.tex }, revoked: N.revoked, decodeMs: N.decodeMs, drawMs: N.drawMs }),
+    cell: (lat, lng) => { if (!N.grid) return null; const i = nIndex(lat, lng); return i < 0 ? { i } : { i, state: N.grid.state[i], p: N.grid.p[i], e: N.grid.e[i], n: N.grid.n[i], near: N.grid.near[i], exp: N.grid.exp[i] }; },
+    text: i => N.grid ? nText(i, 'here') : null, index: nIndex, texY: nTexY, rgb: nRgb, grid: () => N.grid };
 })();
