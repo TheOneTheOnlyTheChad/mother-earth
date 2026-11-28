@@ -29,3 +29,6 @@ body.craft .mgn-miss{background:repeating-linear-gradient(135deg,#6b6b6b 0 2px,#
 body.craft .mgn-wh{background:repeating-linear-gradient(45deg,#e6e6e6 0 2px,#9a9a9a 2px 6px)}
 body.craft .mgn-out{background:linear-gradient(90deg,#5e5e5e,#a3a3a3,#7a7a7a)}
 body.craft #mg-lend-pole[hidden],body.craft #mg-lend-centre[hidden]{display:none}
+body.craft .mgu-bar{background:linear-gradient(90deg,#08306b,#08519c,#2171b5,#4292c6,#6baed6,#9ecae1,#c6dbef,#deebf7)}
+body.craft .mgu-top{background:#fd8d3c}
+body.craft #mg-lamp-pole[hidden],body.craft #mg-lamp-centre[hidden]{display:none}

@@ -37,12 +37,23 @@
  * about the field's normalisation and background, so nothing is shown as a unit, a flux or a hydrogen amount. The whole file is checked
  * before anything is shown: pin, length, every header field, the payload hash, every record. The texture is the usual appearance
  * picture (pinned, checked) with the cap's cells painted over it, so the region north of 80 S looks as it always does. */
+/* South-polar far-ultraviolet albedo (MOON-LAMP-PROPOSAL rev 2 §6-§8, Chad's D1-D8 and D6 decision, GPT's rev 2 recheck notes 1-5 and D6
+ * review notes). Source: LRO LAMP GDR V1.0 (NASA PDS Imaging Node, LROLAM_2001), south-polar cumulative Lyman-alpha (about 121.6 nm) albedo,
+ * night side, Sept 2009 - Sept 2010, 240 m polar stereographic. Albedo here is the archive's measured far-UV brightness divided by a
+ * MODELLED night-time illumination (sky glow and starlight): a model-dependent estimate, not a photograph, and nothing here identifies
+ * ice, frost or water. One file (phase1/moonsci/build_lamp.py), MELAMPR1: a 160-byte header and three planes on 626 x 626 cells of
+ * 4 x 4 source pixels (960 m): value (u16 integer thousandths, 65535 = no value), n_q | bit 7 (a qualifying archive value above 1, kept
+ * as archived and disclosed) and n_in. Map orientation is the documented one (reading B: LON = atan2(x, -y)); fine positional error is
+ * not quantified and no shift is applied. The whole file is checked before anything is shown: gzip and raw pins, every header field,
+ * the source hashes, the payload hash and every cell. Each texture pixel south of 80 S takes its centre's latitude and longitude, the
+ * reading-B inverse and the nearest 960 m cell; no interpolation. */
 (() => {
   'use strict';
   const $ = id => document.getElementById(id);
   const hbtn = $('mg-height'), hcbtn = $('mg-height-centre'), hleg = $('mg-height-leg'), hrd = $('mg-height-read');
   const tbtn = $('mg-temp'), tcbtn = $('mg-temp-centre'), tleg = $('mg-temp-leg'), trd = $('mg-temp-read'), tmode = $('mg-temp-mode');
   const nbtn = $('mg-lend'), npbtn = $('mg-lend-pole'), ncbtn = $('mg-lend-centre'), nleg = $('mg-lend-leg'), nrd = $('mg-lend-read');
+  const ubtn = $('mg-lamp'), upbtn = $('mg-lamp-pole'), ucbtn = $('mg-lamp-centre'), uleg = $('mg-lamp-leg'), urd = $('mg-lamp-read');
   if (!hbtn || !hleg || !hrd) return;
   const TIMEOUT_MS = 15000;
   const hex = async buf => [...new Uint8Array(await crypto.subtle.digest('SHA-256', buf))].map(b => b.toString(16).padStart(2, '0')).join('');
@@ -351,8 +362,129 @@
     },
   };
 
+  // ============================== south-polar far-UV albedo (LAMP) ==============================
+  const UF = { url: 'assets/moon/lamp/lamp-lya-albedo-s-2009-2010-R1.bin.gz?v=1', gzBytes: 233357, gzSha: 'a97907724322d96a23afde4f128169f1cc020d93593689cec52af72888801cbe',
+    bytes: 1567664, sha: '81b5a50ad378bbbc119e8621439a9c6e5341a8dd289a4065620469f6aef755b9' };
+  const UC = 626, UNN = UC * UC, UHDR = 160, UN = 2501, US = 240, UR = 1737400, USENT = 65535, UTOP = 80, UMIN = 8;
+  const USRC_A = '896aa35d377c46b68cc774047638b28451106e28e8a6aa67eb4aeca0358af2e2', USRC_Q = '3f071a9e8afbddc399b2523d6f3995994c9f7f26e27d0e5771de42e1a6ff2754';
+  // one fixed one-hue ramp (ColorBrewer Blues, dark = low) over 0 .. 0.079 in steps of 0.001 from the stored integer; one distinct top colour
+  // for stored values >= 80 (displayed estimate 0.080 or higher after rounding). No meaning beyond the number.
+  const URAMP = ['#08306b', '#08519c', '#2171b5', '#4292c6', '#6baed6', '#9ecae1', '#c6dbef', '#deebf7'].map(h => [1, 3, 5].map(i => parseInt(h.slice(i, i + 2), 16)));
+  const UTOPC = [253, 141, 60];
+  const U = { grid: null, tex: null, revoked: 0, decodeMs: null, drawMs: null };
+  const uRgb = v => { if (v >= UTOP) return UTOPC; const t = v / (UTOP - 1) * (URAMP.length - 1), k = Math.min(URAMP.length - 2, Math.floor(t)), f = t - k;
+    return URAMP[k].map((c, j) => Math.round(c + (URAMP[k + 1][j] - c) * f)); };
+  const shaAt = (u8, o) => [...u8.subarray(o, o + 32)].map(b => b.toString(16).padStart(2, '0')).join('');
+  /** Parse and check the page file (exported for the tests' malformed-file cases). Throws Why on anything unexpected. */
+  async function parseLamp(raw) {
+    if (raw.byteLength !== UF.bytes || await hex(raw) !== UF.sha) throw new Why('the far-UV albedo file failed its integrity check');
+    if (raw.byteLength !== UHDR + 4 * UNN) throw new Why('the far-UV albedo file is not the expected size');
+    const dv = new DataView(raw), u8 = new Uint8Array(raw);
+    const want16 = [[8, 1], [10, UHDR], [12, UC], [14, 4], [16, UN], [18, 2504], [28, 1251], [30, 15], [32, 2], [34, 1000], [36, USENT], [38, UTOP], [40, UMIN], [42, 80]];
+    const want32 = [[20, 960], [24, UR], [44, 20090901], [48, 20101001]];
+    if (String.fromCharCode(...u8.subarray(0, 8)) !== 'MELAMPR1' || want16.some(([o, v]) => dv.getUint16(o, true) !== v) || want32.some(([o, v]) => dv.getUint32(o, true) !== v)
+      || u8.subarray(52, 64).some(b => b !== 0) || shaAt(u8, 64) !== USRC_A || shaAt(u8, 96) !== USRC_Q)
+      throw new Why('the far-UV albedo file header is not the expected one');
+    if (await hex(raw.slice(UHDR)) !== shaAt(u8, 128)) throw new Why('the far-UV albedo file failed its payload check');
+    const val = new Uint16Array(UNN), q = u8.subarray(UHDR + 2 * UNN, UHDR + 3 * UNN), nin = u8.subarray(UHDR + 3 * UNN, UHDR + 4 * UNN);
+    let shown = 0;
+    for (let i = 0; i < UNN; i++) {
+      const v = dv.getUint16(UHDR + 2 * i, true), b = q[i], nq = b & 31, hi = b >> 7, n = nin[i];
+      // GPT's recheck note 3: 0 <= n_q <= n_in <= 16; bits 5-6 reserved; bit 7 only with a qualifying pixel; a value exactly when n_q >= 8
+      if ((b & 0x60) || nq > n || n > 16 || (hi && nq === 0) || ((v !== USENT) !== (nq >= UMIN)))
+        throw new Why(`the far-UV albedo file failed its cell check (row ${Math.floor(i / UC)}, column ${i % UC})`);
+      val[i] = v; shown += nq >= UMIN;
+    }
+    return { val, nq: Uint8Array.from(q, b => b & 31), hi: Uint8Array.from(q, b => b >> 7), nin: Uint8Array.from(nin), shown };
+  }
+  async function loadLamp(signal) {
+    const t0 = performance.now();
+    const raw = await gunzipIfNeeded(await get(UF.url, signal), UF.gzBytes, UF.gzSha, 'far-UV albedo');
+    if (signal.aborted) throw new Why('it took too long or was cancelled');
+    const g = await parseLamp(raw);
+    U.decodeMs = Math.round(performance.now() - t0);
+    return g;
+  }
+  /** Reading B inverse (proposal §5.1, §7). Returns { s: 'S4' } north of 80 S, { s: 'S5' } inside 80 S but beyond the map's square,
+   *  else { i: cell index, I, J } with 1-based fractional sample I and line J. */
+  function uLocate(lat, lng) {
+    if (!(lat <= -80)) return { s: 'S4' };
+    const r = 2 * UR * Math.tan((90 + lat) * Math.PI / 360), L = lng * Math.PI / 180;
+    const I = r * Math.sin(L) / US + 1251, J = -r * Math.cos(L) / US + 1251;
+    if (!(I >= 0.5 && I < UN + 0.5 && J >= 0.5 && J < UN + 0.5)) return { s: 'S5' };
+    return { i: Math.floor((J - 0.5) / 4) * UC + Math.floor((I - 0.5) / 4), I, J };
+  }
+  /** A cell's state: S0 shown, S1 too few usable, S2 no usable value, S3 map edge (fewer than 8 source pixels inside 80 S, including 0). */
+  const uState = (g, i) => g.nq[i] >= UMIN ? 'S0' : g.nin[i] >= UMIN ? (g.nq[i] ? 'S1' : 'S2') : 'S3';
+  const HATCH_A = [[46, 46, 46], [107, 107, 107]], HATCH_B = [[230, 230, 230], [154, 154, 154]];
+  async function drawLamp(g, img) {
+    const t0 = performance.now();
+    const cv = document.createElement('canvas'); cv.width = TW; cv.height = TH;
+    const cx = cv.getContext('2d'); cx.drawImage(img, 0, 0, TW, TH);
+    const y0 = TH - 80, im = cx.getImageData(0, y0, TW, 80), d = im.data;   // texture rows 1360..1439: centres 80.0625 S .. 89.9375 S
+    const sn = new Float64Array(TW), cs = new Float64Array(TW);
+    for (let X = 0; X < TW; X++) { const L = ((X + 0.5) / 8 - 180) * Math.PI / 180; sn[X] = Math.sin(L); cs[X] = Math.cos(L); }
+    for (let y = 0; y < 80; y++) {
+      const lat = 90 - (y0 + y + 0.5) / 8, r = 2 * UR * Math.tan((90 + lat) * Math.PI / 360) / US;
+      for (let X = 0; X < TW; X++) {
+        const I = r * sn[X] + 1251, J = -r * cs[X] + 1251, k = 4 * (y * TW + X);
+        const h = (((X + y) & 3) === 0) ? 1 : 0, h2 = (((X - y) & 3) === 0) ? 1 : 0;
+        let rgb;
+        if (!(I >= 0.5 && I < UN + 0.5 && J >= 0.5 && J < UN + 0.5)) rgb = HATCH_B[h2];                 // S5
+        else { const i = Math.floor((J - 0.5) / 4) * UC + Math.floor((I - 0.5) / 4), st = uState(g, i);
+          rgb = st === 'S0' ? uRgb(g.val[i]) : st === 'S3' ? HATCH_B[h2] : HATCH_A[h]; }
+        d[k] = rgb[0]; d[k + 1] = rgb[1]; d[k + 2] = rgb[2]; d[k + 3] = 255; } }
+    cx.putImageData(im, 0, y0);
+    const blob = await new Promise(res => cv.toBlob(res, 'image/png'));
+    cv.width = cv.height = 0;
+    if (!blob) throw new Why('the far-UV albedo map could not be drawn');
+    U.drawMs = Math.round(performance.now() - t0);
+    return URL.createObjectURL(blob);
+  }
+  const thou = v => Math.floor(v / 1000) + '.' + String(v % 1000).padStart(3, '0');   // integer thousandths -> "a.bcd", as a string
+  function uCentre(i) {
+    const c = i % UC, r = Math.floor(i / UC), x = (4 * c + 1.5 - 1250) * US, y = (4 * r + 1.5 - 1250) * US;
+    const lat = -90 + 2 * Math.atan(Math.hypot(x, y) / (2 * UR)) * 180 / Math.PI, lng = Math.atan2(x, -y) * 180 / Math.PI;
+    return deg(lat, 'N', 'S') + ', ' + deg(norm(lng), 'E', 'W');
+  }
+  function uText(loc, where) {
+    if (loc.s === 'S4') return `${where}: outside this map. LAMP’s map covers 80–90°S; north of that the usual picture is shown.`;
+    if (loc.s === 'S5') return `${where}: inside 80°S but beyond the edge of LAMP’s map square; nothing is filled in.`;
+    const g = U.grid, i = loc.i, st = uState(g, i), nq = g.nq[i], n = g.nin[i], cell = `960 m cell centred ${uCentre(i)}`;
+    if (st === 'S3') return `${where}: edge of the map. Fewer than half of this ${cell} lies inside the 80°S circle and the map’s square (${n} of 16 archive pixels); no value is shown.`;
+    if (st === 'S2') return `${where}: no value here. The archive has no usable value in this ${cell} (missing, or flagged by the archive’s quality map).`;
+    if (st === 'S1') return `${where}: no value here. Only ${nq} of this ${cell}’s ${n} archive pixels pass the quality and finiteness rules (8 needed).`;
+    const v = g.val[i];
+    return `${where}: Lyman-α albedo estimate ${thou(v)}` + (v >= UTOP ? ' (at or above the top of the colour scale: displayed estimate 0.080 or higher after rounding)' : '')
+      + ` · Mother Earth’s 960 m average of ${nq} of ${n} archive pixels; LAMP night side, Sept 2009 – Sept 2010; measured far-UV brightness ÷ modelled night-time illumination · ${cell}.`
+      + (g.hi[i] ? ' This average includes archive values above 1; they are shown as archived, and their cause has not been assessed here.' : '')
+      + ' The third decimal is our rounding, not the estimate’s accuracy.';
+  }
+  const lamp = {
+    name: 'far-UV albedo',
+    async prepare(target, ctl) {
+      const made = [];
+      let g = U.grid;
+      if (!g) g = await loadLamp(ctl.signal);
+      if (ctl.signal.aborted) throw new Why('it took too long or was cancelled');
+      let url = U.tex;
+      if (!url) { const img = await loadAppearance(ctl.signal); if (ctl.signal.aborted) throw new Why('it took too long or was cancelled'); url = await drawLamp(g, img); made.push(url); }
+      const drop = () => { for (const u of made) { URL.revokeObjectURL(u); U.revoked++; } };
+      return { url, drop, keep: () => { U.grid = g; U.tex = url; } };
+    },
+    shown() { say(urd, 'Sunlight is not drawn on the far-UV albedo map, so “Lit as now” is off while it is shown. Use “Turn to the south pole” to bring the region into view; click it, or use “Read far-UV albedo at centre”, to read a value.'); },
+    hidden() { say(urd, ''); },
+    failed(e) { say(urd, 'Far-UV albedo map could not be loaded: ' + (e instanceof Why ? e.message : 'an unexpected error') + '. ' + (MS.active ? 'The map shown is unchanged.' : 'The globe is unchanged.')); },
+    readAt(lat, lng, how) {
+      if (MS.active !== 'lamp' || !U.grid) return;
+      const loc = uLocate(lat, lng), where = deg(lat, 'N', 'S') + ', ' + deg(norm(lng), 'E', 'W') + ` (${how})`;
+      rdSet(urd, uText(loc, where), loc.s ? { state: loc.s, lat: String(lat), lng: String(lng), value: '', cell: '' }
+        : { state: uState(U.grid, loc.i), value: String(U.grid.val[loc.i]), cell: String(loc.i), lat: String(lat), lng: String(lng) });
+    },
+  };
+
   // ============================== the coordinator ==============================
-  const LAYER = { height, 'temp-noon': temp, 'temp-mid': temp, lend };
+  const LAYER = { height, 'temp-noon': temp, 'temp-mid': temp, lend, lamp };
   const MS = { active: null, saved: null, entry: null, pend: null, tok: 0, commits: 0 };
   /** Ask for a map. Pressing a layer's button while that map is shown leaves science mode; pressing it while it is loading cancels. */
   async function request(target) {
@@ -388,7 +520,7 @@
     const wasEarth = MS.saved && MS.saved.earth, entry = MS.entry;
     MS.active = null; MS.saved = null; MS.entry = null; paint();
     for (const L of new Set(Object.values(LAYER))) L.hidden();
-    if (wasEarth) say(LAYER[was] === height ? hrd : LAYER[was] === lend ? nrd : trd, `Earth view was closed while ${entry === 'height' ? 'height' : entry === 'lend' ? 'the neutron record map' : 'the temperature map'} was shown; “As seen from Earth now” can reopen it.`);
+    if (wasEarth) say(LAYER[was] === height ? hrd : LAYER[was] === lend ? nrd : LAYER[was] === lamp ? urd : trd, `Earth view was closed while ${entry === 'height' ? 'height' : entry === 'lend' ? 'the neutron record map' : entry === 'lamp' ? 'the far-UV albedo map' : 'the temperature map'} was shown; “As seen from Earth now” can reopen it.`);
   }
   const isTemp = t => t === 'temp-noon' || t === 'temp-mid';
   const radioMode = () => { const r = tmode && tmode.querySelector('input:checked'); return r && r.value === 'midnight' ? 'temp-mid' : 'temp-noon'; };
@@ -411,6 +543,10 @@
       nbtn.setAttribute('aria-pressed', String(a === 'lend' || nLoad)); nbtn.setAttribute('aria-busy', String(nLoad));
       nbtn.textContent = nLoad ? 'Neutron record: loading…' : a === 'lend' ? 'Hide south-polar neutron record (LEND)' : 'Show south-polar neutron record (LEND)';
       nleg.hidden = a !== 'lend'; if (npbtn) npbtn.hidden = a !== 'lend'; if (ncbtn) ncbtn.hidden = a !== 'lend'; }
+    if (ubtn) { const uLoad = pend === 'lamp';
+      ubtn.setAttribute('aria-pressed', String(a === 'lamp' || uLoad)); ubtn.setAttribute('aria-busy', String(uLoad));
+      ubtn.textContent = uLoad ? 'Far-UV albedo: loading…' : a === 'lamp' ? 'Hide south-polar far-UV albedo (LAMP)' : 'Show south-polar far-UV albedo (LAMP)';
+      uleg.hidden = a !== 'lamp'; if (upbtn) upbtn.hidden = a !== 'lamp'; if (ucbtn) ucbtn.hidden = a !== 'lamp'; }
     const g = $('mg-globe'); g.dataset.height = hLoad ? 'loading' : a === 'height' ? 'on' : 'off';
     g.dataset.science = a || 'none'; g.dataset.pending = pend || '';
   }
@@ -421,6 +557,9 @@
   if (nbtn) nbtn.addEventListener('click', () => { if (MS.active === 'lend') leave(); else if (MS.pend && MS.pend.target === 'lend') cancel(); else request('lend'); });
   if (npbtn) npbtn.addEventListener('click', () => { const v = window.MoonGlobe && window.MoonGlobe.view(); if (v && window.MoonGlobe.point) window.MoonGlobe.point(-85, v.lng); });
   if (ncbtn) ncbtn.addEventListener('click', () => { const h = MG(), v = h && h.centre(); if (v) lend.readAt(v.lat, v.lng, 'centre of view'); });
+  if (ubtn) ubtn.addEventListener('click', () => { if (MS.active === 'lamp') leave(); else if (MS.pend && MS.pend.target === 'lamp') cancel(); else request('lamp'); });
+  if (upbtn) upbtn.addEventListener('click', () => { const v = window.MoonGlobe && window.MoonGlobe.view(); if (v && window.MoonGlobe.point) window.MoonGlobe.point(-85, v.lng); });
+  if (ucbtn) ucbtn.addEventListener('click', () => { const h = MG(), v = h && h.centre(); if (v) lamp.readAt(v.lat, v.lng, 'centre of view'); });
   if (hcbtn) hcbtn.addEventListener('click', () => { const h = MG(), v = h && h.centre(); if (v) height.readAt(v.lat, v.lng, 'centre of view'); });
   if (tcbtn) tcbtn.addEventListener('click', () => { const h = MG(), v = h && h.centre(); if (v) temp.readAt(v.lat, v.lng, 'centre of view'); });
   const hookUp = setInterval(() => { const h = MG(); if (h) { clearInterval(hookUp); h.onClick((lat, lng) => { if (MS.active) LAYER[MS.active].readAt(lat, lng, 'clicked'); }); } }, 200);
@@ -436,4 +575,8 @@
   window.MoonLend = { state: () => ({ cached: { grid: !!N.grid, tex: !!N.tex }, revoked: N.revoked, decodeMs: N.decodeMs, drawMs: N.drawMs }),
     cell: (lat, lng) => { if (!N.grid) return null; const i = nIndex(lat, lng); return i < 0 ? { i } : { i, state: N.grid.state[i], p: N.grid.p[i], e: N.grid.e[i], n: N.grid.n[i], near: N.grid.near[i], exp: N.grid.exp[i] }; },
     text: i => N.grid ? nText(i, 'here') : null, index: nIndex, texY: nTexY, rgb: nRgb, grid: () => N.grid, fmt: { pct, pp } };
+  window.MoonLamp = { state: () => ({ cached: { grid: !!U.grid, tex: !!U.tex }, revoked: U.revoked, decodeMs: U.decodeMs, drawMs: U.drawMs }),
+    locate: uLocate, cellState: i => U.grid ? uState(U.grid, i) : null, text: (lat, lng) => U.grid ? uText(uLocate(lat, lng), 'here') : null,
+    cell: i => U.grid ? { val: U.grid.val[i], nq: U.grid.nq[i], nin: U.grid.nin[i], hi: U.grid.hi[i] } : null,
+    rgb: uRgb, thou, parse: buf => parseLamp(buf).then(g => g.shown), centre: uCentre };
 })();
