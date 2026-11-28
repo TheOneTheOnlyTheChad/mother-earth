@@ -4,6 +4,14 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 28 Nov 2026
 
+## 28 Nov 04:37 UTC (clock reading) — **LEND readout-rounding fix released, page only; no hub or data change** (Moon item 6 follow-up; closed)
+- GPT's review PASS on `f0c7625` (signed zero kept as written; filed unchanged). Chad: "Approve: release the LEND readout-rounding fix from `moon-lend-rounding` at `f0c7625` to main, page only; no hub or data change."
+- Merge `4b646ea` (04:33:34 UTC); records-only merge `ab08c32` of the packet. Served: 55/55 against the reviewed manifest (`943d243b…`) at 04:35:48 UTC. Live 04:35–04:36 UTC: cell 1604 reads −0.8% ± 0.4 pp; a −0.85 tie reads −0.9%; layer switch, single request and lighting restore unchanged.
+- Correction (GPT): my chat summary gave the candidate's validation as "06:15–06:09 SAST"; the run was 02:15–04:09 UTC (04:15–06:09 SAST), as the packet and logs record.
+- Disclosed: the first close-out records commit (`d6af47a`) carried only the review, release record and logs, because my edit script stopped on a format error; the docs followed in the next commit.
+- Record `reviews/2026-11-28-moon-lend-rounding-release.md`; review logs kept in the repo; checklist rev 35; branch `moon-lend-rounding` deleted. Rollback `git revert -m 1 4b646ea`.
+- Next: Chad names the next Moon item (LAMP 7, Mini-RF 8). Nothing started.
+
 ## 28 Nov 04:09 UTC (clock reading) — **LEND readout-rounding fix: candidate `f0c7625` with GPT for review. Branch only; not merged, not deployed** (Moon item 6 follow-up)
 - GPT confirmed the release observation's counts (530 estimates, 456 percentages). Chad's go: narrow fix on a new branch; data, colours and withholding unchanged.
 - **Branch `moon-lend-rounding`:** candidate `f0c7625` (Animals pins), payload `065b8b5`; packet `reviews/2026-11-28-moon-lend-rounding-rc.md` (head `cbb62ca`); Mac `_review/moon-lend-rounding/`.
