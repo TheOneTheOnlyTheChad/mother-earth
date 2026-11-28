@@ -4,6 +4,14 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 28 Nov 2026
 
+## 28 Nov 05:58 UTC (clock reading) — **Moon item 7 (LAMP): assessed; proposal rev 1 with GPT. Docs and a bounded sample only; no page build, bulk acquisition, merge, deployment or hub change** (Moon spec, LAMP thread)
+- New thread read in at 05:27 UTC: main `79a3ac5`, clean; `served_manifest.mjs --check` 55 files; repo attached with push; Mac folders connected; browser pane signed in to GitHub and Cloudflare. Chad's go for item 7 as above.
+- **Product:** LRO-L-LAMP-5-GDR-V1.0 (PDS Imaging Node, LROLAM_2001, 2011; the only map volume). Sample: south-polar cumulative Lyman-α albedo, its quality map and its signal-to-noise map; 240 m per pixel, polar stereographic, 80–90°S, night side, Sept 2009 – Sept 2010.
+- **Acquired (4 files, 76,899,531 B, each checkpointed before the next):** the documents JSON (37 items as exact bytes) and three maps, all MD5-matched to the archive list. Mac `_source-data/moon-lro-science-lamp/`; evidence `docs/research/moon-lamp/`.
+- **Findings:** 98.9% of pixels inside 80°S are good; the "error" maps are SNR (settled by data); flag 1 does not mark NaN and value 5 is undocumented; band edges and dates disagree in the archive; the albedo depends on an undescribed illumination model. **Read as printed, the map is mirrored top to bottom:** an independent test against the released LOLA heights puts reading B first by 1,244.8 m.
+- **Proposal:** `docs/concepts/MOON-LAMP-PROPOSAL.md` rev 1: L1 globe layer (960 m grid, about 244 kB) recommended, L2 polar panel optional; ratio ("H2O absorption feature depth") not proposed; D1–D7 for Chad after GPT. Checklist rev 37.
+- Next: GPT's review (Mac `~/Documents/ChatGPT/Mother Earth/`), then Chad's decisions. Nothing built.
+
 ## 28 Nov 05:21 UTC (clock reading) — **Moon item 6 (LEND) thread closed out; handover written** (Moon spec)
 - **Live:** LEND release merge `25993bf` (reviewed `5ed9d70`) and rounding fix merge `4b646ea` (reviewed `f0c7625`); 55/55 served against the reviewed rounding manifest (`943d243b…`) again at 05:12:32 UTC, expected list read from the manifest file at `4b646ea`.
 - **Records:** START-HERE (live line, handover pointer, LEND lessons 1–9), REGISTER (rounding line in the LEND entry), checklist rev 36, HANDOVER top block; handover `reviews/2026-11-28-moon-lend-handover.md` (Project `claude/HANDOVER-MOON-AFTER-LEND.md`).

@@ -1,6 +1,6 @@
 # Moon globe and LRO science — spec checklist
 
-Rev 36 · 28 Nov 2026, 05:21 UTC (clock reading; rev 35 04:37, rev 34 04:09, rev 33 01:50, rev 32 27 Nov 21:02, rev 31 18:20, rev 30 16:37, rev 29 16:21, rev 28 14:50, rev 27 14:24, rev 26 11:52, rev 25 10:34, rev 24 10:18, rev 23 09:52, rev 22 09:34, rev 21 09:20, rev 20 06:43, rev 19 04:58, rev 18 03:25, rev 17 27 Nov 02:48, rev 16 26 Nov 21:05, rev 15 18:58, rev 14 17:49, rev 13 16:07, rev 12 15:54, rev 11 15:34, rev 10 15:07, rev 9 14:42, rev 8 13:07, rev 7 11:58, rev 6 10:22, rev 5 09:54, rev 4 09:42, rev 3 09:20, rev 2 08:59, rev 1 08:31 UTC) · written by Claude on Chad's instruction (26 Nov) · **persistent record; update it as each item moves** · docs only.
+Rev 37 · 28 Nov 2026, 05:58 UTC (clock reading; rev 36 05:21, rev 35 04:37, rev 34 04:09, rev 33 01:50, rev 32 27 Nov 21:02, rev 31 18:20, rev 30 16:37, rev 29 16:21, rev 28 14:50, rev 27 14:24, rev 26 11:52, rev 25 10:34, rev 24 10:18, rev 23 09:52, rev 22 09:34, rev 21 09:20, rev 20 06:43, rev 19 04:58, rev 18 03:25, rev 17 27 Nov 02:48, rev 16 26 Nov 21:05, rev 15 18:58, rev 14 17:49, rev 13 16:07, rev 12 15:54, rev 11 15:34, rev 10 15:07, rev 9 14:42, rev 8 13:07, rev 7 11:58, rev 6 10:22, rev 5 09:54, rev 4 09:42, rev 3 09:20, rev 2 08:59, rev 1 08:31 UTC) · written by Claude on Chad's instruction (26 Nov) · **persistent record; update it as each item moves** · docs only.
 
 **What this is.** The record of every item in GPT's original brief, `docs/concepts/MOON-LRO-SCIENCE-BRIEF-GPT-2026-11-25.md`. It also covers the scope Chad added on 26 Nov: every page that shows the Moon. It is **not** the narrowed height proposal (`docs/concepts/MOON-LRO-SCIENCE-PROPOSAL.md` rev 2.1), which covered only the first release.
 
@@ -23,7 +23,7 @@ Rev 36 · 28 Nov 2026, 05:21 UTC (clock reading; rev 35 04:37, rev 34 04:09, rev
 | 4 | LROC regional detailed imagery | **done: released and closed** (merge `8e7d262`; Apollo 11) |
 | 5 | CRaTER radiation | **done: released and closed** (merge `ba41c8a`; 10 June 2026 event-count chart) |
 | 6 | LEND neutron and hydrogen products | **done: released and closed** (merge `25993bf`; south-polar archived-field record, 2011–2016) |
-| 7 | LAMP far-ultraviolet products | to assess |
+| 7 | LAMP far-ultraviolet products | **assessed: feasible; proposal rev 1 with GPT** (south-polar Lyman-α albedo, GDR V1.0; docs only) |
 | 8 | Mini-RF radar products | to assess |
 | 9 | Science and trajectory pairing; observation footprints (requirements 5–7) | to assess, only where a selected example benefits |
 | 10a | Sky zoom-out textured Moon (Chad's wider scope) | **done and live** (release commit `1280c0d`, 27 Nov 2026; 51/51 served files match the reviewed manifest `15e96c52…`; later main has records only) |
@@ -377,14 +377,26 @@ Rev 36 · 28 Nov 2026, 05:21 UTC (clock reading; rev 35 04:37, rev 34 04:09, rev
   - Served: 55/55 against the reviewed manifest file (`4764f405…`) at 01:47:03 UTC. Live: off by default, open with one file request, pole and centre readouts, all five readout states, height switch and re-entry without a second request, prior lighting restored, Details reaches the section.
   - REGISTER marked live. Branch `moon-lend-ui` deleted after verification. Raw sources and provenance kept.
 
-## 7. LAMP far-ultraviolet products — to assess
+## 7. LAMP far-ultraviolet products — assessed: feasible; proposal rev 1 with GPT (28 Nov 2026)
 
 - **Brief asked:** far-ultraviolet observations, including shadowed regions. A different spectral view, not ordinary visible-light photography.
-- **Status:** not assessed.
-- **Evidence:** the brief's instrument table only.
-- **Next bounded assessment:** identify the LAMP map products (for example polar far-UV albedo maps), read the labels, fetch one bounded sample, and record wavelength band, coverage, polar extent and interpretation limits.
-- **Blockers:** none known.
-- **Decision needed:** whether a polar far-UV view fits, and its wording.
+- **Status:** assessed, docs only. Proposal `docs/concepts/MOON-LAMP-PROPOSAL.md` rev 1 is with GPT for review. No page build, bulk acquisition, merge, deployment or hub change.
+- **Chad's go (28 Nov):** "Continue with Moon item 7: LAMP. Start with archive documentation, then assess one suitable product and a small, bounded sample. … No page build, bulk acquisition, merge, deployment or hub change."
+- **Product:**
+  - PDS Imaging Node, LRO-L-LAMP-5-GDR-V1.0 (volume LROLAM_2001, released 15 Mar 2011, DOI 10.17189/1520244). This is the only archived map volume; the 2024 PDS4 bundle is raw and calibrated data only;
+  - the sample is the south-polar cumulative Lyman-α albedo (dimensionless) with its quality and signal-to-noise maps;
+  - 240 m per pixel, polar stereographic, 80–90°S, night side, Sept 2009 – Sept 2010;
+  - frame: Mean Earth/Polar Axis of DE421.
+- **Acquired and retained (each checkpointed before the next):** four files, 76,899,531 B: a documents JSON (37 items as exact bytes) and three 25,020,004 B maps, all MD5-matched to the archive's own list. Mac `_source-data/moon-lro-science-lamp/`; evidence `docs/research/moon-lamp/`.
+- **Findings:**
+  - inside 80°S, 98.9% of pixels are finite and flagged good;
+  - the "error" maps are signal-to-noise, settled by data (flag 2 = SNR < 3 on all 53,013 pixels);
+  - quality flag 1 does not mark NaN, and value 5 is undocumented;
+  - the Lyman-α band edges and the dates disagree between the archive documents (recorded, unresolved);
+  - the albedo depends on a modelled illumination the archive does not describe.
+- **Orientation finding:** read as printed, the map is mirrored top to bottom. An independent test against the released LOLA heights puts reading B first by 1,244.8 m. The build must carry reading B and repeat the check; a finer 240 m check is offered to Chad (D6).
+- **Recommended (for Chad after GPT):** L1, a globe layer like LEND from a 960 m grid (about 244 kB); L2, a polar panel, is an option. The off/on "H2O absorption feature depth" ratio is not proposed. No ice, frost or water and no cause for the darkness on the page.
+- **Decisions needed:** D1–D7 (proposal §10).
 
 ## 8. Mini-RF radar products — to assess
 
@@ -483,7 +495,7 @@ Each stays `option` until Chad classifies it as "assess" or "not pursued", with 
 
 **Current handover:** `reviews/2026-11-28-moon-lend-handover.md` (Project `claude/HANDOVER-MOON-AFTER-LEND.md`).
 
-**Remaining open items after 6 (28 Nov):** 7, 8 (to assess); 9 (only inside the item it serves); 12a–c (options to classify); 11 (carried). Done: 1, 2, 3, 4, 5, 6, 10a; 10b closed decision; 13 outside scope. Chad names the next item; suggested order (Claude's suggestion only): LAMP (7), Mini-RF (8). The LEND readout-rounding follow-up is released and closed (merge `4b646ea`). Pairing (9) and the options (12) are taken up only inside the item they serve or when Chad classifies them.
+**Remaining open items after 6 (28 Nov):** 7 (assessed; proposal rev 1 with GPT), 8 (to assess); 9 (only inside the item it serves); 12a–c (options to classify); 11 (carried). Done: 1, 2, 3, 4, 5, 6, 10a; 10b closed decision; 13 outside scope. Chad names the next item; suggested order (Claude's suggestion only): LAMP (7), Mini-RF (8). The LEND readout-rounding follow-up is released and closed (merge `4b646ea`). Pairing (9) and the options (12) are taken up only inside the item they serve or when Chad classifies them.
 
 ## Change log
 
@@ -523,3 +535,4 @@ Each stays `option` until Chad classifies it as "assess" or "not pursued", with 
 - Rev 34 (28 Nov 2026, 04:09 UTC): §6: readout-rounding follow-up candidate `f0c7625` with GPT for review. No other item moved.
 - Rev 35 (28 Nov 2026, 04:37 UTC): §6: readout-rounding fix released (merge `4b646ea`, 55/55 served, live check); follow-up closed. No other item moved.
 - Rev 36 (28 Nov 2026, 05:21 UTC): thread close-out: 55/55 served again at 05:12:32 UTC; handover `reviews/2026-11-28-moon-lend-handover.md`; branches `moon-lend-ui` and `moon-lend-rounding` deleted; Mac leftovers staged for the Trash. No item moved.
+- Rev 37 (28 Nov 2026, 05:58 UTC): §7 assessed (LAMP GDR south-polar Lyman-α albedo; feasible; orientation finding); proposal rev 1 with GPT. No other item moved.

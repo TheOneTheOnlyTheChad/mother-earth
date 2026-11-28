@@ -1,0 +1,378 @@
+{
+ "inputs": {
+  "docs": "ac21b5530c3f63e462c3510a57ee55ec1dbe5b7082dde714810a84634d4708b1",
+  "albed": "896aa35d377c46b68cc774047638b28451106e28e8a6aa67eb4aeca0358af2e2",
+  "dqual": "3f071a9e8afbddc399b2523d6f3995994c9f7f26e27d0e5771de42e1a6ff2754",
+  "error": "8300ecb4262ee3c747524b629c1fff2d1e0bbb94fef25bd0adace1250d415141"
+ },
+ "labels": {
+  "albed": {
+   "lines": 2501,
+   "samples": 2501,
+   "bits": 32,
+   "type": "PC_REAL",
+   "scale": 1.0,
+   "offset": 0.0,
+   "map_scale": 240.0,
+   "lproj": 1250.0,
+   "sproj": 1250.0,
+   "radius_km": 1737.4,
+   "centre_lat": -90.0,
+   "start": "2009-09-01T00:00:00",
+   "stop": "2010-10-01T00:00:00",
+   "wmin": "119.57",
+   "wmax": "125.57",
+   "description": "Each sample represents albedo as a dimensionless fraction.",
+   "frame": "MEAN EARTH/POLAR AXIS OF DE421"
+  },
+  "dqual": {
+   "lines": 2501,
+   "samples": 2501,
+   "bits": 32,
+   "type": "PC_REAL",
+   "scale": 1.0,
+   "offset": 0.0,
+   "map_scale": 240.0,
+   "lproj": 1250.0,
+   "sproj": 1250.0,
+   "radius_km": 1737.4,
+   "centre_lat": -90.0,
+   "start": "2009-09-01T00:00:00",
+   "stop": "2010-10-01T00:00:00",
+   "wmin": "119.57",
+   "wmax": "125.57",
+   "description": "Each sample represents a data quality flag (0 = good data, 1 = NaN, 2 = signal-to-noise ratio < 3, 4 = possible sunlit peak filter, 6 = both values 2 and 4 set).",
+   "frame": "MEAN EARTH/POLAR AXIS OF DE421"
+  },
+  "error": {
+   "lines": 2501,
+   "samples": 2501,
+   "bits": 32,
+   "type": "PC_REAL",
+   "scale": 1.0,
+   "offset": 0.0,
+   "map_scale": 240.0,
+   "lproj": 1250.0,
+   "sproj": 1250.0,
+   "radius_km": 1737.4,
+   "centre_lat": -90.0,
+   "start": "2009-09-01T00:00:00",
+   "stop": "2010-10-01T00:00:00",
+   "wmin": "119.57",
+   "wmax": "125.57",
+   "description": "Each sample represents the signal-to-noise (SNR) ratio.",
+   "frame": "MEAN EARTH/POLAR AXIS OF DE421"
+  }
+ },
+ "projection": {
+  "centre_pixel_for_pole (I,J)": [
+   1251,
+   1251
+  ],
+  "label_projection_offsets": [
+   1250.0,
+   1250.0
+  ],
+  "edge_mid_lat": -80.131,
+  "corner_lat": -76.078,
+  "dsmap_states": "edges 80.13, corners 76.08",
+  "roundtrip_max_lat_error_deg": 0.0037,
+  "roundtrip_lon_check": [
+   [
+    -85,
+    0,
+    0.0
+   ],
+   [
+    -85,
+    90,
+    90.0
+   ],
+   [
+    -88.14,
+    45.91,
+    45.86
+   ],
+   [
+    -80.5,
+    200,
+    199.971
+   ]
+  ],
+  "note": "printed inverse X=SIN(LON) lacks R; with R the forward and inverse agree. Pixel (1251,1251) is the pole (X=(I-N/2-0.5)*S is 0 at I=1251 with real division, N=2501). Longitude uses reading B (check_lamp_frame.py)."
+ },
+ "dqual_values": {
+  "0.0": 6187553,
+  "1.0": 1,
+  "2.0": 52518,
+  "4.0": 13985,
+  "5.0": 449,
+  "6.0": 495
+ },
+ "dqual_nan": 0,
+ "albed": {
+  "finite": 6247163,
+  "nan": 7838,
+  "negative": 141,
+  "min": -0.00013215291255619377,
+  "max": 187.1300506591797
+ },
+ "error": {
+  "finite": 6247338,
+  "nan": 7663,
+  "min": 0.0,
+  "max": 41.650917053222656,
+  "pct_1_50_99": [
+   3.13290189743042,
+   7.197942018508911,
+   17.833583583831775
+  ]
+ },
+ "flag1_vs_albedo_nan": {
+  "q1": 1,
+  "albedo_nan": 7838,
+  "q1_and_nan": 1
+ },
+ "flag2_vs_error_lt3": {
+  "bit2": 53013,
+  "error_lt3": 53013,
+  "both": 53013,
+  "bit2_only": 0,
+  "lt3_only": 0
+ },
+ "flag2_vs_albedo_over_error_lt3": {
+  "albedo/error<3": 6247158,
+  "both": 52837
+ },
+ "rings": {
+  "80-81S": {
+   "pixels": 944220,
+   "finite": 0.9987,
+   "flag0": 0.9822
+  },
+  "81-82S": {
+   "pixels": 858844,
+   "finite": 0.9999,
+   "flag0": 0.9857
+  },
+  "82-83S": {
+   "pixels": 756608,
+   "finite": 0.9999,
+   "flag0": 0.9906
+  },
+  "83-84S": {
+   "pixels": 654860,
+   "finite": 1.0,
+   "flag0": 0.9904
+  },
+  "84-85S": {
+   "pixels": 553408,
+   "finite": 0.9998,
+   "flag0": 0.9936
+  },
+  "85-86S": {
+   "pixels": 452264,
+   "finite": 0.9995,
+   "flag0": 0.9933
+  },
+  "86-87S": {
+   "pixels": 351500,
+   "finite": 0.9951,
+   "flag0": 0.9915
+  },
+  "87-88S": {
+   "pixels": 250924,
+   "finite": 1.0,
+   "flag0": 0.9968
+  },
+  "88-89S": {
+   "pixels": 150484,
+   "finite": 0.9997,
+   "flag0": 0.9921
+  },
+  "89-90S": {
+   "pixels": 50164,
+   "finite": 0.9985,
+   "flag0": 0.983
+  }
+ },
+ "inside_80S": {
+  "pixels": 5023277,
+  "outside_circle_pixels": 1231724,
+  "outside_finite": 1227516
+ },
+ "albedo_by_flag_inside_80S": {
+  "0": {
+   "n": 4966208,
+   "p01_p50_p99": [
+    0.01978,
+    0.03641,
+    0.06184
+   ],
+   "above_0.2": 39,
+   "negative": 0
+  },
+  "2": {
+   "n": 44455,
+   "p01_p50_p99": [
+    0.00132,
+    0.01959,
+    0.05502
+   ],
+   "above_0.2": 3,
+   "negative": 75
+  },
+  "4": {
+   "n": 8519,
+   "p01_p50_p99": [
+    0.01927,
+    0.03957,
+    1.26695
+   ],
+   "above_0.2": 1060,
+   "negative": 0
+  },
+  "6": {
+   "n": 464,
+   "p01_p50_p99": [
+    0.00073,
+    0.02162,
+    0.08559
+   ],
+   "above_0.2": 2,
+   "negative": 1
+  }
+ },
+ "craters_10km": {
+  "Cabeus": {
+   "centre": [
+    -85.33,
+    317.87
+   ],
+   "disc_10km_median_flag0": 0.03366,
+   "flag0_pixels": 5466,
+   "disc_pixels": 5466,
+   "controls_n": 21,
+   "control_median_of_medians": 0.03613,
+   "controls_at_or_below": 3,
+   "disc_median_if_read_as_printed_A": 0.03747
+  },
+  "Shoemaker": {
+   "centre": [
+    -88.14,
+    45.91
+   ],
+   "disc_10km_median_flag0": 0.02669,
+   "flag0_pixels": 5459,
+   "disc_pixels": 5460,
+   "controls_n": 19,
+   "control_median_of_medians": 0.03535,
+   "controls_at_or_below": 0,
+   "disc_median_if_read_as_printed_A": 0.03561
+  },
+  "Haworth": {
+   "centre": [
+    -87.45,
+    354.83
+   ],
+   "disc_10km_median_flag0": 0.02825,
+   "flag0_pixels": 5453,
+   "disc_pixels": 5453,
+   "controls_n": 21,
+   "control_median_of_medians": 0.03503,
+   "controls_at_or_below": 1,
+   "disc_median_if_read_as_printed_A": 0.03531
+  },
+  "Faustini": {
+   "centre": [
+    -87.18,
+    84.31
+   ],
+   "disc_10km_median_flag0": 0.0249,
+   "flag0_pixels": 5462,
+   "disc_pixels": 5462,
+   "controls_n": 21,
+   "control_median_of_medians": 0.03499,
+   "controls_at_or_below": 0,
+   "disc_median_if_read_as_printed_A": 0.02979
+  },
+  "Amundsen": {
+   "centre": [
+    -84.44,
+    83.07
+   ],
+   "disc_10km_median_flag0": 0.03878,
+   "flag0_pixels": 5467,
+   "disc_pixels": 5471,
+   "controls_n": 23,
+   "control_median_of_medians": 0.03574,
+   "controls_at_or_below": 22,
+   "disc_median_if_read_as_printed_A": 0.03318
+  }
+ },
+ "payload_8bit_0_to_0.08": {
+  "240m": {
+   "grid": 2501,
+   "raw_bytes": 6255001,
+   "gzip9": 4309766,
+   "zlib9": 4309754,
+   "cells_centred_inside_80S": 5023277,
+   "shown_inside_80S": 4966208,
+   "rule": "mean of quality-0 finite pixels; shown if at least half of the 1 pixels qualify"
+  },
+  "480m": {
+   "grid": 1250,
+   "raw_bytes": 1562500,
+   "gzip9": 1025199,
+   "zlib9": 1025187,
+   "cells_centred_inside_80S": 1255602,
+   "shown_inside_80S": 1246641,
+   "rule": "mean of quality-0 finite pixels; shown if at least half of the 4 pixels qualify"
+  },
+  "960m": {
+   "grid": 625,
+   "raw_bytes": 390625,
+   "gzip9": 243585,
+   "zlib9": 243573,
+   "cells_centred_inside_80S": 313900,
+   "shown_inside_80S": 311757,
+   "rule": "mean of quality-0 finite pixels; shown if at least half of the 16 pixels qualify"
+  },
+  "1920m": {
+   "grid": 312,
+   "raw_bytes": 97344,
+   "gzip9": 58652,
+   "zlib9": 58640,
+   "cells_centred_inside_80S": 78414,
+   "shown_inside_80S": 77950,
+   "rule": "mean of quality-0 finite pixels; shown if at least half of the 64 pixels qualify"
+  }
+ },
+ "negatives_by_flag": {
+  "2.0": 140,
+  "6.0": 1
+ },
+ "flagged_inside_80S_by_30deg_lon": [
+  2573,
+  5961,
+  27119,
+  11727,
+  485,
+  970,
+  670,
+  582,
+  2045,
+  1003,
+  604,
+  1130
+ ],
+ "shown_240m_inside_80S": {
+  "quality0_finite": 4966208,
+  "of": 5023277
+ },
+ "totals": {
+  "map_bytes": 25020004,
+  "volume_maps": 694,
+  "volume_bytes_maps": 17363882776
+ }
+}
