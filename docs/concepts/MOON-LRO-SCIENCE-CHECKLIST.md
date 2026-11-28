@@ -1,6 +1,6 @@
 # Moon globe and LRO science — spec checklist
 
-Rev 39 · 28 Nov 2026, 10:00 UTC (clock reading; rev 38 06:33, rev 37 05:58, rev 36 05:21, rev 35 04:37, rev 34 04:09, rev 33 01:50, rev 32 27 Nov 21:02, rev 31 18:20, rev 30 16:37, rev 29 16:21, rev 28 14:50, rev 27 14:24, rev 26 11:52, rev 25 10:34, rev 24 10:18, rev 23 09:52, rev 22 09:34, rev 21 09:20, rev 20 06:43, rev 19 04:58, rev 18 03:25, rev 17 27 Nov 02:48, rev 16 26 Nov 21:05, rev 15 18:58, rev 14 17:49, rev 13 16:07, rev 12 15:54, rev 11 15:34, rev 10 15:07, rev 9 14:42, rev 8 13:07, rev 7 11:58, rev 6 10:22, rev 5 09:54, rev 4 09:42, rev 3 09:20, rev 2 08:59, rev 1 08:31 UTC) · written by Claude on Chad's instruction (26 Nov) · **persistent record; update it as each item moves** · docs only.
+Rev 40 · 28 Nov 2026, 10:11 UTC (clock reading; rev 39 10:00, rev 38 06:33, rev 37 05:58, rev 36 05:21, rev 35 04:37, rev 34 04:09, rev 33 01:50, rev 32 27 Nov 21:02, rev 31 18:20, rev 30 16:37, rev 29 16:21, rev 28 14:50, rev 27 14:24, rev 26 11:52, rev 25 10:34, rev 24 10:18, rev 23 09:52, rev 22 09:34, rev 21 09:20, rev 20 06:43, rev 19 04:58, rev 18 03:25, rev 17 27 Nov 02:48, rev 16 26 Nov 21:05, rev 15 18:58, rev 14 17:49, rev 13 16:07, rev 12 15:54, rev 11 15:34, rev 10 15:07, rev 9 14:42, rev 8 13:07, rev 7 11:58, rev 6 10:22, rev 5 09:54, rev 4 09:42, rev 3 09:20, rev 2 08:59, rev 1 08:31 UTC) · written by Claude on Chad's instruction (26 Nov) · **persistent record; update it as each item moves** · docs only.
 
 **What this is.** The record of every item in GPT's original brief, `docs/concepts/MOON-LRO-SCIENCE-BRIEF-GPT-2026-11-25.md`. It also covers the scope Chad added on 26 Nov: every page that shows the Moon. It is **not** the narrowed height proposal (`docs/concepts/MOON-LRO-SCIENCE-PROPOSAL.md` rev 2.1), which covered only the first release.
 
@@ -23,7 +23,7 @@ Rev 39 · 28 Nov 2026, 10:00 UTC (clock reading; rev 38 06:33, rev 37 05:58, rev
 | 4 | LROC regional detailed imagery | **done: released and closed** (merge `8e7d262`; Apollo 11) |
 | 5 | CRaTER radiation | **done: released and closed** (merge `ba41c8a`; 10 June 2026 event-count chart) |
 | 6 | LEND neutron and hydrogen products | **done: released and closed** (merge `25993bf`; south-polar archived-field record, 2011–2016) |
-| 7 | LAMP far-ultraviolet products | **assessed: feasible; rev 2 PASS; D1–D8 accepted; D6 registration evidence with GPT** (docs only) |
+| 7 | LAMP far-ultraviolet products | **assessed: feasible; D1–D8 accepted; D6 inconclusive for fine registration (B retained, no shift); page preview in progress** |
 | 8 | Mini-RF radar products | to assess |
 | 9 | Science and trajectory pairing; observation footprints (requirements 5–7) | to assess, only where a selected example benefits |
 | 10a | Sky zoom-out textured Moon (Chad's wider scope) | **done and live** (release commit `1280c0d`, 27 Nov 2026; 51/51 served files match the reviewed manifest `15e96c52…`; later main has records only) |
@@ -412,9 +412,11 @@ Rev 39 · 28 Nov 2026, 10:00 UTC (clock reading; rev 38 06:33, rev 37 05:58, rev
   - the DEM transform is verified by landmarks (2,126.8 m mean depression at five craters; documented reading first);
   - the declared tile test is INCONCLUSIVE (design flaw disclosed);
   - the labelled post-hoc diagnostic shows a ground-tied cluster at (−1, +1) pixels that tracks known shifts and is absent under wrong symmetries;
-  - registration within about 1–2 pixels, sub-pixel offset unresolved, no shift applied;
+  - ~~registration within about 1–2 pixels~~ (withdrawn after GPT's D6 review): The documented map orientation is supported by landmark and terrain comparisons. A later exploratory albedo/slope diagnostic shows a small-lag cluster that follows artificial shifts, but the declared fine-registration test was inconclusive. Fine positional error is not quantified. No shift is applied.;
   - report `reviews/2026-11-28-moon-lamp-d6-registration.md`, options (a) accept for L1 (recommended), (b) bootstrap re-run, (c) park.
-- **Next:** GPT's review of the D6 evidence, then Chad's go for the page-only branch preview.
+- **GPT's D6 review:** `reviews/2026-11-28-moon-lamp-d6-registration-gpt-review.md`: inconclusive for fine registration; reading B supported; proceed to the preview with corrected claims.
+- **Chad (28 Nov):** "Accept D6 as assessed but inconclusive for fine positional accuracy, with reading B retained and no shift applied. Correct the unsupported 240–480 m bound in the records, then build the page-only LAMP preview…"
+- **Next:** the page-only preview on branch `moon-lamp-ui`, for GPT's review.
 
 ## 8. Mini-RF radar products — to assess
 
@@ -513,7 +515,7 @@ Each stays `option` until Chad classifies it as "assess" or "not pursued", with 
 
 **Current handover:** `reviews/2026-11-28-moon-lend-handover.md` (Project `claude/HANDOVER-MOON-AFTER-LEND.md`).
 
-**Remaining open items after 6 (28 Nov):** 7 (assessed; D1–D8 accepted; D6 evidence with GPT), 8 (to assess); 9 (only inside the item it serves); 12a–c (options to classify); 11 (carried). Done: 1, 2, 3, 4, 5, 6, 10a; 10b closed decision; 13 outside scope. Chad names the next item; suggested order (Claude's suggestion only): LAMP (7), Mini-RF (8). The LEND readout-rounding follow-up is released and closed (merge `4b646ea`). Pairing (9) and the options (12) are taken up only inside the item they serve or when Chad classifies them.
+**Remaining open items after 6 (28 Nov):** 7 (D1–D8 accepted; D6 inconclusive for fine registration; preview in progress), 8 (to assess); 9 (only inside the item it serves); 12a–c (options to classify); 11 (carried). Done: 1, 2, 3, 4, 5, 6, 10a; 10b closed decision; 13 outside scope. Chad names the next item; suggested order (Claude's suggestion only): LAMP (7), Mini-RF (8). The LEND readout-rounding follow-up is released and closed (merge `4b646ea`). Pairing (9) and the options (12) are taken up only inside the item they serve or when Chad classifies them.
 
 ## Change log
 
@@ -556,3 +558,4 @@ Each stays `option` until Chad classifies it as "assess" or "not pursued", with 
 - Rev 37 (28 Nov 2026, 05:58 UTC): §7 assessed (LAMP GDR south-polar Lyman-α albedo; feasible; orientation finding); proposal rev 1 with GPT. No other item moved.
 - Rev 38 (28 Nov 2026, 06:33 UTC): §7: GPT's rev 1 review filed; proposal rev 2 (R1–R4) with GPT for recheck. No other item moved.
 - Rev 39 (28 Nov 2026, 10:00 UTC): §7: rev 2 recheck PASS filed; D1–D8 accepted; D6 acquisition (checkpoints 5–6) and registration evidence with GPT. No other item moved.
+- Rev 40 (28 Nov 2026, 10:11 UTC): §7: GPT's D6 review filed; the unsupported 240–480 m registration bound withdrawn; Chad's D6 decision recorded; preview started. No other item moved.

@@ -7,6 +7,15 @@
 - **Script:** `docs/research/moon-lamp/check_lamp_register.py`.
 - **Output:** `docs/research/moon-lamp/outputs/check_lamp_register.out.json` (sha256 `9e75a6c2…6254e30a0`).
 
+## Correction (28 Nov 2026, 10:11 UTC, after GPT's review `reviews/2026-11-28-moon-lamp-d6-registration-gpt-review.md`)
+
+- **Withdrawn:** this report's claims that the map is "registered within about 1–2 LAMP pixels (240–480 m)" and the option wording "within 2 pixels, unresolved below". **D6 did not establish fine registration or any upper error bound.**
+- **Why:** a correlation mode is not an upper bound on position error. In this report's own table, another 14 of 67 tiles peak at (−1, +2) or (−2, +1), about 537 m. Albedo and slope are different quantities, so their best lag can reflect their physical relation or processing rather than position. Recovering injected shifts shows relative sensitivity, not the true unshifted error.
+- **Replacement statement, used in all records:** "The documented map orientation is supported by landmark and terrain comparisons. A later exploratory albedo/slope diagnostic shows a small-lag cluster that follows artificial shifts, but the declared fine-registration test was inconclusive. Fine positional error is not quantified. No shift is applied."
+- **Chad's decision (28 Nov):** "Accept D6 as assessed but inconclusive for fine positional accuracy, with reading B retained and no shift applied."
+- **Execution-rule note:** the script permits a PASS on one feature (at least 5 tiles in at least 3 quadrants), reporting two-feature agreement rather than requiring it, whereas proposal §5.4 said both features agreeing. This refinement was set when the script was written (28 Nov, before the run). It has no effect on this result, because zero tiles passed either feature.
+- The withdrawn sentences below are struck through and kept as history.
+
 ## 0. Bottom line
 
 1. **The DEM's own transform is verified by landmarks.**
@@ -20,7 +29,7 @@
    - with the reflected (reading A), rotated 90° and 180°, and shuffled controls it **vanishes**.
 4. **The cause of the 1-pixel residual is not established.** It could be a real sub-kilometre misregistration, or the two different quantities (far-UV albedo, slope magnitude) simply not peaking at the same place. The sunlit-peak feature's pooled peak is (+1, +1), disagreeing in the east–west sign. **No shift is proposed or applied.**
 5. **What this means for L1 (my reading, for GPT and Chad):**
-   - the adopted transform is registered to the DEM's landmark-verified frame within about **1–2 LAMP pixels (240–480 m)** on a ground-tied diagnostic;
+   - ~~the adopted transform is registered to the DEM's landmark-verified frame within about 1–2 LAMP pixels (240–480 m) on a ground-tied diagnostic;~~ **withdrawn (see Correction): fine positional error is not quantified;**
    - that is below L1's 960 m cells (4 pixels) and far below the globe texture's about 3.8 km rows;
    - it is not a 240 m accuracy claim. A bounded alternative is offered in §6.
 
@@ -106,7 +115,7 @@ Measured as the ring 25–35 km mean height minus the disc ≤ 8 km mean height,
 **Supported:**
 - the DEM's documented transform (landmarks);
 - reading B for LAMP, now also at 60 km tile scale, by a ground-tied cluster absent under every wrong symmetry;
-- registration to within about 1–2 LAMP pixels (240–480 m) on the albedo-vs-slope diagnostic.
+- ~~registration to within about 1–2 LAMP pixels (240–480 m) on the albedo-vs-slope diagnostic~~ (withdrawn: not supported; see Correction).
 
 **Not supported:**
 - 240 m registration;
@@ -115,14 +124,14 @@ Measured as the ring 25–35 km mean height minus the disc ≤ 8 km mean height,
 
 **Options for GPT's view and Chad's decision:**
 - **(a) Accept for L1 (my recommendation):**
-  - record "registered within about 1–2 LAMP pixels to LOLA's landmark-verified frame (post-hoc diagnostic); sub-pixel offset unresolved; no shift applied";
+  - ~~record "registered within about 1–2 LAMP pixels…"~~ (withdrawn); as decided: record the replacement statement in the Correction;
   - the build's frame guard repeats the landmark check, and the tile-cluster diagnostic on the shipped grid's source as a regression guard, not a release criterion;
   - L1 cells are 4 pixels and the texture rows are about 16 pixels.
 - **(b) One bounded re-run with a new criterion declared now, before running:**
   - prominence measured by a block-bootstrap over tiles of the pooled peak position (95% interval);
   - pass if the interval lies within ±1 pixel and the controls' intervals do not;
   - the same inputs; no new acquisition.
-- **(c) Park the registration question as "within 2 pixels, unresolved below" with no further work**, and state it in Details.
+- **(c) Park the registration question** ~~as "within 2 pixels, unresolved below"~~ with no further work, and state it in Details.
 
 **Not proposed:** applying a (−1, +1) shift, or fetching a finer DEM.
 

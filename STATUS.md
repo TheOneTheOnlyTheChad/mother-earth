@@ -4,11 +4,18 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 28 Nov 2026
 
+## 28 Nov 10:11 UTC (clock reading) — **Moon item 7 (LAMP): GPT's D6 review filed; unsupported registration bound withdrawn; Chad's D6 decision; page preview started** (Moon spec, LAMP thread)
+- GPT's review filed unchanged: `reviews/2026-11-28-moon-lamp-d6-registration-gpt-review.md` (`c4b8478a…62b3be`, equal to the Mac copy). The declared fine-registration test is INCONCLUSIVE; reading B is supported; the preview can proceed with corrected claims. GPT independently reproduced the landmark tables (2,126.8 m; next 1,519.2 m).
+- **Correction:** the "1–2 pixels (240–480 m)" bound is withdrawn everywhere (D6 report, checklist, this file, HANDOVER). A correlation mode is not an error bound; 14 of 67 tiles peak at about 537 m. Replacement: "The documented map orientation is supported by landmark and terrain comparisons. A later exploratory albedo/slope diagnostic shows a small-lag cluster that follows artificial shifts, but the declared fine-registration test was inconclusive. Fine positional error is not quantified. No shift is applied."
+- Execution-rule note (one-feature PASS allowed, agreement reported) recorded in the D6 report; no effect, since zero tiles passed.
+- **Chad:** "Accept D6 as assessed but inconclusive for fine positional accuracy, with reading B retained and no shift applied… then build the page-only LAMP preview under proposal rev 2 and GPT's review notes. Return the exact candidate and evidence for GPT review. No new acquisition, merge, deployment or hub change."
+- Checklist rev 40. Next: branch `moon-lamp-ui` preview.
+
 ## 28 Nov 10:00 UTC (clock reading) — **Moon item 7 (LAMP): D6 finer-registration evidence with GPT. Docs only; no page build, bulk acquisition, merge, deployment or hub change** (Moon spec, LAMP thread)
 - After Chad confirmed the pending save dialog (09:52 UTC), the LOLA documents package (`989d0ef6…`) and `ldem_75s_240m.img` (29,062,688 B, `d031efe2…`, two identical reads; no archive checksum) were retained and checkpointed (5–6).
 - **DEM landmarks:** the documented LOLA transform (2022 DSMAP, NS = −1 = reading B) puts the five crater centres in depressions averaging 2,126.8 m, first of eight readings (next 1,519.2 m). The printed south inverse is numerically inconsistent (sample 1274.4 against 2538.6 at 85°S, 90°E).
 - **Declared tile test (68 tiles, ±4 pixels, two features):** INCONCLUSIVE; no usable tiles and the controls are also empty. The MAD-based prominence rule cannot pass broad peaks (my design error, disclosed; not relaxed).
-- **Post-hoc diagnostic (labelled; not an outcome):** the albedo-vs-slope peaks cluster at (−1, +1) pixels in 37 of 67 tiles. The cluster moves exactly with known shifts ((−3, +4), (−4, 0)) and is absent for the reflected, rotated and shuffled controls. The sunlit-peak feature's pooled peak is (+1, +1). Registration is within about 1–2 pixels; the sub-pixel cause is unresolved; no shift is applied.
+- **Post-hoc diagnostic (labelled; not an outcome):** the albedo-vs-slope peaks cluster at (−1, +1) pixels in 37 of 67 tiles. The cluster moves exactly with known shifts ((−3, +4), (−4, 0)) and is absent for the reflected, rotated and shuffled controls. The sunlit-peak feature's pooled peak is (+1, +1). ~~Registration is within about 1–2 pixels~~ (withdrawn; see the next entry); no shift is applied.
 - Report `reviews/2026-11-28-moon-lamp-d6-registration.md`; script `check_lamp_register.py`; checklist rev 39. Next: GPT's review; then Chad's go for the page preview (option a recommended).
 
 ## 28 Nov 06:55 UTC (clock reading) — **Moon item 7 (LAMP): GPT's rev 2 recheck PASS filed; Chad accepted D1–D8 and gave the go for the bounded D6 finer-registration check. D6 acquisition paused: downloads are not reaching the Mac** (Moon spec, LAMP thread)
