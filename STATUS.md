@@ -4,6 +4,12 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 28 Nov 2026
 
+## 28 Nov 11:25 UTC (clock reading) — **Moon item 7 (LAMP): page-only preview built; candidate `7e98a56` with GPT. Branch only: no merge, deployment, hub change or acquisition** (Moon spec, LAMP thread)
+- Branch `moon-lamp-ui` (from main `6a33d1e`), candidate `7e98a563cbfe3ff6fe6d7ec95849d2fbf972d691`, pushed. Packet `reviews/2026-11-28-moon-lamp-ui-rc.md`; Mac `_review/moon-lamp-ui/`.
+- Evidence: builder `--check` byte-identical; builder tests 24/24; mutants 9/9; page suite 100/100 (all 230,400 cap texture pixels exact against an independent nearest-cell oracle); 26/26 page BREAKs fail; LEND 89/89, Diviner 178/178, globe 67/67; height 101/102 (only the LOLA-source prerequisite, not in this container).
+- Open: low contrast under the approved 0–0.080 scale (observation §5); Chad decides after GPT.
+- Live page unchanged (`4b646ea`).
+
 ## 28 Nov 10:11 UTC (clock reading) — **Moon item 7 (LAMP): GPT's D6 review filed; unsupported registration bound withdrawn; Chad's D6 decision; page preview started** (Moon spec, LAMP thread)
 - GPT's review filed unchanged: `reviews/2026-11-28-moon-lamp-d6-registration-gpt-review.md` (`c4b8478a…62b3be`, equal to the Mac copy). The declared fine-registration test is INCONCLUSIVE; reading B is supported; the preview can proceed with corrected claims. GPT independently reproduced the landmark tables (2,126.8 m; next 1,519.2 m).
 - **Correction:** the "1–2 pixels (240–480 m)" bound is withdrawn everywhere (D6 report, checklist, this file, HANDOVER). A correlation mode is not an error bound; 14 of 67 tiles peak at about 537 m. Replacement: "The documented map orientation is supported by landmark and terrain comparisons. A later exploratory albedo/slope diagnostic shows a small-lag cluster that follows artificial shifts, but the declared fine-registration test was inconclusive. Fine positional error is not quantified. No shift is applied."
