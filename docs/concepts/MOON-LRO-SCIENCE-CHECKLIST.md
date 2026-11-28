@@ -1,6 +1,6 @@
 # Moon globe and LRO science — spec checklist
 
-Rev 32 · 27 Nov 2026, 21:02 UTC (clock reading; rev 31 18:20, rev 30 16:37, rev 29 16:21, rev 28 14:50, rev 27 14:24, rev 26 11:52, rev 25 10:34, rev 24 10:18, rev 23 09:52, rev 22 09:34, rev 21 09:20, rev 20 06:43, rev 19 04:58, rev 18 03:25, rev 17 27 Nov 02:48, rev 16 26 Nov 21:05, rev 15 18:58, rev 14 17:49, rev 13 16:07, rev 12 15:54, rev 11 15:34, rev 10 15:07, rev 9 14:42, rev 8 13:07, rev 7 11:58, rev 6 10:22, rev 5 09:54, rev 4 09:42, rev 3 09:20, rev 2 08:59, rev 1 08:31 UTC) · written by Claude on Chad's instruction (26 Nov) · **persistent record; update it as each item moves** · docs only.
+Rev 33 · 28 Nov 2026, 01:50 UTC (clock reading; rev 32 27 Nov 21:02, rev 31 18:20, rev 30 16:37, rev 29 16:21, rev 28 14:50, rev 27 14:24, rev 26 11:52, rev 25 10:34, rev 24 10:18, rev 23 09:52, rev 22 09:34, rev 21 09:20, rev 20 06:43, rev 19 04:58, rev 18 03:25, rev 17 27 Nov 02:48, rev 16 26 Nov 21:05, rev 15 18:58, rev 14 17:49, rev 13 16:07, rev 12 15:54, rev 11 15:34, rev 10 15:07, rev 9 14:42, rev 8 13:07, rev 7 11:58, rev 6 10:22, rev 5 09:54, rev 4 09:42, rev 3 09:20, rev 2 08:59, rev 1 08:31 UTC) · written by Claude on Chad's instruction (26 Nov) · **persistent record; update it as each item moves** · docs only.
 
 **What this is.** The record of every item in GPT's original brief, `docs/concepts/MOON-LRO-SCIENCE-BRIEF-GPT-2026-11-25.md`. It also covers the scope Chad added on 26 Nov: every page that shows the Moon. It is **not** the narrowed height proposal (`docs/concepts/MOON-LRO-SCIENCE-PROPOSAL.md` rev 2.1), which covered only the first release.
 
@@ -22,7 +22,7 @@ Rev 32 · 27 Nov 2026, 21:02 UTC (clock reading; rev 31 18:20, rev 30 16:37, rev
 | 3 | Diviner temperature ("Recommended first feature", second paragraph) | **done: released and closed** (merge `0622e80`) |
 | 4 | LROC regional detailed imagery | **done: released and closed** (merge `8e7d262`; Apollo 11) |
 | 5 | CRaTER radiation | **done: released and closed** (merge `ba41c8a`; 10 June 2026 event-count chart) |
-| 6 | LEND neutron and hydrogen products | **release candidate with GPT** (branch `moon-lend-ui`, candidate `5ed9d70`; preview passed) |
+| 6 | LEND neutron and hydrogen products | **done: released and closed** (merge `25993bf`; south-polar archived-field record, 2011–2016) |
 | 7 | LAMP far-ultraviolet products | to assess |
 | 8 | Mini-RF radar products | to assess |
 | 9 | Science and trajectory pairing; observation footprints (requirements 5–7) | to assess, only where a selected example benefits |
@@ -324,11 +324,15 @@ Rev 32 · 27 Nov 2026, 21:02 UTC (clock reading; rev 31 18:20, rev 30 16:37, rev
   - **Records:** REGISTER entry "NASA PDS — LRO CRaTER Level 2 secondary science…" (live); `sources.html#mooncrater`; builder `phase1/moonsci/build_crater.py` (`--check`); asset `assets/moon/crater/crater-good-2026-06-10-R1.json`; tests `phase1/moon-crater-ui.test.cjs` (51; 11 breaks) and `phase1/moonsci/crater/test_build_crater.py` (28); Animals pins `CR_MAIN` `4927a02` / `CR_PARENT` `67a615c` (13e, 13aa, 13ab); evidence `docs/research/moon-crater/`; retained inputs on the Mac `_source-data/moon-lro-science-crater/`.
   - **Not pursued now, with revisit conditions (proposal):** a computed dose (R3: needs its own reading, the flag question resolved and a bulk acquisition); path colouring (the per-minute variation is near counting noise).
 
-## 6. LEND neutron and hydrogen products — release candidate with GPT for release review (preview passed)
+## 6. LEND neutron and hydrogen products — done: released and closed (28 Nov 2026)
 
 - **Brief asked:** neutron measurements and hydrogen-related products. A hydrogen inference is not direct confirmation of water ice, nor a quantity of accessible ice.
 - **Chad's go (27 Nov):** "Continue with Moon item 6: LEND, using the bounded assessment instructions already agreed. Start with archive documentation while folder access is being connected. Return a docs-only feasibility assessment and proposal for GPT review. Keep neutron measurements distinct from inferred hydrogen and accessible water ice. No page build, bulk acquisition, merge or deployment."
-- **Status: partly assessed (16:21 UTC, clock reading).** Proposal `docs/concepts/MOON-LEND-PROPOSAL.md` rev 1; evidence `docs/research/moon-lend/`; retained on the Mac in `_source-data/moon-lro-science-lend/`.
+- **Status: done: released and closed.** Merge `25993bf` of candidate `5ed9d70` (28 Nov 2026, 01:44:38 UTC commit time), on Chad's own Approve line; page only, no hub change, no north acquisition. 55 of 55 files of the reviewed manifest (`4764f405…`) matched live at 01:47:03 UTC; bounded live check passed 01:47–01:48 UTC. Release record `reviews/2026-11-28-moon-lend-release.md`; rollback `git revert -m 1 25993bf`. The history below is kept as it was written.
+  - **Records:** REGISTER entry "NASA PDS — LRO LEND averaged science product `lend_rdr_alds_20111211`…" (live); `sources.html#moonlend`; builder `phase1/moonsci/build_lend.py` (`--check`); asset `assets/moon/lend/lend-alds-2011-2016-R1.bin` (144,160 B, `9f185cc3…`); tests `phase1/moon-lend-ui.test.cjs` (83; 17 breaks), `phase1/moonsci/lend/test_build_lend.py` (436) and `break_build_lend.py` (9 mutants); Animals pins `LE_MAIN` `0db9f9f` / `LE_PARENT` `b67358d` (13e, 13ac, 13ad); served manifest `reviews/evidence/2026-11-27-moon-lend-manifest.json` (55 files); evidence `docs/research/moon-lend/`; review logs `reviews/evidence/2026-11-28-moon-lend-review-logs.tgz`; retained inputs on the Mac `_source-data/moon-lro-science-lend/` (rechecked).
+  - **Open follow-up (not started; needs its own review and Chad's go):** at exact hundredth ties the readout's `toFixed(1)` rounds down (530 shown ± values read 0.1 lower and 456 percentages 0.1 nearer zero than half-away rounding of the stored values); within the frozen "rounded to 0.1" wording; the map colours are unaffected (release record).
+  - **Not pursued now, with revisit conditions (proposal rev 2):** north pole (one more bounded file, on Chad's go); a newer map from DLD (a bulk acquisition); a hydrogen or WEH map (L3, not proposed).
+- **Earlier status: partly assessed (16:21 UTC, clock reading).** Proposal `docs/concepts/MOON-LEND-PROPOSAL.md` rev 1; evidence `docs/research/moon-lend/`; retained on the Mac in `_source-data/moon-lro-science-lend/`.
 - **Superseded rev 1 summary (kept as written; GPT's rev 2 recheck note 4).** The bullets from here to "Decision needed" describe rev 1. Where they differ from rev 2 — the unrestricted noise claim (rev 2 §6.2 restricts it to one ring and one statistic), "30 km" smoothing (rev 2: a 30 km **radius**, 60 km diameter), "signal" (rev 2: descriptive differences in stored values), "count rate" (rev 2: the archived `CSETN_RATE` field, meaning unresolved) and the north-pole D2 (rev 2 D9: not now) — rev 2 and the updates below govern.
 - **Evidence (rev 1 summary; superseded where noted above):**
   - Archive: PDS Geosciences Node bundle `urn:nasa:pds:lro_lend` v2.0 (DOI 10.17189/p89b-8w72), Release 67. Collections: raw, reduced, derived (DLD/DLX to 2026-03-14) and **averaged (ALD): six gridded maps** (south pole, north pole, equatorial; 2009-09-15 to 2011-12-11 and 2011-12-11 to 2016-09-14). ALD last updated in Release 29 (2017); not included in any of releases 30–67. **No hydrogen or water product in the bundle.**
@@ -364,6 +368,12 @@ Rev 32 · 27 Nov 2026, 21:02 UTC (clock reading; rev 31 18:20, rev 30 16:37, rev
   - Added: `sources.html#moonlend` and shortcut; Details link; REGISTER entry (release candidate); served manifest `reviews/evidence/2026-11-27-moon-lend-manifest.json` (55 files, `4764f405…`); Animals pins `LE_MAIN` / `LE_PARENT` with 13ac, 13ad and four tamper breaks; `moon-diviner-ui` H narrow maintenance; `moonsci.js` comment; runner exit capture fixed.
   - Validation on frozen `5ed9d70` (19:05–20:53 UTC): builder `--check`, tests 436/0, mutants 9/9; `moon-lend-ui` 83/0, 17 of 17 breaks; Animals 308/0 with nine tamper breaks caught; Moon, Sky, craft, Sun and Sources-reading suites green; exceptions run on main `b67358d` the same evening and identical (timeline-mixed-assets 16/2, kept-ui 18/3, ux-round1 33/1, osmc crash, smoke-fixes); tides-ui T1a by design.
   - Next: GPT's release review; then Chad's own Approve line naming `5ed9d70`; merge, served check from the reviewed manifest, live check, records.
+- **Update (01:50 UTC, 28 Nov, clock reading): released and closed.**
+  - GPT's release review PASS, filed unchanged (`reviews/2026-11-28-moon-lend-release-rc-gpt-review.md`, sha256 `232e9859…`).
+  - Chad: "Approve: release the Moon south-polar LEND record from moon-lend-ui at 5ed9d70 to main, page only; no hub deployment or north acquisition."
+  - Merge `25993bf` (main `90c457e` held only my docs commit since the candidate's base); the branch head's packet followed in a records-only merge `a46d218`.
+  - Served: 55/55 against the reviewed manifest file (`4764f405…`) at 01:47:03 UTC. Live: off by default, open with one file request, pole and centre readouts, all five readout states, height switch and re-entry without a second request, prior lighting restored, Details reaches the section.
+  - REGISTER marked live. Branch `moon-lend-ui` deleted after verification. Raw sources and provenance kept.
 
 ## 7. LAMP far-ultraviolet products — to assess
 
@@ -446,6 +456,7 @@ Rev 32 · 27 Nov 2026, 21:02 UTC (clock reading; rev 31 18:20, rev 30 16:37, rev
 - **LROC release (27 Nov):** the same four checks are still not done. Used instead: headless Chrome with SwiftShader (desktop and 360 px, keyboard path to the toggle, globe-failure fallback), and the browser pane on the live site for the functional check (the tab must be in front: a background tab gets no animation frames, so the globe's HTML layer is not drawn). WebGL draws per frame are unchanged (1 on, 1 off); the HTML locator's CPU and layout cost was not measured.
 - **Sky zoom-out Moon picture (10a, 27 Nov):** the same four checks are still not done. Used instead: headless Chrome with SwiftShader (360–1920 px; DPR 1 and 2), the browser pane on the live site for one bounded functional check. GPU memory (≈10.7 MiB) is an estimate; heap figures are script heap only; rendered brightness (+19–21%) is an image statistic in that environment; free-orbit Moon sizes not measured. `smoke-fixes` is an unresolved baseline exception on main (not caused by Moon work).
 - **CRaTER release (5, 27 Nov):** the same four checks are still not done. Used instead: headless Chrome with SwiftShader (desktop and narrow widths, keyboard toggle), the browser pane on the live site for one bounded functional check. No chart performance measurement was made or claimed (an SVG of 145 groups). Failure paths are covered by the suite only.
+- **LEND release (6, 28 Nov):** the same four checks are still not done. Used instead: headless Chrome with SwiftShader (desktop and 360 px, keyboard path), and the browser pane on the live site for one bounded functional check in the foreground tab. No performance measurement of the layer is claimed; "no second request on re-entry" is for the LEND file only. osmc-reliability-ui remains an incomplete test (missing fixture history), not a pass.
 - **Next:** record real-device checks separately whenever they are done. Every later item reports its own limits.
 
 ## 12. Options to classify — not automatic builds
@@ -466,9 +477,9 @@ Each stays `option` until Chad classifies it as "assess" or "not pursued", with 
 ## Order of work (Chad, 26 Nov)
 
 1. **Diviner:** assessment and proposal first, not a build. *(26 Nov: released, merge `0622e80`; item 3 done and closed.)*
-2. Then the remaining items **one at a time**, in the order Chad chooses. *(27 Nov: item 4, LROC Apollo 11, released, merge `8e7d262`; item 5, CRaTER, released, merge `ba41c8a`.)*
+2. Then the remaining items **one at a time**, in the order Chad chooses. *(27 Nov: item 4, LROC Apollo 11, released, merge `8e7d262`; item 5, CRaTER, released, merge `ba41c8a`. 28 Nov: item 6, LEND, released, merge `25993bf`.)*
 
-**Remaining open items after 5 (27 Nov):** 6, 7, 8 (to assess); 9 (only inside the item it serves); 12a–c (options to classify); 11 (carried). Done: 1, 2, 3, 4, 5, 10a; 10b closed decision; 13 outside scope. Chad names the next item; suggested order (Claude's suggestion only): LEND (6), LAMP (7), Mini-RF (8). Pairing (9) and the options (12) are taken up only inside the item they serve or when Chad classifies them.
+**Remaining open items after 6 (28 Nov):** 7, 8 (to assess); 9 (only inside the item it serves); 12a–c (options to classify); 11 (carried). Done: 1, 2, 3, 4, 5, 6, 10a; 10b closed decision; 13 outside scope. Chad names the next item; suggested order (Claude's suggestion only): LAMP (7), Mini-RF (8). The LEND readout-rounding follow-up waits for Chad. Pairing (9) and the options (12) are taken up only inside the item they serve or when Chad classifies them.
 
 ## Change log
 
@@ -504,3 +515,4 @@ Each stays `option` until Chad classifies it as "assess" or "not pursued", with 
 - Rev 30 (27 Nov 2026, 16:37 UTC): §6: GPT's rev 1 review filed; proposal rev 2 with GPT for recheck. No other item moved.
 - Rev 31 (27 Nov 2026, 18:20 UTC): §6: GPT's rev 2 recheck (PASS), Chad's D1–D9 and go; page preview `moon-lend-ui` (tested `cd3a9b6`) with GPT; rev 1 summary marked superseded. No other item moved.
 - Rev 32 (27 Nov 2026, 21:02 UTC): §6: GPT's preview review (PASS, finite-header fix); release candidate `5ed9d70` with GPT for release review. No other item moved.
+- Rev 33 (28 Nov 2026, 01:50 UTC): §6 released and closed (merge `25993bf`, 55/55 served, live check); readout-rounding follow-up recorded; §11 limits for 6; remaining-items line and order of work updated. No other item moved.

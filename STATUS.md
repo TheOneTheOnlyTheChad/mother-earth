@@ -2,6 +2,15 @@
 
 Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 Nov). Current state and next steps: `HANDOVER.md`.
 
+# 28 Nov 2026
+
+## 28 Nov 01:50 UTC (clock reading) — **Moon item 6 (LEND) released: south-polar archived-field record live, page only; no hub change; no north acquisition** (Moon spec, LEND thread)
+- GPT's release review PASS on `5ed9d70` (filed unchanged). Chad: "Approve: release the Moon south-polar LEND record from moon-lend-ui at 5ed9d70 to main, page only; no hub deployment or north acquisition."
+- **Merge `25993bf`** (01:44:38 UTC); records-only merge `a46d218` of the branch head. Served: 55/55 against the reviewed manifest (`4764f405…`) at 01:47:03 UTC. Live check 01:47–01:48 UTC passed (off by default; one file request; pole and centre; all readout states; layer switch and re-entry; lighting restored; Details).
+- **Observation, not changed:** readout rounding at exact hundredth ties goes down (530 ± values, 456 percentages, 0.1 each); within the frozen wording; a fix needs its own review and Chad's go.
+- REGISTER live; checklist rev 33; release record `reviews/2026-11-28-moon-lend-release.md`; review logs kept in the repo; branch `moon-lend-ui` deleted; raw inputs kept and rechecked. Rollback `git revert -m 1 25993bf`.
+- Next: Chad names the next Moon item (suggested LAMP, 7). Nothing started.
+
 # 27 Nov 2026
 
 ## 27 Nov 21:02 UTC (clock reading) — **Moon item 6 (LEND): release candidate `5ed9d70` with GPT for release review. Branch only; not merged, not deployed; no hub change; no north acquisition** (Moon spec, LEND thread)
