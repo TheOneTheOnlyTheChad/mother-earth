@@ -4,6 +4,14 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 28 Nov 2026
 
+## 28 Nov 04:09 UTC (clock reading) — **LEND readout-rounding fix: candidate `f0c7625` with GPT for review. Branch only; not merged, not deployed** (Moon item 6 follow-up)
+- GPT confirmed the release observation's counts (530 estimates, 456 percentages). Chad's go: narrow fix on a new branch; data, colours and withholding unchanged.
+- **Branch `moon-lend-rounding`:** candidate `f0c7625` (Animals pins), payload `065b8b5`; packet `reviews/2026-11-28-moon-lend-rounding-rc.md` (head `cbb62ca`); Mac `_review/moon-lend-rounding/`.
+- **Change:** stored integer hundredths shown as tenths, rounded half away from zero in integer arithmetic (both values); sign as released; `moonsci.js` key; new served manifest (55 files: `moon.html`, `moonsci.js` changed).
+- **Validation (frozen `f0c7625`, 02:15–04:09 UTC):** `moon-lend-ui` 89/0, 19 of 19 breaks (new `tofixed`, `nohalfaway`); every shown readout equals the oracle and Python `Decimal` half-up; Animals 311/0 with six tamper breaks caught; Moon, Sky, craft, Sun and shared-page suites green; five exceptions identical on main `542b689`; tides-ui T1a by design. The cloud environment restarted twice during the run; the interrupted tamper run was redone whole and the resume points are logged.
+- Disclosed: a mistyped full hash for `RD_PARENT` made 13ae fail closed in my first pin draft; corrected before commit.
+- Next: GPT's review; release only on Chad's own Approve line naming `f0c7625`.
+
 ## 28 Nov 01:50 UTC (clock reading) — **Moon item 6 (LEND) released: south-polar archived-field record live, page only; no hub change; no north acquisition** (Moon spec, LEND thread)
 - GPT's release review PASS on `5ed9d70` (filed unchanged). Chad: "Approve: release the Moon south-polar LEND record from moon-lend-ui at 5ed9d70 to main, page only; no hub deployment or north acquisition."
 - **Merge `25993bf`** (01:44:38 UTC); records-only merge `a46d218` of the branch head. Served: 55/55 against the reviewed manifest (`4764f405…`) at 01:47:03 UTC. Live check 01:47–01:48 UTC passed (off by default; one file request; pole and centre; all readout states; layer switch and re-entry; lighting restored; Details).
