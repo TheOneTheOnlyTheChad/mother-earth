@@ -2,7 +2,7 @@
 
 Docs only. Nothing here is served or drawn. Proposal: `docs/concepts/MOON-LAMP-PROPOSAL.md`.
 
-- `checkpoints.jsonl`: copy of the Mac checkpoint file (`~/Documents/Mother Earth/_source-data/moon-lro-science-lamp/checkpoints.jsonl`, sha256 `1f17e6efd6b167d9366cb5158c7e9706a9f74c9b0db6df49743f3e679db452c3`). There is one line per acquisition, each written before the next acquisition started. There are four lines.
+- `checkpoints.jsonl`: copy of the Mac checkpoint file (`~/Documents/Mother Earth/_source-data/moon-lro-science-lamp/checkpoints.jsonl`, sha256 `1f17e6efd6b167d9366cb5158c7e9706a9f74c9b0db6df49743f3e679db452c3`). There is one line per acquisition, each written before the next acquisition started. There were four lines at rev 1; six since D6 (`b62419dc…784c4`).
 - `assess_lamp_1.py`: reads the image layout from each map's own PDS3 label (inside the retained documents JSON), so no sizes are hand-typed. It checks each map's MD5 against the archive's own `LROLAM_2001_md5.txt`. It then covers:
   - the projection extents;
   - the data-quality values against NaN and against the "error" map;
@@ -30,6 +30,14 @@ Docs only. Nothing here is served or drawn. Proposal: `docs/concepts/MOON-LAMP-P
   Output: `outputs/assess_lamp_2.out.json`.
 - Note: `assess_lamp_1.py`'s payload section measures the rev 1 8-bit route, which rev 2 withdraws. Its other results stand.
 
+- `check_lamp_register.py` (D6, 28 Nov 2026): the finer registration check against LOLA `LDEM_75S_240M`.
+  - **DEM landmark check:** the documented transform puts the five crater centres in depressions averaging 2,126.8 m, ahead of seven wrong readings.
+  - **Declared tile test:** INCONCLUSIVE (no usable tiles; the controls are also empty).
+  - **Labelled post-hoc diagnostic** (±6 pixel window): the albedo-vs-slope cluster at (−1, +1) pixels moves with known shifts and vanishes under wrong symmetries.
+
+  Output: `outputs/check_lamp_register.out.json`. Report: `reviews/2026-11-28-moon-lamp-d6-registration.md`.
+- `checkpoints.jsonl` now has 6 lines (`b62419dc…784c4`); lines 5–6 are the LOLA documents JSON and `ldem_75s_240m.img`.
+
 **Documents JSON.** `lamp-docs-labels-2026-11-28.json` keeps each fetched file's exact bytes as base64, next to its URL, HTTP status, server last-modified time and sha256. There is no text decoding, so the LEND rev 1 latin-1/Windows-1252 question does not arise. Text views of the two Word documents (`DPSIS.DOC`, `ARCHSIS.DOC`) were made in the cloud workspace with LibreOffice for reading. They are not retained and not quoted beyond short phrases.
 
 Run (each script checks the retained files' sha256 first; both need numpy):
@@ -38,6 +46,7 @@ Run (each script checks the retained files' sha256 first; both need numpy):
 python3 -I assess_lamp_1.py <dir>
 python3 -I check_lamp_frame.py <dir> <repo root>
 python3 -I assess_lamp_2.py <dir>
+python3 -I check_lamp_register.py <dir>   # also needs ldem_75s_240m.img (d031efe2…97c490)
 ```
 
 where `<dir>` holds:

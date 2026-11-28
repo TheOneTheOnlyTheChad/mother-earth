@@ -4,6 +4,13 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 28 Nov 2026
 
+## 28 Nov 10:00 UTC (clock reading) — **Moon item 7 (LAMP): D6 finer-registration evidence with GPT. Docs only; no page build, bulk acquisition, merge, deployment or hub change** (Moon spec, LAMP thread)
+- After Chad confirmed the pending save dialog (09:52 UTC), the LOLA documents package (`989d0ef6…`) and `ldem_75s_240m.img` (29,062,688 B, `d031efe2…`, two identical reads; no archive checksum) were retained and checkpointed (5–6).
+- **DEM landmarks:** the documented LOLA transform (2022 DSMAP, NS = −1 = reading B) puts the five crater centres in depressions averaging 2,126.8 m, first of eight readings (next 1,519.2 m). The printed south inverse is numerically inconsistent (sample 1274.4 against 2538.6 at 85°S, 90°E).
+- **Declared tile test (68 tiles, ±4 pixels, two features):** INCONCLUSIVE; no usable tiles and the controls are also empty. The MAD-based prominence rule cannot pass broad peaks (my design error, disclosed; not relaxed).
+- **Post-hoc diagnostic (labelled; not an outcome):** the albedo-vs-slope peaks cluster at (−1, +1) pixels in 37 of 67 tiles. The cluster moves exactly with known shifts ((−3, +4), (−4, 0)) and is absent for the reflected, rotated and shuffled controls. The sunlit-peak feature's pooled peak is (+1, +1). Registration is within about 1–2 pixels; the sub-pixel cause is unresolved; no shift is applied.
+- Report `reviews/2026-11-28-moon-lamp-d6-registration.md`; script `check_lamp_register.py`; checklist rev 39. Next: GPT's review; then Chad's go for the page preview (option a recommended).
+
 ## 28 Nov 06:55 UTC (clock reading) — **Moon item 7 (LAMP): GPT's rev 2 recheck PASS filed; Chad accepted D1–D8 and gave the go for the bounded D6 finer-registration check. D6 acquisition paused: downloads are not reaching the Mac** (Moon spec, LAMP thread)
 - GPT's recheck filed unchanged: `reviews/2026-11-28-moon-lamp-proposal-rev2-gpt-recheck.md` (`19f370d5…17b40d`, equal to the Mac copy). PASS for D1–D8 and D6, with notes 1–5: the top bin holds 56 cells after rounding (label it "0.080 or higher after rounding"); P1 with range and flag checks; the header and `n_q ≤ n_in` rules; rendered resampling honesty; precision wording.
 - Chad: "Accept D1–D8 as recommended, with GPT's recheck notes. Go for the bounded D6 finer-registration assessment… No page build, bulk acquisition, merge, deployment or hub change."
